@@ -9,9 +9,11 @@ import (
 
 func InitApiKeysRoot(parent *cobra.Command) error {
 	var ApiKeysCmd = &cobra.Command{
-		Use:   "api-keys",
-		Short: "Long-lived credentials for callers that cannot hold an AuthKit session — agents, SDKs, CI",
-		Long:  "Long-lived credentials for callers that cannot hold an AuthKit session — agents, SDKs, CI. A key is accepted wherever an access token is, and acts with the role its creator holds when the request arrives.",
+		Use:         "api-keys",
+		Short:       "Long-lived credentials for callers that cannot hold an AuthKit session — agents, SDKs, CI",
+		Long:        "Long-lived credentials for callers that cannot hold an AuthKit session — agents, SDKs, CI. A key is accepted wherever an access token is, and acts with the role its creator holds when the request arrives.",
+		Args:        cobra.NoArgs,
+		Annotations: map[string]string{"speakeasy_cli_group": "true"},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if usage.UsageRequested(cmd) {
 				return usage.EmitSchema(cmd, cmd.OutOrStdout())

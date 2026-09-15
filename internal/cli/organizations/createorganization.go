@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/panoratech/twinbay-cli/internal/client"
 	"github.com/panoratech/twinbay-cli/internal/flagutil"
-	"github.com/panoratech/twinbay-cli/internal/interactive"
 	"github.com/panoratech/twinbay-cli/internal/output"
 	"github.com/panoratech/twinbay-cli/internal/sdk"
 	"github.com/panoratech/twinbay-cli/internal/sdk/models/components"
@@ -16,7 +15,7 @@ import (
 )
 
 var createOrganizationCmdMeta = []flagutil.FlagMeta{
-	{FlagName: "name", Shorthand: "n", FieldPath: "Name", Kind: flagutil.FlagKindString, Required: true, Description: "Display name of the new organization [required]"},
+	{FlagName: "name", Shorthand: "n", FieldPath: "Name", Kind: flagutil.FlagKindString, Required: true, MinLength: 1, Description: "Display name of the new organization [required]"},
 }
 
 // initCreateOrganizationCmd initializes the create-organization command.
@@ -26,13 +25,24 @@ func initCreateOrganizationCmd(parent *cobra.Command) error {
 		Short:   "Create an organization",
 		Long:    "Creates the organization in WorkOS with the caller as an admin, then mirrors it locally. The caller's current token is unchanged; refresh the AuthKit session into the new organization to act inside it.",
 		Example: "  twinbay organizations create --name <value>",
+		Args:    cobra.NoArgs,
 		RunE:    runCreateOrganizationCmd,
+		Annotations: map[string]string{
+			"speakeasy_operation": "create_organization",
+		},
 	}
 	flagutil.RegisterFlags(cmd, createOrganizationCmdMeta)
 	if err := flagutil.ValidateMeta[components.CreateOrganizationRequest](createOrganizationCmdMeta); err != nil {
 		return fmt.Errorf("invalid metadata for create-organization: %w", err)
 	}
-	cmd.Flags().String("body", "", "Request body as JSON (alternative to individual flags). Can also be provided via stdin.")
+	cmd.Flags().String("body", "", "Request body as JSON (alternative to individual flags). Can also be provided via stdin; @path reads a file, @- reads stdin to EOF. Use --schema to print the exact JSON Schema.")
+	_ = flagutil.AnnotatePromptFlag(cmd, "body", flagutil.PromptFlagSpec{Kind: "json", BodyFlag: true})
+	cmd.Annotations[flagutil.AnnotationWholeBodyFlag] = "body"
+	if err := flagutil.AnnotateBodyFields(cmd, createOrganizationCmdMeta, "", "body"); err != nil {
+		return fmt.Errorf("annotate body fields for create-organization: %w", err)
+	}
+	cmd.Flags().Bool("schema", false, "Print the exact JSON Schema of the request body and exit")
+	_ = flagutil.AnnotatePromptFlag(cmd, "schema", flagutil.PromptFlagSpec{Kind: "bool", DocSurface: true})
 	parent.AddCommand(cmd)
 	return nil
 }
@@ -42,14 +52,12 @@ func runCreateOrganizationCmd(cmd *cobra.Command, args []string) error {
 	if usage.UsageRequested(cmd) {
 		return usage.EmitSchema(cmd, cmd.OutOrStdout())
 	}
-	if interactive.ShouldPrompt(cmd, createOrganizationCmdMeta) {
-		if err := interactive.PromptAndSetFlags(cmd, createOrganizationCmdMeta); err != nil {
-			return err
-		}
+	if requested, _ := cmd.Flags().GetBool("schema"); requested {
+		return usage.EmitBodySchema(cmd.OutOrStdout(), "create_organization")
 	}
 	request, err := flagutil.BuildRequest[components.CreateOrganizationRequest](cmd, createOrganizationCmdMeta, "", "body")
 	if err != nil {
-		return err
+		return flagutil.WithCLIValidation(err)
 	}
 	s, err := client.NewClient(cmd)
 	if err != nil {

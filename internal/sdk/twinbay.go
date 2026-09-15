@@ -2,7 +2,7 @@
 
 package sdk
 
-// Generated from OpenAPI doc version 0.1.0 and generator version 2.935.1
+// Generated from OpenAPI doc version 0.1.0 and generator version 2.937.18
 
 import (
 	"context"
@@ -60,7 +60,11 @@ type Twinbay struct {
 	// Browse the digital twins available for new sandboxes.
 	Twins *Twins
 	// Create and edit isolated provider sandboxes. Each sandbox contains behavioural twins from the `twins` package.
-	Sandboxes *Sandboxes
+	Sandboxes        *Sandboxes
+	SandboxTwins     *SandboxTwins
+	SandboxRecords   *SandboxRecords
+	SandboxTemplates *SandboxTemplates
+	SandboxLogs      *SandboxLogs
 
 	sdkConfiguration config.SDKConfiguration
 	hooks            *hooks.Hooks
@@ -136,11 +140,11 @@ func WithTimeout(timeout time.Duration) SDKOption {
 // New creates a new instance of the SDK with the provided options
 func New(opts ...SDKOption) *Twinbay {
 	sdk := &Twinbay{
-		SDKVersion: "0.1.1",
+		SDKVersion: "0.2.0",
 		sdkConfiguration: config.SDKConfiguration{
-			UserAgent:         "speakeasy-sdk/go 0.1.1 2.935.1 0.1.0 github.com/panoratech/twinbay-cli/internal/sdk",
-			SDKVersion:        "0.1.1",
-			GenVersion:        "2.935.1",
+			UserAgent:         "speakeasy-sdk/go 0.2.0 2.937.18 0.1.0 github.com/panoratech/twinbay-cli/internal/sdk",
+			SDKVersion:        "0.2.0",
+			GenVersion:        "2.937.18",
 			OpenAPIDocVersion: "0.1.0",
 			ServerList:        ServerList,
 		},
@@ -162,6 +166,10 @@ func New(opts ...SDKOption) *Twinbay {
 	sdk.APIKeys = newAPIKeys(sdk, sdk.sdkConfiguration, sdk.hooks)
 	sdk.Twins = newTwins(sdk, sdk.sdkConfiguration, sdk.hooks)
 	sdk.Sandboxes = newSandboxes(sdk, sdk.sdkConfiguration, sdk.hooks)
+	sdk.SandboxTwins = newSandboxTwins(sdk, sdk.sdkConfiguration, sdk.hooks)
+	sdk.SandboxRecords = newSandboxRecords(sdk, sdk.sdkConfiguration, sdk.hooks)
+	sdk.SandboxTemplates = newSandboxTemplates(sdk, sdk.sdkConfiguration, sdk.hooks)
+	sdk.SandboxLogs = newSandboxLogs(sdk, sdk.sdkConfiguration, sdk.hooks)
 
 	return sdk
 }

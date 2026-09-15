@@ -3,34 +3,23 @@
 package sandboxes
 
 import (
-	"github.com/panoratech/twinbay-cli/internal/cli/sandboxes/logs"
-	"github.com/panoratech/twinbay-cli/internal/cli/sandboxes/sandboxestwins"
-	"github.com/panoratech/twinbay-cli/internal/cli/sandboxes/templates"
 	"github.com/panoratech/twinbay-cli/internal/usage"
 	"github.com/spf13/cobra"
 )
 
 func InitSandboxesRoot(parent *cobra.Command) error {
 	var SandboxesCmd = &cobra.Command{
-		Use:   "sandboxes",
-		Short: "Create and edit isolated provider sandboxes",
-		Long:  "Create and edit isolated provider sandboxes. Each sandbox contains behavioural twins from the `twins` package.",
+		Use:         "sandboxes",
+		Short:       "Create and edit isolated provider sandboxes",
+		Long:        "Create and edit isolated provider sandboxes. Each sandbox contains behavioural twins from the `twins` package.",
+		Args:        cobra.NoArgs,
+		Annotations: map[string]string{"speakeasy_cli_group": "true"},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if usage.UsageRequested(cmd) {
 				return usage.EmitSchema(cmd, cmd.OutOrStdout())
 			}
 			return cmd.Help()
 		},
-	}
-
-	if err := sandboxestwins.InitSandboxesTwinsRoot(SandboxesCmd); err != nil {
-		return err
-	}
-	if err := templates.InitTemplatesRoot(SandboxesCmd); err != nil {
-		return err
-	}
-	if err := logs.InitLogsRoot(SandboxesCmd); err != nil {
-		return err
 	}
 
 	if err := initListCmd(SandboxesCmd); err != nil {
@@ -41,7 +30,7 @@ func InitSandboxesRoot(parent *cobra.Command) error {
 		return err
 	}
 
-	if err := initGetCmd(SandboxesCmd); err != nil {
+	if err := initRetrieveCmd(SandboxesCmd); err != nil {
 		return err
 	}
 

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/panoratech/twinbay-cli/internal/client"
 	"github.com/panoratech/twinbay-cli/internal/flagutil"
-	"github.com/panoratech/twinbay-cli/internal/interactive"
 	"github.com/panoratech/twinbay-cli/internal/output"
 	"github.com/panoratech/twinbay-cli/internal/sdk"
 	"github.com/panoratech/twinbay-cli/internal/sdk/models/operations"
@@ -25,7 +24,11 @@ func initRevokeApiKeyCmd(parent *cobra.Command) error {
 		Short:   "Revoke an API key",
 		Long:    "The key stops working immediately. Its row stays, so a key seen in a log can still be named, and its token can never be minted again.",
 		Example: "  twinbay api-keys revoke --api-key-id 70d05b12-db01-4e93-afb7-c26ecf254345",
+		Args:    cobra.NoArgs,
 		RunE:    runRevokeApiKeyCmd,
+		Annotations: map[string]string{
+			"speakeasy_operation": "revoke_api_key",
+		},
 	}
 	flagutil.RegisterFlags(cmd, revokeAPIKeyCmdMeta)
 	if err := flagutil.ValidateMeta[operations.RevokeAPIKeyRequest](revokeAPIKeyCmdMeta); err != nil {
@@ -40,14 +43,9 @@ func runRevokeApiKeyCmd(cmd *cobra.Command, args []string) error {
 	if usage.UsageRequested(cmd) {
 		return usage.EmitSchema(cmd, cmd.OutOrStdout())
 	}
-	if interactive.ShouldPrompt(cmd, revokeAPIKeyCmdMeta) {
-		if err := interactive.PromptAndSetFlags(cmd, revokeAPIKeyCmdMeta); err != nil {
-			return err
-		}
-	}
 	req, err := flagutil.BuildRequest[operations.RevokeAPIKeyRequest](cmd, revokeAPIKeyCmdMeta, "", "")
 	if err != nil {
-		return err
+		return flagutil.WithCLIValidation(err)
 	}
 	s, err := client.NewClient(cmd)
 	if err != nil {

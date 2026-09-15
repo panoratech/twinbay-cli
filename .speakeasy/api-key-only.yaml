@@ -12,13 +12,7 @@ actions:
     description: Drop the now-unreferenced access token scheme.
     remove: true
 
-  # The upstream spec still carries the pre-rebrand name and host. Drop these
-  # two actions once api.twinbay.ai serves them itself.
-  - target: $.info
-    description: Rebrand Semva to Twinbay.
+  - target: $.paths['/organizations/default'].post
+    description: Hide idempotent onboarding provisioning from the CLI.
     update:
-      title: Twinbay
-  - target: $.servers[0]
-    description: Point the default server at the Twinbay host.
-    update:
-      url: https://api.twinbay.ai
+      x-speakeasy-ignore: true

@@ -27,6 +27,7 @@ paths:
           description: "The token names an organization with a role we do not model"
       security:
         - Organization API key: []
+      x-speakeasy-name-override: "retrieve"
   /organizations:
     get:
       tags:
@@ -120,6 +121,7 @@ paths:
           description: "The credential is missing, malformed, expired, or not trusted"
       security:
         - Organization API key: []
+      x-speakeasy-ignore: true
   /organizations/current:
     get:
       tags:
@@ -140,6 +142,7 @@ paths:
           description: "The credential does not act inside an organization"
       security:
         - Organization API key: []
+      x-speakeasy-name-override: "retrieve"
     patch:
       tags:
         - "organizations"
@@ -171,6 +174,7 @@ paths:
                 $ref: "#/components/schemas/HTTPValidationError"
       security:
         - Organization API key: []
+      x-speakeasy-name-override: "update"
   /organizations/current/api-keys:
     post:
       tags:
@@ -360,6 +364,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
+      x-speakeasy-name-override: "retrieve"
   /sandboxes:
     get:
       tags:
@@ -387,7 +392,7 @@ paths:
       tags:
         - "sandboxes"
       summary: "Create a sandbox"
-      description: "Records the sandbox and queues each twin for provisioning. The twins are not serving yet: poll the sandbox until each reports `ready`, then collect its API key."
+      description: "Records the sandbox and queues each twin for provisioning. The twins are not serving yet: read each one with `wait_for=ready`, then collect its API key."
       operationId: "create_sandbox"
       requestBody:
         content:
@@ -448,7 +453,61 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-      x-speakeasy-name-override: "get"
+      x-speakeasy-name-override: "retrieve"
+  /sandboxes/{sandbox_id}/twins/{sandbox_twin_id}:
+    get:
+      tags:
+        - "sandboxes"
+      summary: "Retrieve a sandbox twin"
+      description: "With `wait_for`, the answer is held until the twin reaches that state, a run of it settles, or the wait runs out — so a caller waiting for a twin to serve sends one request rather than polling."
+      operationId: "get_sandbox_twin"
+      security:
+        - Organization API key: []
+      parameters:
+        - name: "sandbox_id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+            title: "Sandbox Id"
+        - name: "sandbox_twin_id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+            title: "Sandbox Twin Id"
+        - name: "wait_for"
+          in: "query"
+          required: false
+          schema:
+            anyOf:
+              - enum:
+                  - "ready"
+                  - "stopped"
+                type: "string"
+              - type: "null"
+            title: "Wait For"
+      responses:
+        "200":
+          description: "Successful Response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SandboxTwinResponse"
+        "401":
+          description: "The credential is missing, malformed, expired, or not trusted"
+        "403":
+          description: "The credential does not act inside an organization"
+        "422":
+          description: "Validation Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+      x-speakeasy-group: "sandbox_twins"
+      x-speakeasy-name-override: "retrieve"
   /sandboxes/{sandbox_id}/twins/{sandbox_twin_id}/start:
     post:
       tags:
@@ -490,7 +549,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-      x-speakeasy-group: "sandboxes.twins"
+      x-speakeasy-group: "sandbox_twins"
       x-speakeasy-name-override: "start"
   /sandboxes/{sandbox_id}/twins/{sandbox_twin_id}/stop:
     post:
@@ -533,7 +592,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-      x-speakeasy-group: "sandboxes.twins"
+      x-speakeasy-group: "sandbox_twins"
       x-speakeasy-name-override: "stop"
   /sandboxes/{sandbox_id}/twins/{sandbox_twin_id}/credential:
     post:
@@ -576,8 +635,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-      x-speakeasy-group: "sandboxes.twins"
-      x-speakeasy-name-override: "credential"
+      x-speakeasy-group: "sandbox_twins"
+      x-speakeasy-name-override: "collect_credential"
   /sandboxes/{sandbox_id}/twins/{sandbox_twin_id}/records/{resource}:
     get:
       tags:
@@ -627,7 +686,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-      x-speakeasy-group: "sandboxes.twins.records"
+      x-speakeasy-group: "sandbox_records"
       x-speakeasy-name-override: "list"
   /sandboxes/{sandbox_id}/twins/{sandbox_twin_id}/records/{resource}/{external_id}:
     put:
@@ -687,7 +746,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-      x-speakeasy-group: "sandboxes.twins.records"
+      x-speakeasy-group: "sandbox_records"
       x-speakeasy-name-override: "update"
   /sandboxes/{sandbox_id}/twins/{sandbox_twin_id}/advance:
     post:
@@ -738,7 +797,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-      x-speakeasy-group: "sandboxes.twins"
+      x-speakeasy-group: "sandbox_twins"
       x-speakeasy-name-override: "advance"
   /sandbox-templates:
     get:
@@ -763,7 +822,7 @@ paths:
           description: "The credential does not act inside an organization"
       security:
         - Organization API key: []
-      x-speakeasy-group: "sandboxes.templates"
+      x-speakeasy-group: "sandbox_templates"
       x-speakeasy-name-override: "list"
   /sandbox-templates/{template_id}:
     delete:
@@ -795,7 +854,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-      x-speakeasy-group: "sandboxes.templates"
+      x-speakeasy-group: "sandbox_templates"
       x-speakeasy-name-override: "delete"
   /sandboxes/{sandbox_id}/logs:
     get:
@@ -860,7 +919,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-      x-speakeasy-group: "sandboxes.logs"
+      x-speakeasy-group: "sandbox_logs"
       x-speakeasy-name-override: "list"
   /sandboxes/{sandbox_id}/logs/{request_id}:
     get:
@@ -904,8 +963,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-      x-speakeasy-group: "sandboxes.logs"
-      x-speakeasy-name-override: "get"
+      x-speakeasy-group: "sandbox_logs"
+      x-speakeasy-name-override: "retrieve"
   /:
     get:
       tags:
@@ -1679,14 +1738,15 @@ components:
       title: "UpdateOrganizationRequest"
     UpdateSandboxRecordRequest:
       properties:
-        body:
+        fields:
           additionalProperties: true
           type: "object"
-          title: "Body"
+          title: "Fields"
+          description: "The record's fields, as the provider's API returns them."
       additionalProperties: false
       type: "object"
       required:
-        - "body"
+        - "fields"
       title: "UpdateSandboxRecordRequest"
     UserResponse:
       properties:

@@ -18,7 +18,11 @@ func initListCmd(parent *cobra.Command) error {
 		Short:   "List sandboxes",
 		Long:    "List sandboxes",
 		Example: "  twinbay sandboxes list",
+		Args:    cobra.NoArgs,
 		RunE:    runListCmd,
+		Annotations: map[string]string{
+			"speakeasy_operation": "list_sandboxes",
+		},
 	}
 	parent.AddCommand(cmd)
 	return nil
