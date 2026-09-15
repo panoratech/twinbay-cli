@@ -31,9 +31,9 @@ func newUsers(rootSDK *Twinbay, sdkConfig config.SDKConfiguration, hooks *hooks.
 	}
 }
 
-// ReadMe - Read the authenticated user
+// Retrieve - Read the authenticated user
 // Returns the caller, the organization their token acts in, and every organization they belong to with their role in each. A caller who has not joined an organization yet gets a null active organization, which is how the client knows to show onboarding.
-func (s *Users) ReadMe(ctx context.Context, opts ...operations.Option) (*operations.ReadMeResponse, error) {
+func (s *Users) Retrieve(ctx context.Context, opts ...operations.Option) (*operations.ReadMeResponse, error) {
 	o := operations.Options{}
 	supportedOptions := []string{
 		operations.SupportedOptionTimeout,

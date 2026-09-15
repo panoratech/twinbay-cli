@@ -18,10 +18,6 @@ import (
 
 // Sandboxes - Create and edit isolated provider sandboxes. Each sandbox contains behavioural twins from the `twins` package.
 type Sandboxes struct {
-	Twins     *SandboxesTwins
-	Templates *Templates
-	Logs      *Logs
-
 	rootSDK          *Twinbay
 	sdkConfiguration config.SDKConfiguration
 	hooks            *hooks.Hooks
@@ -32,9 +28,6 @@ func newSandboxes(rootSDK *Twinbay, sdkConfig config.SDKConfiguration, hooks *ho
 		rootSDK:          rootSDK,
 		sdkConfiguration: sdkConfig,
 		hooks:            hooks,
-		Twins:            newSandboxesTwins(rootSDK, sdkConfig, hooks),
-		Templates:        newTemplates(rootSDK, sdkConfig, hooks),
-		Logs:             newLogs(rootSDK, sdkConfig, hooks),
 	}
 }
 
@@ -197,7 +190,7 @@ func (s *Sandboxes) List(ctx context.Context, opts ...operations.Option) (*opera
 }
 
 // Create a sandbox
-// Records the sandbox and queues each twin for provisioning. The twins are not serving yet: poll the sandbox until each reports `ready`, then collect its API key.
+// Records the sandbox and queues each twin for provisioning. The twins are not serving yet: read each one with `wait_for=ready`, then collect its API key.
 func (s *Sandboxes) Create(ctx context.Context, request components.CreateSandboxRequest, opts ...operations.Option) (*operations.CreateSandboxResponse, error) {
 	o := operations.Options{}
 	supportedOptions := []string{
@@ -387,8 +380,8 @@ func (s *Sandboxes) Create(ctx context.Context, request components.CreateSandbox
 
 }
 
-// Get - Retrieve a sandbox
-func (s *Sandboxes) Get(ctx context.Context, request operations.GetSandboxRequest, opts ...operations.Option) (*operations.GetSandboxResponse, error) {
+// Retrieve a sandbox
+func (s *Sandboxes) Retrieve(ctx context.Context, request operations.GetSandboxRequest, opts ...operations.Option) (*operations.GetSandboxResponse, error) {
 	o := operations.Options{}
 	supportedOptions := []string{
 		operations.SupportedOptionTimeout,

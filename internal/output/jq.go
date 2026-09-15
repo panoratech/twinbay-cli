@@ -7,6 +7,8 @@ import (
 	"fmt"
 
 	"github.com/itchyny/gojq"
+
+	"github.com/panoratech/twinbay-cli/internal/flagutil"
 )
 
 // ApplyJqFilter applies a jq expression to the given content and returns the results.
@@ -28,7 +30,7 @@ func ApplyJqFilter(content interface{}, expression string) ([]interface{}, error
 
 	query, err := gojq.Parse(expression)
 	if err != nil {
-		return nil, fmt.Errorf("invalid jq expression %q: %w", expression, err)
+		return nil, flagutil.WithCLIValidation(fmt.Errorf("invalid jq expression %q: %w", expression, err))
 	}
 
 	var results []interface{}

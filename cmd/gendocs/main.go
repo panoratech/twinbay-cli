@@ -12,14 +12,28 @@ import (
 	"strings"
 
 	"github.com/panoratech/twinbay-cli/internal/cli"
+	"github.com/panoratech/twinbay-cli/internal/clierrors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/cobra/doc"
 )
 
+const (
+	usage            = "usage: gendocs [output-dir]"
+	usageDescription = "Writes the CLI's Cobra markdown command docs into output-dir (default ./docs)."
+)
+
+var usageLines = []string{usage, usageDescription}
+
 func main() {
-	dir := "./docs"
-	if len(os.Args) > 1 {
-		dir = os.Args[1]
+	dir, showHelp, exitCode, messages := parseArgs(os.Args[1:])
+	for _, message := range messages {
+		fmt.Fprintln(os.Stderr, message)
+	}
+	if exitCode != 0 {
+		os.Exit(exitCode)
+	}
+	if showHelp {
+		return
 	}
 
 	if err := os.MkdirAll(dir, 0755); err != nil {
@@ -31,6 +45,19 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// Exclude cobra's builtin help and completion commands from the generated
+	// docs. A generated command may legitimately be named "help" or
+	// "completion" (via name overrides); such commands always carry a
+	// speakeasy_operation or speakeasy_cli_group annotation and must be kept.
+	for _, c := range rootCmd.Commands() {
+		if c.Name() != "help" && c.Name() != "completion" {
+			continue
+		}
+		if c.Annotations["speakeasy_operation"] == "" && c.Annotations["speakeasy_cli_group"] == "" {
+			rootCmd.RemoveCommand(c)
+		}
+	}
+
 	// Truncate any command names that would cause filenames to exceed OS limits.
 	// Cobra doc generates filenames from the full command path joined with "_".
 	truncateLongCommandNames(rootCmd, 0)
@@ -38,6 +65,35 @@ func main() {
 	if err := genMarkdownTreeNoDate(rootCmd, dir); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func parseArgs(args []string) (dir string, showHelp bool, exitCode int, messages []string) {
+	for _, arg := range args {
+		if arg == "-h" || arg == "--help" || arg == "help" {
+			return "", true, 0, usageLines
+		}
+	}
+
+	if len(args) == 0 {
+		return "./docs", false, 0, nil
+	}
+
+	if len(args) == 1 {
+		arg := args[0]
+		if strings.HasPrefix(arg, "-") {
+			return "", false, 2, append([]string{fmt.Sprintf("unknown flag %q", arg)}, usageLines...)
+		}
+		return arg, false, 0, nil
+	}
+
+	for _, arg := range args {
+		if strings.HasPrefix(arg, "-") {
+			return "", false, 2, append([]string{fmt.Sprintf("unknown flag %q", arg)}, usageLines...)
+		}
+	}
+
+	reason := "too many arguments: " + strings.Join(args, " ")
+	return "", false, 2, append([]string{reason}, usageLines...)
 }
 
 // truncateLongCommandNames walks the command tree and truncates any Use fields
@@ -63,6 +119,10 @@ func truncateLongCommandNames(cmd *cobra.Command, parentPathLen int) {
 		}
 		hash := sha256.Sum256([]byte(use))
 		truncated := use[:available] + fmt.Sprintf("_%x", hash[:4])
+		if cmd.Annotations == nil {
+			cmd.Annotations = map[string]string{}
+		}
+		cmd.Annotations["speakeasy_original_name"] = use
 		if parts := strings.SplitN(cmd.Use, " ", 2); len(parts) > 1 {
 			cmd.Use = truncated + " " + parts[1]
 		} else {
@@ -106,6 +166,41 @@ func genMarkdownTreeNoDate(cmd *cobra.Command, dir string) error {
 	if idx := strings.LastIndex(content, "\n###### Auto generated"); idx != -1 {
 		content = strings.TrimRight(content[:idx], "\n") + "\n"
 	}
+	content += machineInterfaceFooter(cmd)
 
 	return os.WriteFile(filename, []byte(content), 0644)
+}
+
+func commandRuntimePath(cmd *cobra.Command) string {
+	var parts []string
+	for cur := cmd; cur != nil; cur = cur.Parent() {
+		name := cur.Name()
+		if orig, ok := cur.Annotations["speakeasy_original_name"]; ok && orig != "" {
+			name = orig
+		}
+		parts = append([]string{name}, parts...)
+	}
+	return strings.Join(parts, " ")
+}
+
+func machineInterfaceFooter(cmd *cobra.Command) string {
+	var b strings.Builder
+	if _, ok := cmd.Annotations["speakeasy_operation"]; ok {
+		path := commandRuntimePath(cmd)
+		b.WriteString("\n### Machine interface\n\n")
+		fmt.Fprintf(&b, "* `%s --usage` — this command's flags, defaults and env vars as machine-readable KDL\n", path)
+		if cmd.Flags().Lookup("schema") != nil {
+			fmt.Fprintf(&b, "* `%s --schema` — the exact JSON Schema of the request body (all `$ref`s bundled)\n", path)
+		}
+		fmt.Fprintf(&b, "* `%s --dry-run` — preview the request without OS-keychain access or a network call (human preview on stderr)\n", path)
+		b.WriteString("* `--dry-run --output-format json` (or a caller-explicit `--jq`) writes one preview object per request as NDJSON on stdout; jq is not applied to previews\n")
+		if cmd.Flags().Lookup("output-file") != nil {
+			b.WriteString("* `--output-format json` or `--jq <expr>` for machine-readable live output when the response is JSON; a binary response body is written raw to stdout (use `--output-file <path>` or `--output-b64`); in agent mode errors are a JSON envelope on stderr\n")
+		} else {
+			b.WriteString("* `--output-format json` or `--jq <expr>` for machine-readable live output; in agent mode errors are a JSON envelope on stderr\n")
+		}
+	}
+	fmt.Fprintln(&b)
+	fmt.Fprintln(&b, clierrors.HelpFooter)
+	return b.String()
 }

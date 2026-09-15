@@ -219,8 +219,8 @@ func (s *Twins) ListTwins(ctx context.Context, request *operations.ListTwinsRequ
 
 }
 
-// GetTwin - Retrieve a twin
-func (s *Twins) GetTwin(ctx context.Context, request operations.GetTwinRequest, opts ...operations.Option) (*operations.GetTwinResponse, error) {
+// Retrieve a twin
+func (s *Twins) Retrieve(ctx context.Context, request operations.GetTwinRequest, opts ...operations.Option) (*operations.GetTwinResponse, error) {
 	o := operations.Options{}
 	supportedOptions := []string{
 		operations.SupportedOptionTimeout,

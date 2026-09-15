@@ -5,6 +5,7 @@ package cli
 import (
 	"fmt"
 	"github.com/panoratech/twinbay-cli/internal/config"
+	"github.com/panoratech/twinbay-cli/internal/output"
 	"github.com/panoratech/twinbay-cli/internal/usage"
 	"github.com/spf13/cobra"
 )
@@ -24,6 +25,7 @@ Sources are shown as:
   [unset]   - Not configured
 
 Credential values are masked for security.`,
+		Args: cobra.NoArgs,
 		RunE: runWhoamiCmd,
 	}
 	parent.AddCommand(cmd)
@@ -35,6 +37,22 @@ func runWhoamiCmd(cmd *cobra.Command, args []string) error {
 	if usage.UsageRequested(cmd) {
 		return usage.EmitSchema(cmd, cmd.OutOrStdout())
 	}
+
+	if output.IsMachineMode(cmd) {
+		info := map[string]any{
+			"config_file":        config.GetConfigPath(),
+			"environment_prefix": "CLI_TWINBAY_",
+		}
+		credentials := map[string]any{}
+		{
+			value, source := config.ResolveSecurityCredential(cmd, "organization-api-key")
+			credentials["organization-api-key"] = map[string]any{"source": source, "value": maskSecret(value)}
+		}
+		info["credentials"] = credentials
+
+		return output.LocalResult(cmd, info)
+	}
+
 	out := cmd.OutOrStdout()
 	fmt.Fprintln(out, "Configuration")
 	fmt.Fprintln(out, "=============")

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/panoratech/twinbay-cli/internal/client"
 	"github.com/panoratech/twinbay-cli/internal/flagutil"
-	"github.com/panoratech/twinbay-cli/internal/interactive"
 	"github.com/panoratech/twinbay-cli/internal/output"
 	"github.com/panoratech/twinbay-cli/internal/sdk"
 	"github.com/panoratech/twinbay-cli/internal/sdk/models/operations"
@@ -15,8 +14,8 @@ import (
 )
 
 var listOrganizationsCmdMeta = []flagutil.FlagMeta{
-	{FlagName: "page", Shorthand: "p", FieldPath: "Page", Kind: flagutil.FlagKindInt64, Optional: true, HasDefault: true, DefaultInt: 1, Description: "Page number"},
-	{FlagName: "size", Shorthand: "s", FieldPath: "Size", Kind: flagutil.FlagKindInt64, Optional: true, HasDefault: true, DefaultInt: 50, Description: "Page size"},
+	{FlagName: "page", Shorthand: "p", FieldPath: "Page", Kind: flagutil.FlagKindInt64, Optional: true, HasDefault: true, DefaultInt: 1, HasMinimum: true, Minimum: 1, Description: "Page number"},
+	{FlagName: "size", Shorthand: "s", FieldPath: "Size", Kind: flagutil.FlagKindInt64, Optional: true, HasDefault: true, DefaultInt: 50, HasMinimum: true, Minimum: 1, HasMaximum: true, Maximum: 100, Description: "Page size"},
 }
 
 // initListOrganizationsCmd initializes the list-organizations command.
@@ -26,7 +25,11 @@ func initListOrganizationsCmd(parent *cobra.Command) error {
 		Short:   "List your organizations",
 		Long:    "Every organization the caller is a member of, with their role in each, oldest membership first. Independent of the organization the current token acts in. Paginated: walk the pages with `page` and `size`.",
 		Example: "  twinbay organizations list",
+		Args:    cobra.NoArgs,
 		RunE:    runListOrganizationsCmd,
+		Annotations: map[string]string{
+			"speakeasy_operation": "list_organizations",
+		},
 	}
 	flagutil.RegisterFlags(cmd, listOrganizationsCmdMeta)
 	if err := flagutil.ValidateMeta[operations.ListOrganizationsRequest](listOrganizationsCmdMeta); err != nil {
@@ -41,14 +44,9 @@ func runListOrganizationsCmd(cmd *cobra.Command, args []string) error {
 	if usage.UsageRequested(cmd) {
 		return usage.EmitSchema(cmd, cmd.OutOrStdout())
 	}
-	if interactive.ShouldPrompt(cmd, listOrganizationsCmdMeta) {
-		if err := interactive.PromptAndSetFlags(cmd, listOrganizationsCmdMeta); err != nil {
-			return err
-		}
-	}
 	req, err := flagutil.BuildRequest[operations.ListOrganizationsRequest](cmd, listOrganizationsCmdMeta, "", "")
 	if err != nil {
-		return err
+		return flagutil.WithCLIValidation(err)
 	}
 	s, err := client.NewClient(cmd)
 	if err != nil {

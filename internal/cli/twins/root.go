@@ -9,9 +9,11 @@ import (
 
 func InitTwinsRoot(parent *cobra.Command) error {
 	var TwinsCmd = &cobra.Command{
-		Use:   "twins",
-		Short: "Browse the digital twins available for new sandboxes",
-		Long:  "Browse the digital twins available for new sandboxes.",
+		Use:         "twins",
+		Short:       "Browse the digital twins available for new sandboxes",
+		Long:        "Browse the digital twins available for new sandboxes.",
+		Args:        cobra.NoArgs,
+		Annotations: map[string]string{"speakeasy_cli_group": "true"},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if usage.UsageRequested(cmd) {
 				return usage.EmitSchema(cmd, cmd.OutOrStdout())
@@ -24,7 +26,7 @@ func InitTwinsRoot(parent *cobra.Command) error {
 		return err
 	}
 
-	if err := initGetTwinCmd(TwinsCmd); err != nil {
+	if err := initRetrieveCmd(TwinsCmd); err != nil {
 		return err
 	}
 

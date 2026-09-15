@@ -3,12 +3,13 @@
 package components
 
 type UpdateSandboxRecordRequest struct {
-	Body map[string]any `json:"body"`
+	// The record's fields, as the provider's API returns them.
+	Fields map[string]any `json:"fields"`
 }
 
-func (u *UpdateSandboxRecordRequest) GetBody() map[string]any {
+func (u *UpdateSandboxRecordRequest) GetFields() map[string]any {
 	if u == nil {
 		return map[string]any{}
 	}
-	return u.Body
+	return u.Fields
 }

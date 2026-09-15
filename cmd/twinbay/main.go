@@ -3,10 +3,12 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
 	"github.com/panoratech/twinbay-cli/internal/cli"
+	"github.com/panoratech/twinbay-cli/internal/clierrors"
 )
 
 // version and buildTime can be set at build time using Go linker flags:
@@ -24,7 +26,10 @@ func main() {
 	}
 
 	if err := cli.Execute(); err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		var rendered interface{ Rendered() bool }
+		if !errors.As(err, &rendered) || !rendered.Rendered() {
+			fmt.Fprintln(os.Stderr, err)
+		}
+		os.Exit(clierrors.ExitCode(err))
 	}
 }

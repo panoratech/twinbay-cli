@@ -9,9 +9,11 @@ import (
 
 func InitOrganizationsRoot(parent *cobra.Command) error {
 	var OrganizationsCmd = &cobra.Command{
-		Use:   "organizations",
-		Short: "Organizations the caller belongs to",
-		Long:  "Organizations the caller belongs to. Every authenticated request acts inside exactly one organization — the one its access token names — so these routes address it as `current`.",
+		Use:         "organizations",
+		Short:       "Organizations the caller belongs to",
+		Long:        "Organizations the caller belongs to. Every authenticated request acts inside exactly one organization — the one its access token names — so these routes address it as `current`.",
+		Args:        cobra.NoArgs,
+		Annotations: map[string]string{"speakeasy_cli_group": "true"},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if usage.UsageRequested(cmd) {
 				return usage.EmitSchema(cmd, cmd.OutOrStdout())
@@ -28,15 +30,11 @@ func InitOrganizationsRoot(parent *cobra.Command) error {
 		return err
 	}
 
-	if err := initEnsureDefaultOrganizationCmd(OrganizationsCmd); err != nil {
+	if err := initRetrieveCmd(OrganizationsCmd); err != nil {
 		return err
 	}
 
-	if err := initReadCurrentOrganizationCmd(OrganizationsCmd); err != nil {
-		return err
-	}
-
-	if err := initRenameCurrentOrganizationCmd(OrganizationsCmd); err != nil {
+	if err := initUpdateCmd(OrganizationsCmd); err != nil {
 		return err
 	}
 
