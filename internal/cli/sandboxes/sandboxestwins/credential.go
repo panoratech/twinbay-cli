@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/panoratech/twinbay-cli/internal/client"
 	"github.com/panoratech/twinbay-cli/internal/flagutil"
-	"github.com/panoratech/twinbay-cli/internal/interactive"
 	"github.com/panoratech/twinbay-cli/internal/output"
 	"github.com/panoratech/twinbay-cli/internal/sdk"
 	"github.com/panoratech/twinbay-cli/internal/sdk/models/operations"
@@ -25,8 +24,12 @@ func initCredentialCmd(parent *cobra.Command) error {
 		Use:     "credential",
 		Short:   "Collect the twin's API key",
 		Long:    "Returns the key once. A second call is refused.",
-		Example: "  twinbay sandboxes-twins credential --sandbox-id cc29592e-1d70-4c21-bc2e-8e72393deee2 --sandbox-twin-id 9fa09c5a-ef7c-4178-8ed1-40c62888eee8",
+		Example: "  twinbay twins credential --sandbox-id cc29592e-1d70-4c21-bc2e-8e72393deee2 --sandbox-twin-id 9fa09c5a-ef7c-4178-8ed1-40c62888eee8",
+		Args:    cobra.NoArgs,
 		RunE:    runCredentialCmd,
+		Annotations: map[string]string{
+			"speakeasy_operation": "collect_sandbox_twin_credential",
+		},
 	}
 	flagutil.RegisterFlags(cmd, credentialCmdMeta)
 	if err := flagutil.ValidateMeta[operations.CollectSandboxTwinCredentialRequest](credentialCmdMeta); err != nil {
@@ -41,14 +44,9 @@ func runCredentialCmd(cmd *cobra.Command, args []string) error {
 	if usage.UsageRequested(cmd) {
 		return usage.EmitSchema(cmd, cmd.OutOrStdout())
 	}
-	if interactive.ShouldPrompt(cmd, credentialCmdMeta) {
-		if err := interactive.PromptAndSetFlags(cmd, credentialCmdMeta); err != nil {
-			return err
-		}
-	}
 	req, err := flagutil.BuildRequest[operations.CollectSandboxTwinCredentialRequest](cmd, credentialCmdMeta, "", "")
 	if err != nil {
-		return err
+		return flagutil.WithCLIValidation(err)
 	}
 	s, err := client.NewClient(cmd)
 	if err != nil {

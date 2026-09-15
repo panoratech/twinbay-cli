@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/panoratech/twinbay-cli/internal/client"
 	"github.com/panoratech/twinbay-cli/internal/flagutil"
-	"github.com/panoratech/twinbay-cli/internal/interactive"
 	"github.com/panoratech/twinbay-cli/internal/output"
 	"github.com/panoratech/twinbay-cli/internal/sdk"
 	"github.com/panoratech/twinbay-cli/internal/sdk/models/operations"
@@ -25,7 +24,11 @@ func initDeleteCmd(parent *cobra.Command) error {
 		Short:   "Delete a sandbox template",
 		Long:    "Sandboxes already started from it are untouched.",
 		Example: "  twinbay templates delete --template-id a20706ee-1743-41a5-b94e-257617129b0a",
+		Args:    cobra.NoArgs,
 		RunE:    runDeleteCmd,
+		Annotations: map[string]string{
+			"speakeasy_operation": "delete_sandbox_template",
+		},
 	}
 	flagutil.RegisterFlags(cmd, deleteCmdMeta)
 	if err := flagutil.ValidateMeta[operations.DeleteSandboxTemplateRequest](deleteCmdMeta); err != nil {
@@ -40,14 +43,9 @@ func runDeleteCmd(cmd *cobra.Command, args []string) error {
 	if usage.UsageRequested(cmd) {
 		return usage.EmitSchema(cmd, cmd.OutOrStdout())
 	}
-	if interactive.ShouldPrompt(cmd, deleteCmdMeta) {
-		if err := interactive.PromptAndSetFlags(cmd, deleteCmdMeta); err != nil {
-			return err
-		}
-	}
 	req, err := flagutil.BuildRequest[operations.DeleteSandboxTemplateRequest](cmd, deleteCmdMeta, "", "")
 	if err != nil {
-		return err
+		return flagutil.WithCLIValidation(err)
 	}
 	s, err := client.NewClient(cmd)
 	if err != nil {

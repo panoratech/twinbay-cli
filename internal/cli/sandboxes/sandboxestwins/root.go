@@ -10,9 +10,11 @@ import (
 
 func InitSandboxesTwinsRoot(parent *cobra.Command) error {
 	var SandboxesTwinsCmd = &cobra.Command{
-		Use:   "twins",
-		Short: "Operations for sandboxes-twins",
-		Long:  "Operations for sandboxes-twins",
+		Use:         "twins",
+		Short:       "Operations for twins",
+		Long:        "Operations for twins",
+		Args:        cobra.NoArgs,
+		Annotations: map[string]string{"speakeasy_cli_group": "true"},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if usage.UsageRequested(cmd) {
 				return usage.EmitSchema(cmd, cmd.OutOrStdout())

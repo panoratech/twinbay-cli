@@ -18,8 +18,12 @@ func initReadMeCmd(parent *cobra.Command) error {
 		Short:   "Read the authenticated user",
 		Long:    "Returns the caller, the organization their token acts in, and every organization they belong to with their role in each. A caller who has not joined an organization yet gets a null active organization, which is how the client knows to show onboarding.",
 		Example: "  twinbay users read-me",
+		Args:    cobra.NoArgs,
 		RunE:    runReadMeCmd,
 		Aliases: []string{"rm"},
+		Annotations: map[string]string{
+			"speakeasy_operation": "read_me",
+		},
 	}
 	parent.AddCommand(cmd)
 	return nil

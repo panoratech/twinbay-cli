@@ -23,8 +23,9 @@ Twinbay: Backend API
   * [CLI Installation](#cli-installation)
   * [Shell Completion](#shell-completion)
   * [CLI Example Usage](#cli-example-usage)
+  * [For AI agents](#for-ai-agents)
   * [Authentication](#authentication)
-  * [Available Commands](#available-commands)
+  * [Commands](#commands)
   * [Request Body Input](#request-body-input)
   * [Server Selection](#server-selection)
   * [Output Formats](#output-formats)
@@ -116,6 +117,108 @@ twinbay users read-me --organization-api-key test_api_key
 ```
 <!-- End CLI Example Usage [usage] -->
 
+<!-- Start For AI agents [agents] -->
+## For AI agents
+
+This CLI is built to be driven by AI coding agents as well as people: everything an agent needs is discoverable from the binary itself, and every command can be validated without credentials. Work down this ladder:
+
+| Run | You get |
+|-----|---------|
+| `twinbay --help`, `twinbay sandboxes list --help` | Commands by category, runnable examples, flags |
+| `twinbay --usage`, `twinbay sandboxes list --usage` | The command surface as machine-readable [KDL](https://kdl.dev): commands, aliases, flags, defaults, env vars, config keys |
+| `twinbay api-keys create --schema` | The exact JSON Schema of the command's request body (all `$ref`s bundled) — build a valid `--body` from it |
+| `twinbay sandboxes list --dry-run` | The exact HTTP request (method, URL, headers, body), with no credentials or network call |
+| `twinbay sandboxes list --output-format json` (or `--jq`) | Machine-readable output |
+
+### Discover the command surface
+
+```bash
+# Every command, flag, default, env var and config key, as KDL
+twinbay --usage
+
+# One command's subtree only
+twinbay sandboxes list --usage
+```
+
+### Read the exact request schema
+
+`--schema` is available on every command that accepts a request body (`--body`, stdin, or a whole-body flag where the command has one), including intent commands. It prints the JSON Schema the request is validated against and exits without calling the API.
+
+```bash
+# JSON Schema (draft 2020-12) of the request body, with every $ref bundled under $defs
+twinbay api-keys create --schema
+```
+
+### Probe before you spend
+
+Start quota-spending commands with `--dry-run`. It validates inputs, resolves the request, redacts secrets and binary payloads, makes no network call, and exits 0. It never reads the OS keychain; credentials supplied by flag, environment, or config file are included only as `[REDACTED]`.
+
+```bash
+# Human preview: the [DRY-RUN] block is on stderr and stdout is empty
+twinbay sandboxes list --dry-run
+
+# Machine preview: compact JSON on stdout and silent stderr
+twinbay sandboxes list --dry-run --output-format json
+```
+
+The machine form writes one object per would-be request, one per line (NDJSON for multi-request commands), with exactly this shape:
+
+```json
+{"dry_run":true,"request":{"method":"POST","url":"https://…","headers":{"Accept":["application/json"],…},"body":<JSON value | string | null>}}
+```
+
+`body` is a parsed JSON value when the body is JSON, a string for text, `"<bytes:N>"` for binary data, and `null` when absent. An explicit caller `--jq` also selects this JSON preview protocol, but the filter is not applied to preview objects. Command-declared jq presets do not select or filter the preview.
+
+Local mutation commands make no request under `--dry-run`: instead of a preview they emit one `{"dry_run":true,"local":true,"command":"…","message":"…"}` object. `select(.request)` keeps only would-be requests; `select(.local)` keeps the local no-ops.
+
+### Machine-readable output
+
+```bash
+# JSON on stdout
+twinbay sandboxes list --output-format json
+
+# Filter or reshape with a jq expression (always emits JSON, overrides --output-format)
+twinbay sandboxes list --jq '.'
+
+# Print jq string results as plain text instead of JSON strings (like jq -r)
+twinbay sandboxes list --jq '.' --raw-output
+```
+
+`--output-format toon` emits [TOON](https://github.com/toon-format/spec), a compact line-oriented format that uses fewer tokens than JSON; it is the default in agent mode.
+
+### Interactive mode
+Required-input prompts and guided `configure` / `auth login` forms are enabled by default. Required-input prompts require an interactive terminal; off-TTY forms read line input from stdin. Use `--no-interactive` to force flag-only execution.
+
+```bash
+# Prompt for missing command inputs
+twinbay sandboxes list --interactive
+
+# Open the guided configuration form
+twinbay configure --interactive
+
+# Explicitly launch the terminal command explorer
+twinbay explore
+```
+
+### Agent mode and structured errors
+Agent mode turns on automatically when a known agent environment is detected (`CLAUDECODE`, `CURSOR_AGENT`, `CODEX`, `AIDER`, `CLINE`, `WINDSURF_AGENT`, `GITHUB_COPILOT`, `AMAZON_Q`, `GEMINI_CODE_ASSIST`, `SRC_CODY`) or with `--agent-mode` (`--agent-mode=false` disables detection).
+In agent mode interactive prompts never launch, output defaults to TOON, and every failure — API errors and CLI usage errors alike — is one JSON envelope on stderr:
+Outside agent mode, explicit JSON and `--jq` preserve the compatibility envelope without classification; enable agent mode to request the classified contract.
+
+```json
+{
+  "error": "...",
+  "error_type": "validation_error",
+  "error_reason": "CLI_VALIDATION",
+  "exit_code": 2,
+  "message": "human-readable message",
+  "hints": ["what to try next"]
+}
+```
+
+`error_type` is one of `authentication_error`, `authorization_error`, `not_found`, `validation_error`, `rate_limit_error`, `server_error`, `api_error`, `connection_error`, `protocol_error`, `runtime_error`, `unsupported_error`, `async_failed`, `async_timeout`, `async_unknown_state`. Classification derives from the HTTP status and transport evidence; `error_reason` is absent for API errors. Status-less local failures may use `CLI_VALIDATION`, `CLI_CONNECTION`, `CLI_PROTOCOL`, `CLI_RUNTIME`, `CLI_UNAVAILABLE`, `CLI_AUTHENTICATION`, or the async polling reasons `CLI_ASYNC_FAILED`, `CLI_ASYNC_TIMEOUT`, and `CLI_ASYNC_UNKNOWN_STATE`. `hints` preserves server guidance first, adds the most specific local taxonomy guidance, then typed CLI and command-specific guidance, removing exact duplicates. `exit_code` is always the code for the final `error_type` shown in the envelope: 1 runtime, 2 usage, or 3 authentication/authorization.
+<!-- End For AI agents [agents] -->
+
 <!-- Start Authentication [security] -->
 ## Authentication
 
@@ -126,7 +229,7 @@ Authentication credentials can be configured in four ways (in order of priority)
 Pass credentials directly as flags to any command:
 
 ```bash
-twinbay --organization-api-key <value> <command> [arguments]
+twinbay --organization-api-key "$CLI_TWINBAY_ORGANIZATION_API_KEY" sandboxes list
 ```
 
 ### 2. Environment variables
@@ -163,126 +266,53 @@ twinbay configure
 Configuration is stored in `~/.config/twinbay/config.yaml`.
 <!-- End Authentication [security] -->
 
-<!-- Start Available Commands [operations] -->
-## Available Commands
+<!-- Start Commands [operations] -->
+## Commands
 
 <details open>
 <summary>Available commands</summary>
 
-### [users](docs/twinbay_users.md)
-
-* [`read-me`](docs/twinbay_users_read-me.md) - Read the authenticated user
-
-### [organizations](docs/twinbay_organizations.md)
-
-* [`list`](docs/twinbay_organizations_list.md) - List your organizations
-* [`create`](docs/twinbay_organizations_create.md) - Create an organization
-* [`ensure-default`](docs/twinbay_organizations_ensure-default.md) - Create your first organization
-* [`read-current`](docs/twinbay_organizations_read-current.md) - Read the active organization
-* [`rename-current`](docs/twinbay_organizations_rename-current.md) - Rename the active organization
-
-### [api-keys](docs/twinbay_api-keys.md)
-
-* [`create`](docs/twinbay_api-keys_create.md) - Create an API key
-* [`list`](docs/twinbay_api-keys_list.md) - List API keys
-* [`revoke`](docs/twinbay_api-keys_revoke.md) - Revoke an API key
-
-### [twins](docs/twinbay_twins.md)
-
-* [`list`](docs/twinbay_twins_list.md) - List available twins
-* [`get`](docs/twinbay_twins_get.md) - Retrieve a twin
-
-### [sandboxes](docs/twinbay_sandboxes.md)
-
-* [`list`](docs/twinbay_sandboxes_list.md) - List sandboxes
-* [`create`](docs/twinbay_sandboxes_create.md) - Create a sandbox
-* [`get`](docs/twinbay_sandboxes_get.md) - Retrieve a sandbox
-
-#### [sandboxes-twins](docs/twinbay_sandboxes_sandboxes-twins.md)
-
-* [`start`](docs/twinbay_sandboxes_sandboxes-twins_start.md) - Start a sandbox twin
-* [`stop`](docs/twinbay_sandboxes_sandboxes-twins_stop.md) - Stop a sandbox twin
-* [`credential`](docs/twinbay_sandboxes_sandboxes-twins_credential.md) - Collect the twin's API key
-* [`advance`](docs/twinbay_sandboxes_sandboxes-twins_advance.md) - Advance a deterministic twin lifecycle
-
-##### [records](docs/twinbay_sandboxes_sandboxes-twins_records.md)
-
-* [`list`](docs/twinbay_sandboxes_sandboxes-twins_records_list.md) - List sandbox twin state
-* [`update`](docs/twinbay_sandboxes_sandboxes-twins_records_update.md) - Replace a sandbox twin record
-
-#### [templates](docs/twinbay_sandboxes_templates.md)
-
-* [`list`](docs/twinbay_sandboxes_templates_list.md) - List sandbox templates
-* [`delete`](docs/twinbay_sandboxes_templates_delete.md) - Delete a sandbox template
-
-#### [logs](docs/twinbay_sandboxes_logs.md)
-
-* [`list`](docs/twinbay_sandboxes_logs_list.md) - List recent sandbox request logs
-* [`get`](docs/twinbay_sandboxes_logs_get.md) - Retrieve a sandbox request log
+* [`users`](docs/twinbay_users.md) - The current user
+  * [`read-me`](docs/twinbay_users_read-me.md) - Read the authenticated user
+* [`organizations`](docs/twinbay_organizations.md) - Organizations the caller belongs to
+  * [`list`](docs/twinbay_organizations_list.md) - List your organizations
+  * [`create`](docs/twinbay_organizations_create.md) - Create an organization
+  * [`ensure-default`](docs/twinbay_organizations_ensure-default.md) - Create your first organization
+  * [`read-current`](docs/twinbay_organizations_read-current.md) - Read the active organization
+  * [`rename-current`](docs/twinbay_organizations_rename-current.md) - Rename the active organization
+* [`api-keys`](docs/twinbay_api-keys.md) - Long-lived credentials for callers that cannot hold an AuthKit session — agents, SDKs, CI
+  * [`create`](docs/twinbay_api-keys_create.md) - Create an API key
+  * [`list`](docs/twinbay_api-keys_list.md) - List API keys
+  * [`revoke`](docs/twinbay_api-keys_revoke.md) - Revoke an API key
+* [`twins`](docs/twinbay_twins.md) - Browse the digital twins available for new sandboxes
+  * [`list`](docs/twinbay_twins_list.md) - List available twins
+  * [`get`](docs/twinbay_twins_get.md) - Retrieve a twin
+* [`sandboxes`](docs/twinbay_sandboxes.md) - Create and edit isolated provider sandboxes
+  * [`list`](docs/twinbay_sandboxes_list.md) - List sandboxes
+  * [`create`](docs/twinbay_sandboxes_create.md) - Create a sandbox
+  * [`get`](docs/twinbay_sandboxes_get.md) - Retrieve a sandbox
+  * [`twins`](docs/twinbay_sandboxes_twins.md) - Operations for twins
+    * [`start`](docs/twinbay_sandboxes_twins_start.md) - Start a sandbox twin
+    * [`stop`](docs/twinbay_sandboxes_twins_stop.md) - Stop a sandbox twin
+    * [`credential`](docs/twinbay_sandboxes_twins_credential.md) - Collect the twin's API key
+    * [`advance`](docs/twinbay_sandboxes_twins_advance.md) - Advance a deterministic twin lifecycle
+    * [`records`](docs/twinbay_sandboxes_twins_records.md) - Operations for records
+      * [`list`](docs/twinbay_sandboxes_twins_records_list.md) - List sandbox twin state
+      * [`update`](docs/twinbay_sandboxes_twins_records_update.md) - Replace a sandbox twin record
+  * [`templates`](docs/twinbay_sandboxes_templates.md) - Operations for templates
+    * [`list`](docs/twinbay_sandboxes_templates_list.md) - List sandbox templates
+    * [`delete`](docs/twinbay_sandboxes_templates_delete.md) - Delete a sandbox template
+  * [`logs`](docs/twinbay_sandboxes_logs.md) - Operations for logs
+    * [`list`](docs/twinbay_sandboxes_logs_list.md) - List recent sandbox request logs
+    * [`get`](docs/twinbay_sandboxes_logs_get.md) - Retrieve a sandbox request log
 
 </details>
-<!-- End Available Commands [operations] -->
+<!-- End Commands [operations] -->
 
 <!-- Start Request Body Input [stdinpiping] -->
 ## Request Body Input
 
-Operations that accept a request body support three input methods, with a clear priority chain:
-
-### Individual flags (highest priority)
-
-```bash
-twinbay <command> --name "Jane" --age 30
-```
-
-### `--body` flag
-
-Provide the entire request body as a JSON string:
-
-```bash
-twinbay <command> --body '{"name": "John", "age": 30}'
-```
-
-Individual flags override `--body` values:
-
-```bash
-# Result: {name: "Jane", age: 30}
-twinbay <command> --body '{"name": "John", "age": 30}' --name "Jane"
-```
-
-### Stdin piping (lowest priority)
-
-Pipe JSON into any command that accepts a request body:
-
-```bash
-echo '{"name": "John", "age": 30}' | twinbay <command>
-```
-
-Individual flags override stdin values:
-
-```bash
-# Result: {name: "Jane", age: 30}
-echo '{"name": "John", "age": 30}' | twinbay <command> --name "Jane"
-```
-
-This is useful for chaining commands, reading from files, or scripting:
-
-```bash
-# Read body from a file
-twinbay <command> < request.json
-
-# Pipe from another command
-curl -s https://example.com/data.json | twinbay <command>
-```
-
-### Priority
-
-When multiple input methods are used, the priority is:
-
-| Priority | Source | Description |
-|----------|--------|-------------|
-| 1 (highest) | Individual flags | `--name "Jane"` always wins |
-| 2 | `--body` flag | Whole-body JSON via flag |
-| 3 (lowest) | Stdin | Piped JSON input |
+Commands that accept a request body take it three ways, with a clear priority chain: individual field flags (highest priority), the whole body as JSON via `--body`, and JSON piped on stdin (lowest priority). Later sources never override earlier ones; a body-bearing command prints its exact request schema with `--schema`.
 <!-- End Request Body Input [stdinpiping] -->
 
 <!-- Start Server Selection [server] -->
@@ -293,7 +323,7 @@ When multiple input methods are used, the priority is:
 Use `--server-url` to override the server URL entirely, bypassing any named or indexed server selection:
 
 ```bash
-twinbay --server-url https://custom-api.example.com <command> [arguments]
+twinbay --server-url https://custom-api.example.com sandboxes list
 ```
 
 **Precedence**: `--server-url` > `--server` > default
@@ -316,16 +346,16 @@ Every command supports a `--output-format` flag that controls how the response i
 
 ```bash
 # Default pretty output
-twinbay <command>
+twinbay sandboxes list
 
 # Machine-readable JSON
-twinbay <command> --output-format json
+twinbay sandboxes list --output-format json
 
 # TOON for LLM-friendly compact output
-twinbay <command> --output-format toon
+twinbay sandboxes list --output-format toon
 
 # Pipe JSON to jq without using --output-format
-twinbay <command> --output-format json | jq '.fieldName'
+twinbay sandboxes list --output-format json | jq '.'
 ```
 
 ### jq filtering
@@ -334,10 +364,10 @@ Use `--jq` to filter or transform the response inline using a [jq](https://jqlan
 
 ```bash
 # Extract a single field
-twinbay <command> --jq '.name'
+twinbay sandboxes list --jq '.'
 
-# Filter an array
-twinbay <command> --jq '.items[] | select(.active == true)'
+# Reshape with any jq program; --raw-output prints string results as plain text (like jq -r)
+twinbay sandboxes list --jq '.' --raw-output
 ```
 
 ### Color control
@@ -372,17 +402,20 @@ The CLI uses standard exit codes to indicate success or failure:
 | Exit Code | Meaning |
 |-----------|---------|
 | `0` | Success |
-| `1` | Error (API error, invalid input, etc.) |
+| `1` | Runtime/API failure |
+| `2` | Usage or input failure |
+| `3` | Authentication or authorization failure |
 
 On success, the response data is printed to **stdout** as JSON. On failure, error details are printed to **stderr**.
 
 ```bash
 # Capture output and handle errors
-twinbay ... > output.json 2> error.log
+twinbay sandboxes list --output-format json > output.json 2> error.log
 if [ $? -ne 0 ]; then
   echo "Error occurred, see error.log"
 fi
 ```
+This CLI uses unclassified error rendering outside agent mode: pretty and TOON print the API error text as received, while `--output-format json` and `--jq` emit the unclassified envelope (including the configure `_hint` for HTTP 401/403) plus `exit_code`. Agent mode always emits the classified JSON envelope with `exit_code`, `error_type`, optional `error_reason`, `message`, `hints`, and optional `status_code` — see [For AI agents](#for-ai-agents).
 <!-- End Error Handling [errors] -->
 
 <!-- Start Diagnostics [diagnostics] -->
@@ -395,22 +428,30 @@ The CLI includes two diagnostic flags available on all commands:
 Preview what would be sent without making any network calls:
 
 ```bash
-twinbay <command> --dry-run
+twinbay sandboxes list --dry-run
 ```
 
-Output goes to stderr and includes:
+In human output modes, stdout is empty and the `[DRY-RUN]` block goes to stderr. It includes:
 - HTTP method and URL
 - Request headers (sensitive values redacted)
 - Request body preview (sensitive fields redacted)
 
-The command exits successfully without contacting the API. This is useful for verifying request construction before executing.
+With `--output-format json`, or with a caller-explicit `--jq`, stderr is silent and stdout is NDJSON: one compact preview object per would-be request. The jq filter is not applied, and command-declared jq presets do not select the JSON protocol.
+
+```json
+{"dry_run":true,"request":{"method":"POST","url":"https://…","headers":{"Accept":["application/json"],…},"body":<JSON value | string | null>}}
+```
+
+JSON bodies remain structured; text bodies are strings; binary bodies are `"<bytes:N>"`; absent bodies are `null`. Headers retain all values as arrays, with credentials replaced by `[REDACTED]`. Dry-run never reads the OS keychain, but credentials supplied by flag, environment, or config file still appear redacted. The command exits successfully without contacting the API.
+
+Local mutation commands emit one `{"dry_run":true,"local":true,"command":"…","message":"…"}` object in place of a preview; filter with `select(.request)` or `select(.local)`.
 
 ### Debug
 
 Log request and response diagnostics while running normally:
 
 ```bash
-twinbay <command> --debug
+twinbay sandboxes list --debug
 ```
 
 Debug output goes to stderr and includes:
@@ -429,6 +470,8 @@ If both `--dry-run` and `--debug` are set, `--dry-run` takes precedence and no n
 Sensitive information is automatically redacted in diagnostic output:
 - **Headers**: `Authorization`, `Cookie`, `Set-Cookie`, `X-API-Key`, and other security headers show `[REDACTED]`
 - **Body**: JSON fields named `password`, `secret`, `token`, `api_key`, `client_secret`, etc. show `[REDACTED]`
+- **Binary data**: binary media and canonical base64 strings are replaced with `<bytes:N>`
+- **URL query**: credential-like query parameters are replaced with `[REDACTED]`
 
 Diagnostic output should still be treated as potentially sensitive operational data.
 <!-- End Diagnostics [diagnostics] -->

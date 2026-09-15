@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/panoratech/twinbay-cli/internal/client"
 	"github.com/panoratech/twinbay-cli/internal/flagutil"
-	"github.com/panoratech/twinbay-cli/internal/interactive"
 	"github.com/panoratech/twinbay-cli/internal/output"
 	"github.com/panoratech/twinbay-cli/internal/sdk"
 	"github.com/panoratech/twinbay-cli/internal/sdk/models/operations"
@@ -15,8 +14,8 @@ import (
 )
 
 var listAPIKeysCmdMeta = []flagutil.FlagMeta{
-	{FlagName: "page", Shorthand: "p", FieldPath: "Page", Kind: flagutil.FlagKindInt64, Optional: true, HasDefault: true, DefaultInt: 1, Description: "Page number"},
-	{FlagName: "size", Shorthand: "s", FieldPath: "Size", Kind: flagutil.FlagKindInt64, Optional: true, HasDefault: true, DefaultInt: 50, Description: "Page size"},
+	{FlagName: "page", Shorthand: "p", FieldPath: "Page", Kind: flagutil.FlagKindInt64, Optional: true, HasDefault: true, DefaultInt: 1, HasMinimum: true, Minimum: 1, Description: "Page number"},
+	{FlagName: "size", Shorthand: "s", FieldPath: "Size", Kind: flagutil.FlagKindInt64, Optional: true, HasDefault: true, DefaultInt: 50, HasMinimum: true, Minimum: 1, HasMaximum: true, Maximum: 100, Description: "Page size"},
 }
 
 // initListApiKeysCmd initializes the list-api-keys command.
@@ -26,7 +25,11 @@ func initListApiKeysCmd(parent *cobra.Command) error {
 		Short:   "List API keys",
 		Long:    "Every key of the active organization that has not been revoked, oldest first. A key that has expired is still listed, so that it can be read and cleaned up rather than vanishing unexplained; `expires_at` says which. Tokens are never included. Paginated: walk the pages with `page` and `size`.",
 		Example: "  twinbay api-keys list",
+		Args:    cobra.NoArgs,
 		RunE:    runListApiKeysCmd,
+		Annotations: map[string]string{
+			"speakeasy_operation": "list_api_keys",
+		},
 	}
 	flagutil.RegisterFlags(cmd, listAPIKeysCmdMeta)
 	if err := flagutil.ValidateMeta[operations.ListAPIKeysRequest](listAPIKeysCmdMeta); err != nil {
@@ -41,14 +44,9 @@ func runListApiKeysCmd(cmd *cobra.Command, args []string) error {
 	if usage.UsageRequested(cmd) {
 		return usage.EmitSchema(cmd, cmd.OutOrStdout())
 	}
-	if interactive.ShouldPrompt(cmd, listAPIKeysCmdMeta) {
-		if err := interactive.PromptAndSetFlags(cmd, listAPIKeysCmdMeta); err != nil {
-			return err
-		}
-	}
 	req, err := flagutil.BuildRequest[operations.ListAPIKeysRequest](cmd, listAPIKeysCmdMeta, "", "")
 	if err != nil {
-		return err
+		return flagutil.WithCLIValidation(err)
 	}
 	s, err := client.NewClient(cmd)
 	if err != nil {

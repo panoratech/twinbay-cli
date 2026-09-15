@@ -18,7 +18,11 @@ func initListCmd(parent *cobra.Command) error {
 		Short:   "List sandbox templates",
 		Long:    "Saved sandbox definitions. Start a sandbox from one by sending its id as `template` to `POST /sandboxes`.",
 		Example: "  twinbay templates list",
+		Args:    cobra.NoArgs,
 		RunE:    runListCmd,
+		Annotations: map[string]string{
+			"speakeasy_operation": "list_sandbox_templates",
+		},
 	}
 	parent.AddCommand(cmd)
 	return nil

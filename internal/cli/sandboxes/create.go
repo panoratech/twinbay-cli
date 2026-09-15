@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/panoratech/twinbay-cli/internal/client"
 	"github.com/panoratech/twinbay-cli/internal/flagutil"
-	"github.com/panoratech/twinbay-cli/internal/interactive"
 	"github.com/panoratech/twinbay-cli/internal/output"
 	"github.com/panoratech/twinbay-cli/internal/sdk"
 	"github.com/panoratech/twinbay-cli/internal/sdk/models/components"
@@ -16,7 +15,7 @@ import (
 )
 
 var createCmdMeta = []flagutil.FlagMeta{
-	{FlagName: "name", Shorthand: "n", FieldPath: "Name", Kind: flagutil.FlagKindString, Required: true, Description: "Display name of the new sandbox [required]"},
+	{FlagName: "name", Shorthand: "n", FieldPath: "Name", Kind: flagutil.FlagKindString, Required: true, MinLength: 1, Description: "Display name of the new sandbox [required]"},
 	{FlagName: "prompt", Shorthand: "p", FieldPath: "Prompt", Kind: flagutil.FlagKindJSON, Optional: true, Annotations: `json:"prompt,omitempty"`, Description: "A natural-language description of the scenario the whole sandbox represents. Every twin in it is seeded from this description while it is being provisioned."},
 	{FlagName: "twins", FieldPath: "Twins", Kind: flagutil.FlagKindJSON, Optional: true, Annotations: `json:"twins,omitempty"`, Description: "Provider twins to provision in the sandbox. Omitted when the sandbox is started from a template, which holds them already."},
 	{FlagName: "template", FieldPath: "Template", Kind: flagutil.FlagKindJSON, Optional: true, Annotations: `json:"template,omitempty"`, Description: "A saved sandbox definition to start from, instead of listing twins. Its twins, their curated scenarios and their instructions are used as they were saved."},
@@ -30,13 +29,24 @@ func initCreateCmd(parent *cobra.Command) error {
 		Short:   "Create a sandbox",
 		Long:    "Records the sandbox and queues each twin for provisioning. The twins are not serving yet: poll the sandbox until each reports `ready`, then collect its API key.",
 		Example: "  twinbay sandboxes create --name <value>",
+		Args:    cobra.NoArgs,
 		RunE:    runCreateCmd,
+		Annotations: map[string]string{
+			"speakeasy_operation": "create_sandbox",
+		},
 	}
 	flagutil.RegisterFlags(cmd, createCmdMeta)
 	if err := flagutil.ValidateMeta[components.CreateSandboxRequest](createCmdMeta); err != nil {
 		return fmt.Errorf("invalid metadata for create: %w", err)
 	}
-	cmd.Flags().String("body", "", "Request body as JSON (alternative to individual flags). Can also be provided via stdin.")
+	cmd.Flags().String("body", "", "Request body as JSON (alternative to individual flags). Can also be provided via stdin; @path reads a file, @- reads stdin to EOF. Use --schema to print the exact JSON Schema.")
+	_ = flagutil.AnnotatePromptFlag(cmd, "body", flagutil.PromptFlagSpec{Kind: "json", BodyFlag: true})
+	cmd.Annotations[flagutil.AnnotationWholeBodyFlag] = "body"
+	if err := flagutil.AnnotateBodyFields(cmd, createCmdMeta, "", "body"); err != nil {
+		return fmt.Errorf("annotate body fields for create: %w", err)
+	}
+	cmd.Flags().Bool("schema", false, "Print the exact JSON Schema of the request body and exit")
+	_ = flagutil.AnnotatePromptFlag(cmd, "schema", flagutil.PromptFlagSpec{Kind: "bool", DocSurface: true})
 	parent.AddCommand(cmd)
 	return nil
 }
@@ -46,14 +56,12 @@ func runCreateCmd(cmd *cobra.Command, args []string) error {
 	if usage.UsageRequested(cmd) {
 		return usage.EmitSchema(cmd, cmd.OutOrStdout())
 	}
-	if interactive.ShouldPrompt(cmd, createCmdMeta) {
-		if err := interactive.PromptAndSetFlags(cmd, createCmdMeta); err != nil {
-			return err
-		}
+	if requested, _ := cmd.Flags().GetBool("schema"); requested {
+		return usage.EmitBodySchema(cmd.OutOrStdout(), "create_sandbox")
 	}
 	request, err := flagutil.BuildRequest[components.CreateSandboxRequest](cmd, createCmdMeta, "", "body")
 	if err != nil {
-		return err
+		return flagutil.WithCLIValidation(err)
 	}
 	s, err := client.NewClient(cmd)
 	if err != nil {

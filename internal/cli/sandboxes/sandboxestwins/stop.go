@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/panoratech/twinbay-cli/internal/client"
 	"github.com/panoratech/twinbay-cli/internal/flagutil"
-	"github.com/panoratech/twinbay-cli/internal/interactive"
 	"github.com/panoratech/twinbay-cli/internal/output"
 	"github.com/panoratech/twinbay-cli/internal/sdk"
 	"github.com/panoratech/twinbay-cli/internal/sdk/models/operations"
@@ -25,8 +24,12 @@ func initStopCmd(parent *cobra.Command) error {
 		Use:     "stop",
 		Short:   "Stop a sandbox twin",
 		Long:    "Queues the container for destruction. Everything it holds is lost.",
-		Example: "  twinbay sandboxes-twins stop --sandbox-id c596993f-a7ba-4c8f-a8ef-12fa7483b957 --sandbox-twin-id 2bc8e24b-4bd7-43d3-88b9-1466c640d1d1",
+		Example: "  twinbay twins stop --sandbox-id c596993f-a7ba-4c8f-a8ef-12fa7483b957 --sandbox-twin-id 2bc8e24b-4bd7-43d3-88b9-1466c640d1d1",
+		Args:    cobra.NoArgs,
 		RunE:    runStopCmd,
+		Annotations: map[string]string{
+			"speakeasy_operation": "stop_sandbox_twin",
+		},
 	}
 	flagutil.RegisterFlags(cmd, stopCmdMeta)
 	if err := flagutil.ValidateMeta[operations.StopSandboxTwinRequest](stopCmdMeta); err != nil {
@@ -41,14 +44,9 @@ func runStopCmd(cmd *cobra.Command, args []string) error {
 	if usage.UsageRequested(cmd) {
 		return usage.EmitSchema(cmd, cmd.OutOrStdout())
 	}
-	if interactive.ShouldPrompt(cmd, stopCmdMeta) {
-		if err := interactive.PromptAndSetFlags(cmd, stopCmdMeta); err != nil {
-			return err
-		}
-	}
 	req, err := flagutil.BuildRequest[operations.StopSandboxTwinRequest](cmd, stopCmdMeta, "", "")
 	if err != nil {
-		return err
+		return flagutil.WithCLIValidation(err)
 	}
 	s, err := client.NewClient(cmd)
 	if err != nil {

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/panoratech/twinbay-cli/internal/client"
 	"github.com/panoratech/twinbay-cli/internal/flagutil"
-	"github.com/panoratech/twinbay-cli/internal/interactive"
 	"github.com/panoratech/twinbay-cli/internal/output"
 	"github.com/panoratech/twinbay-cli/internal/sdk"
 	"github.com/panoratech/twinbay-cli/internal/sdk/models/operations"
@@ -15,8 +14,8 @@ import (
 )
 
 var listTwinsCmdMeta = []flagutil.FlagMeta{
-	{FlagName: "page", Shorthand: "p", FieldPath: "Page", Kind: flagutil.FlagKindInt64, Optional: true, HasDefault: true, DefaultInt: 1, Description: "integer value"},
-	{FlagName: "size", Shorthand: "s", FieldPath: "Size", Kind: flagutil.FlagKindInt64, Optional: true, HasDefault: true, DefaultInt: 50, Description: "integer value"},
+	{FlagName: "page", Shorthand: "p", FieldPath: "Page", Kind: flagutil.FlagKindInt64, Optional: true, HasDefault: true, DefaultInt: 1, HasMinimum: true, Minimum: 1, Description: "integer value"},
+	{FlagName: "size", Shorthand: "s", FieldPath: "Size", Kind: flagutil.FlagKindInt64, Optional: true, HasDefault: true, DefaultInt: 50, HasMinimum: true, Minimum: 1, HasMaximum: true, Maximum: 100, Description: "integer value"},
 }
 
 // initListTwinsCmd initializes the list-twins command.
@@ -26,7 +25,11 @@ func initListTwinsCmd(parent *cobra.Command) error {
 		Short:   "List available twins",
 		Long:    "Returns the registered code twins ordered by display name.",
 		Example: "  twinbay twins list",
+		Args:    cobra.NoArgs,
 		RunE:    runListTwinsCmd,
+		Annotations: map[string]string{
+			"speakeasy_operation": "list_twins",
+		},
 	}
 	flagutil.RegisterFlags(cmd, listTwinsCmdMeta)
 	if err := flagutil.ValidateMeta[operations.ListTwinsRequest](listTwinsCmdMeta); err != nil {
@@ -41,14 +44,9 @@ func runListTwinsCmd(cmd *cobra.Command, args []string) error {
 	if usage.UsageRequested(cmd) {
 		return usage.EmitSchema(cmd, cmd.OutOrStdout())
 	}
-	if interactive.ShouldPrompt(cmd, listTwinsCmdMeta) {
-		if err := interactive.PromptAndSetFlags(cmd, listTwinsCmdMeta); err != nil {
-			return err
-		}
-	}
 	req, err := flagutil.BuildRequest[operations.ListTwinsRequest](cmd, listTwinsCmdMeta, "", "")
 	if err != nil {
-		return err
+		return flagutil.WithCLIValidation(err)
 	}
 	s, err := client.NewClient(cmd)
 	if err != nil {

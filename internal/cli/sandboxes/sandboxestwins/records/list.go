@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/panoratech/twinbay-cli/internal/client"
 	"github.com/panoratech/twinbay-cli/internal/flagutil"
-	"github.com/panoratech/twinbay-cli/internal/interactive"
 	"github.com/panoratech/twinbay-cli/internal/output"
 	"github.com/panoratech/twinbay-cli/internal/sdk"
 	"github.com/panoratech/twinbay-cli/internal/sdk/models/operations"
@@ -27,7 +26,11 @@ func initListCmd(parent *cobra.Command) error {
 		Short:   "List sandbox twin state",
 		Long:    "List sandbox twin state",
 		Example: "  twinbay records list --sandbox-id 6f60bb85-deb3-43ae-bb26-ebef09e653bb --sandbox-twin-id 4283a66c-a030-40f0-a3d5-549f98bcda12 --resource <value>",
+		Args:    cobra.NoArgs,
 		RunE:    runListCmd,
+		Annotations: map[string]string{
+			"speakeasy_operation": "list_sandbox_records",
+		},
 	}
 	flagutil.RegisterFlags(cmd, listCmdMeta)
 	if err := flagutil.ValidateMeta[operations.ListSandboxRecordsRequest](listCmdMeta); err != nil {
@@ -42,14 +45,9 @@ func runListCmd(cmd *cobra.Command, args []string) error {
 	if usage.UsageRequested(cmd) {
 		return usage.EmitSchema(cmd, cmd.OutOrStdout())
 	}
-	if interactive.ShouldPrompt(cmd, listCmdMeta) {
-		if err := interactive.PromptAndSetFlags(cmd, listCmdMeta); err != nil {
-			return err
-		}
-	}
 	req, err := flagutil.BuildRequest[operations.ListSandboxRecordsRequest](cmd, listCmdMeta, "", "")
 	if err != nil {
-		return err
+		return flagutil.WithCLIValidation(err)
 	}
 	s, err := client.NewClient(cmd)
 	if err != nil {

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/panoratech/twinbay-cli/internal/client"
 	"github.com/panoratech/twinbay-cli/internal/flagutil"
-	"github.com/panoratech/twinbay-cli/internal/interactive"
 	"github.com/panoratech/twinbay-cli/internal/output"
 	"github.com/panoratech/twinbay-cli/internal/sdk"
 	"github.com/panoratech/twinbay-cli/internal/sdk/models/operations"
@@ -26,14 +25,25 @@ func initAdvanceCmd(parent *cobra.Command) error {
 		Use:     "advance",
 		Short:   "Advance a deterministic twin lifecycle",
 		Long:    "Advance a deterministic twin lifecycle",
-		Example: "  twinbay sandboxes-twins advance --sandbox-id 0e5430b8-577a-40fb-a158-9fc5ad75ab04 --sandbox-twin-id 10a63cd8-60d5-4c91-bbd5-7c17aa12a3d7",
+		Example: "  twinbay twins advance --sandbox-id 0e5430b8-577a-40fb-a158-9fc5ad75ab04 --sandbox-twin-id 10a63cd8-60d5-4c91-bbd5-7c17aa12a3d7",
+		Args:    cobra.NoArgs,
 		RunE:    runAdvanceCmd,
+		Annotations: map[string]string{
+			"speakeasy_operation": "advance_sandbox",
+		},
 	}
 	flagutil.RegisterFlags(cmd, advanceCmdMeta)
 	if err := flagutil.ValidateMeta[operations.AdvanceSandboxRequest](advanceCmdMeta); err != nil {
 		return fmt.Errorf("invalid metadata for advance: %w", err)
 	}
-	cmd.Flags().String("body", "", "Request body as JSON (alternative to individual flags). Can also be provided via stdin.")
+	cmd.Flags().String("body", "", "Request body as JSON (alternative to individual flags). Can also be provided via stdin; @path reads a file, @- reads stdin to EOF. Use --schema to print the exact JSON Schema.")
+	_ = flagutil.AnnotatePromptFlag(cmd, "body", flagutil.PromptFlagSpec{Kind: "json", BodyFlag: true})
+	cmd.Annotations[flagutil.AnnotationWholeBodyFlag] = "body"
+	if err := flagutil.AnnotateBodyFields(cmd, advanceCmdMeta, "Body", "body"); err != nil {
+		return fmt.Errorf("annotate body fields for advance: %w", err)
+	}
+	cmd.Flags().Bool("schema", false, "Print the exact JSON Schema of the request body and exit")
+	_ = flagutil.AnnotatePromptFlag(cmd, "schema", flagutil.PromptFlagSpec{Kind: "bool", DocSurface: true})
 	parent.AddCommand(cmd)
 	return nil
 }
@@ -43,14 +53,12 @@ func runAdvanceCmd(cmd *cobra.Command, args []string) error {
 	if usage.UsageRequested(cmd) {
 		return usage.EmitSchema(cmd, cmd.OutOrStdout())
 	}
-	if interactive.ShouldPrompt(cmd, advanceCmdMeta) {
-		if err := interactive.PromptAndSetFlags(cmd, advanceCmdMeta); err != nil {
-			return err
-		}
+	if requested, _ := cmd.Flags().GetBool("schema"); requested {
+		return usage.EmitBodySchema(cmd.OutOrStdout(), "advance_sandbox")
 	}
 	req, err := flagutil.BuildRequest[operations.AdvanceSandboxRequest](cmd, advanceCmdMeta, "Body", "body")
 	if err != nil {
-		return err
+		return flagutil.WithCLIValidation(err)
 	}
 	s, err := client.NewClient(cmd)
 	if err != nil {

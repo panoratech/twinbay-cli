@@ -3,55 +3,69 @@
 package usage
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 	"io"
 	"strings"
+	"sync"
 )
 
 var usageSchemas = map[string]string{
-	"":                               "name \"twinbay\"\nbin \"twinbay\"\nabout \"Twinbay: Backend API\"\nversion \"0.1.1\"\nconfig {\n  file \"~/.config/twinbay/config.yaml\"\n}\nflag \"--usage\" help=\"Print the CLI Usage schema in KDL format\" global=#true\nflag \"-o --output-format <format>\" help=\"Specify the output format. Options: pretty, json, yaml, table, toon.\" global=#true config=\"output_format\" default=\"pretty\"\nflag \"--color <color>\" help=\"Control colored output: auto (color when output is a TTY), always, or never. Respects NO_COLOR and FORCE_COLOR env vars.\" global=#true default=\"auto\"\nflag \"-q --jq <jq>\" help=\"Filter and transform output using a jq expression (e.g., '.name', '.items[] | .id')\" global=#true\nflag \"--server-url <url>\" help=\"Override the default server URL\" global=#true\nflag \"--server <server>\" help=\"Select a server by index (for indexed servers) or name (for named servers)\" global=#true\nflag \"-H --header <header...>\" help=\"Set a custom HTTP request header (format: \\\"Key: Value\\\"). Can be specified multiple times.\" global=#true var=#true\nflag \"--include-headers\" help=\"Include HTTP response headers in the output\" global=#true default=#false\nflag \"--timeout <duration>\" help=\"HTTP request timeout (e.g., 30s, 5m, 100ms)\" global=#true config=\"timeout\"\nflag \"--dry-run\" help=\"Preview the request that would be sent without executing it (output to stderr)\" global=#true default=#false\nflag \"-d --debug\" help=\"Log request and response diagnostics to stderr\" global=#true default=#false\nflag \"--agent-mode\" help=\"Enable structured errors and default TOON output for AI coding agents. Automatically enabled when a known agent environment is detected (CLAUDE_CODE, CURSOR_AGENT, etc.). Use --agent-mode=false to disable.\" global=#true default=#false\nflag \"--organization-api-key <organization_api_key>\" help=\"An organization API key, as minted by POST /organizations/current/api-keys.\" global=#true env=\"CLI_TWINBAY_ORGANIZATION_API_KEY\" config=\"security.organization_api_key\"\ncmd \"users\" help=\"The current user\" {\n  cmd \"read-me\" help=\"Read the authenticated user\" {\n    alias \"rm\"\n  }\n}\ncmd \"organizations\" help=\"Organizations the caller belongs to\" {\n  cmd \"list\" help=\"List your organizations\" {\n    flag \"--page <page>\" help=\"Page number\" default=1\n    flag \"--size <size>\" help=\"Page size\" default=50\n  }\n  cmd \"create\" help=\"Create an organization\" {\n    flag \"--name <name>\" help=\"Display name of the new organization [required]\"\n    flag \"--body <body>\" help=\"Request body as JSON (alternative to individual flags). Can also be provided via stdin.\"\n  }\n  cmd \"ensure-default\" help=\"Create your first organization\" {\n    alias \"ed\"\n  }\n  cmd \"read-current\" help=\"Read the active organization\" {\n    alias \"rc\"\n  }\n  cmd \"rename-current\" help=\"Rename the active organization\" {\n    alias \"rcu\"\n    flag \"--name <name>\" help=\"New display name of the organization [required]\"\n    flag \"--body <body>\" help=\"Request body as JSON (alternative to individual flags). Can also be provided via stdin.\"\n  }\n}\ncmd \"api-keys\" help=\"Long-lived credentials for callers that cannot hold an AuthKit session — agents, SDKs, CI\" {\n  alias \"ak\"\n  cmd \"create\" help=\"Create an API key\" {\n    flag \"--name <name>\" help=\"What this key is for, in the operator's words [required]\"\n    flag \"--expires-at <expires_at>\" help=\"When the key stops working on its own. Omitted or null for a key that only stops when it is revoked.\"\n    flag \"--body <body>\" help=\"Request body as JSON (alternative to individual flags). Can also be provided via stdin.\"\n  }\n  cmd \"list\" help=\"List API keys\" {\n    flag \"--page <page>\" help=\"Page number\" default=1\n    flag \"--size <size>\" help=\"Page size\" default=50\n  }\n  cmd \"revoke\" help=\"Revoke an API key\" {\n    flag \"--api-key-id <api_key_id>\" help=\"[required]\"\n  }\n}\ncmd \"twins\" help=\"Browse the digital twins available for new sandboxes\" {\n  cmd \"list\" help=\"List available twins\" {\n    flag \"--page <page>\" help=\"integer value\" default=1\n    flag \"--size <size>\" help=\"integer value\" default=50\n  }\n  cmd \"get\" help=\"Retrieve a twin\" {\n    flag \"--twin-slug <twin_slug>\" help=\"[required]\"\n  }\n}\ncmd \"sandboxes\" help=\"Create and edit isolated provider sandboxes\" {\n  cmd \"list\" help=\"List sandboxes\"\n  cmd \"create\" help=\"Create a sandbox\" {\n    flag \"--name <name>\" help=\"Display name of the new sandbox [required]\"\n    flag \"--prompt <prompt>\" help=\"A natural-language description of the scenario the whole sandbox represents. Every twin in it is seeded from this description while it is being provisioned.\"\n    flag \"--twins <twins>\" help=\"Provider twins to provision in the sandbox. Omitted when the sandbox is started from a template, which holds them already.\"\n    flag \"--template <template>\" help=\"A saved sandbox definition to start from, instead of listing twins. Its twins, their curated scenarios and their instructions are used as they were saved.\"\n    flag \"--save-as-template\" help=\"Also save this sandbox's definition, so another sandbox can be started from it later.\" default=#false\n    flag \"--body <body>\" help=\"Request body as JSON (alternative to individual flags). Can also be provided via stdin.\"\n  }\n  cmd \"get\" help=\"Retrieve a sandbox\" {\n    flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n  }\n  cmd \"twins\" help=\"Operations for sandboxes-twins\" {\n    cmd \"start\" help=\"Start a sandbox twin\" {\n      flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n      flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n    }\n    cmd \"stop\" help=\"Stop a sandbox twin\" {\n      flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n      flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n    }\n    cmd \"credential\" help=\"Collect the twin's API key\" {\n      flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n      flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n    }\n    cmd \"advance\" help=\"Advance a deterministic twin lifecycle\" {\n      flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n      flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n      flag \"--at <at>\" help=\"Instant to advance the sandbox to. Defaults to now.\"\n      flag \"--body <body>\" help=\"Request body as JSON (alternative to individual flags). Can also be provided via stdin.\"\n    }\n    cmd \"records\" help=\"Operations for records\" {\n      cmd \"list\" help=\"List sandbox twin state\" {\n        flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n        flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n        flag \"--resource <resource>\" help=\"[required]\"\n      }\n      cmd \"update\" help=\"Replace a sandbox twin record\" {\n        flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n        flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n        flag \"--resource <resource>\" help=\"[required]\"\n        flag \"--external-id <external_id>\" help=\"[required]\"\n        flag \"--body-param <body_param>\" help=\"[required]\"\n        flag \"--body <body>\" help=\"Request body as JSON (alternative to individual flags). Can also be provided via stdin.\"\n      }\n    }\n  }\n  cmd \"templates\" help=\"Operations for templates\" {\n    cmd \"list\" help=\"List sandbox templates\"\n    cmd \"delete\" help=\"Delete a sandbox template\" {\n      flag \"--template-id <template_id>\" help=\"[required]\"\n    }\n  }\n  cmd \"logs\" help=\"Operations for logs\" {\n    cmd \"list\" help=\"List recent sandbox request logs\" {\n      flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n      flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"string value\"\n      flag \"--page <page>\" help=\"Page number\" default=1\n      flag \"--size <size>\" help=\"Page size\" default=50\n    }\n    cmd \"get\" help=\"Retrieve a sandbox request log\" {\n      flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n      flag \"--request-id <request_id>\" help=\"[required]\"\n    }\n  }\n}\ncmd \"configure\" help=\"Configure authentication credentials and preferences\"\ncmd \"whoami\" help=\"Display current authentication configuration\"\ncmd \"version\" help=\"Print the CLI version\"\n",
+	"":                               "name \"twinbay\"\nbin \"twinbay\"\nabout \"Twinbay: Backend API\"\nversion \"0.2.0\"\nconfig {\n  file \"~/.config/twinbay/config.yaml\"\n}\nflag \"--usage\" help=\"Print the CLI Usage schema in KDL format\" global=#true\nflag \"-o --output-format <format>\" help=\"Specify the output format. Options: pretty, json, yaml, table, toon.\" global=#true config=\"output_format\" default=\"pretty\"\nflag \"--color <color>\" help=\"Control colored output: auto (color when output is a TTY), always, or never. Respects NO_COLOR and FORCE_COLOR env vars.\" global=#true default=\"auto\"\nflag \"-q --jq <jq>\" help=\"Filter and transform output using a jq expression (e.g., '.name', '.items[] | .id')\" global=#true\nflag \"--raw-output\" help=\"Write --jq string results as raw text instead of JSON strings (like jq -r); non-string results stay JSON\" global=#true default=#false\nflag \"--server-url <url>\" help=\"Override the default server URL\" global=#true\nflag \"--server <server>\" help=\"Select a server by index (for indexed servers) or name (for named servers)\" global=#true\nflag \"-H --header <header...>\" help=\"Set a custom HTTP request header (format: \\\"Key: Value\\\"). Can be specified multiple times.\" global=#true var=#true\nflag \"--include-headers\" help=\"Include HTTP response headers in the output\" global=#true default=#false\nflag \"--timeout <duration>\" help=\"HTTP request timeout (e.g., 30s, 5m, 100ms)\" global=#true config=\"timeout\"\nflag \"--interactive\" help=\"Prompt for missing inputs and open guided configure/auth forms (forms fall back to line prompts on stdin off-TTY)\" global=#true default=#true\nflag \"--no-interactive\" help=\"Disable all interactive features (auto-prompting, explorer auto-launch, TUI forms)\" global=#true default=#false\nflag \"--dry-run\" help=\"Preview API requests without sending them (no network, no OS keychain). Human preview on stderr; with -o json or --jq, one JSON object per request on stdout. Local mutation commands (auth login, auth logout and configure) make no request: they skip prompts and writes and report a no-op (stderr, or one JSON object on stdout in the machine form)\" global=#true default=#false\nflag \"-d --debug\" help=\"Log request and response diagnostics to stderr\" global=#true default=#false\nflag \"--agent-mode\" help=\"Enable structured errors and default TOON output for AI coding agents. Automatically enabled when a known agent environment is detected (CLAUDECODE, CURSOR_AGENT, etc.). Use --agent-mode=false to disable.\" global=#true default=#false\nflag \"--organization-api-key <organization_api_key>\" help=\"An organization API key, as minted by POST /organizations/current/api-keys.\" global=#true env=\"CLI_TWINBAY_ORGANIZATION_API_KEY\" config=\"security.organization_api_key\"\ncmd \"api-keys\" help=\"Long-lived credentials for callers that cannot hold an AuthKit session — agents, SDKs, CI\" {\n  alias \"ak\"\n  cmd \"create\" help=\"Create an API key\" {\n    flag \"--name <name>\" help=\"What this key is for, in the operator's words [required]\"\n    flag \"--expires-at <expires_at>\" help=\"When the key stops working on its own. Omitted or null for a key that only stops when it is revoked.\"\n    flag \"--body <body>\" help=\"Request body as JSON (alternative to individual flags). Can also be provided via stdin; @path reads a file, @- reads stdin to EOF. Use --schema to print the exact JSON Schema.\"\n    flag \"--schema\" help=\"Print the exact JSON Schema of the request body and exit\"\n  }\n  cmd \"list\" help=\"List API keys\" {\n    flag \"--page <page>\" help=\"Page number\" default=1\n    flag \"--size <size>\" help=\"Page size\" default=50\n  }\n  cmd \"revoke\" help=\"Revoke an API key\" {\n    flag \"--api-key-id <api_key_id>\" help=\"[required]\"\n  }\n}\ncmd \"auth\" help=\"Manage authentication credentials\" {\n  cmd \"login\" help=\"Interactively configure authentication credentials\"\n  cmd \"logout\" help=\"Clear all stored authentication credentials\"\n  cmd \"whoami\" help=\"Display current authentication configuration\"\n}\ncmd \"completion\" help=\"Generate the autocompletion script for the specified shell\" {\n  cmd \"bash\" help=\"Generate the autocompletion script for bash\"\n  cmd \"fish\" help=\"Generate the autocompletion script for fish\"\n  cmd \"powershell\" help=\"Generate the autocompletion script for powershell\"\n  cmd \"zsh\" help=\"Generate the autocompletion script for zsh\"\n}\ncmd \"configure\" help=\"Configure authentication credentials and preferences\"\ncmd \"explore\" help=\"Interactively browse and run commands\"\ncmd \"help\" help=\"Help about any command\"\ncmd \"organizations\" help=\"Organizations the caller belongs to\" {\n  cmd \"create\" help=\"Create an organization\" {\n    flag \"--name <name>\" help=\"Display name of the new organization [required]\"\n    flag \"--body <body>\" help=\"Request body as JSON (alternative to individual flags). Can also be provided via stdin; @path reads a file, @- reads stdin to EOF. Use --schema to print the exact JSON Schema.\"\n    flag \"--schema\" help=\"Print the exact JSON Schema of the request body and exit\"\n  }\n  cmd \"ensure-default\" help=\"Create your first organization\" {\n    alias \"ed\"\n  }\n  cmd \"list\" help=\"List your organizations\" {\n    flag \"--page <page>\" help=\"Page number\" default=1\n    flag \"--size <size>\" help=\"Page size\" default=50\n  }\n  cmd \"read-current\" help=\"Read the active organization\" {\n    alias \"rc\"\n  }\n  cmd \"rename-current\" help=\"Rename the active organization\" {\n    alias \"rcu\"\n    flag \"--name <name>\" help=\"New display name of the organization [required]\"\n    flag \"--body <body>\" help=\"Request body as JSON (alternative to individual flags). Can also be provided via stdin; @path reads a file, @- reads stdin to EOF. Use --schema to print the exact JSON Schema.\"\n    flag \"--schema\" help=\"Print the exact JSON Schema of the request body and exit\"\n  }\n}\ncmd \"sandboxes\" help=\"Create and edit isolated provider sandboxes\" {\n  cmd \"create\" help=\"Create a sandbox\" {\n    flag \"--name <name>\" help=\"Display name of the new sandbox [required]\"\n    flag \"--prompt <prompt>\" help=\"A natural-language description of the scenario the whole sandbox represents. Every twin in it is seeded from this description while it is being provisioned.\"\n    flag \"--twins <twins>\" help=\"Provider twins to provision in the sandbox. Omitted when the sandbox is started from a template, which holds them already.\"\n    flag \"--template <template>\" help=\"A saved sandbox definition to start from, instead of listing twins. Its twins, their curated scenarios and their instructions are used as they were saved.\"\n    flag \"--save-as-template\" help=\"Also save this sandbox's definition, so another sandbox can be started from it later.\" default=#false\n    flag \"--body <body>\" help=\"Request body as JSON (alternative to individual flags). Can also be provided via stdin; @path reads a file, @- reads stdin to EOF. Use --schema to print the exact JSON Schema.\"\n    flag \"--schema\" help=\"Print the exact JSON Schema of the request body and exit\"\n  }\n  cmd \"get\" help=\"Retrieve a sandbox\" {\n    flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n  }\n  cmd \"list\" help=\"List sandboxes\"\n  cmd \"logs\" help=\"Operations for logs\" {\n    cmd \"get\" help=\"Retrieve a sandbox request log\" {\n      flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n      flag \"--request-id <request_id>\" help=\"[required]\"\n    }\n    cmd \"list\" help=\"List recent sandbox request logs\" {\n      flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n      flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"string value\"\n      flag \"--page <page>\" help=\"Page number\" default=1\n      flag \"--size <size>\" help=\"Page size\" default=50\n    }\n  }\n  cmd \"templates\" help=\"Operations for templates\" {\n    cmd \"delete\" help=\"Delete a sandbox template\" {\n      flag \"--template-id <template_id>\" help=\"[required]\"\n    }\n    cmd \"list\" help=\"List sandbox templates\"\n  }\n  cmd \"twins\" help=\"Operations for twins\" {\n    cmd \"advance\" help=\"Advance a deterministic twin lifecycle\" {\n      flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n      flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n      flag \"--at <at>\" help=\"Instant to advance the sandbox to. Defaults to now.\"\n      flag \"--body <body>\" help=\"Request body as JSON (alternative to individual flags). Can also be provided via stdin; @path reads a file, @- reads stdin to EOF. Use --schema to print the exact JSON Schema.\"\n      flag \"--schema\" help=\"Print the exact JSON Schema of the request body and exit\"\n    }\n    cmd \"credential\" help=\"Collect the twin's API key\" {\n      flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n      flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n    }\n    cmd \"records\" help=\"Operations for records\" {\n      cmd \"list\" help=\"List sandbox twin state\" {\n        flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n        flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n        flag \"--resource <resource>\" help=\"[required]\"\n      }\n      cmd \"update\" help=\"Replace a sandbox twin record\" {\n        flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n        flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n        flag \"--resource <resource>\" help=\"[required]\"\n        flag \"--external-id <external_id>\" help=\"[required]\"\n        flag \"--body-param <body_param>\" help=\"[required]\"\n        flag \"--body <body>\" help=\"Request body as JSON (alternative to individual flags). Can also be provided via stdin; @path reads a file, @- reads stdin to EOF. Use --schema to print the exact JSON Schema.\"\n        flag \"--schema\" help=\"Print the exact JSON Schema of the request body and exit\"\n      }\n    }\n    cmd \"start\" help=\"Start a sandbox twin\" {\n      flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n      flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n    }\n    cmd \"stop\" help=\"Stop a sandbox twin\" {\n      flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n      flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n    }\n  }\n}\ncmd \"twins\" help=\"Browse the digital twins available for new sandboxes\" {\n  cmd \"get\" help=\"Retrieve a twin\" {\n    flag \"--twin-slug <twin_slug>\" help=\"[required]\"\n  }\n  cmd \"list\" help=\"List available twins\" {\n    flag \"--page <page>\" help=\"integer value\" default=1\n    flag \"--size <size>\" help=\"integer value\" default=50\n  }\n}\ncmd \"users\" help=\"The current user\" {\n  cmd \"read-me\" help=\"Read the authenticated user\" {\n    alias \"rm\"\n  }\n}\ncmd \"version\" help=\"Print the CLI version\"\ncmd \"whoami\" help=\"Display current authentication configuration\"\n",
+	"api-keys":                       "cmd \"api-keys\" help=\"Long-lived credentials for callers that cannot hold an AuthKit session — agents, SDKs, CI\" {\n  alias \"ak\"\n  cmd \"create\" help=\"Create an API key\" {\n    flag \"--name <name>\" help=\"What this key is for, in the operator's words [required]\"\n    flag \"--expires-at <expires_at>\" help=\"When the key stops working on its own. Omitted or null for a key that only stops when it is revoked.\"\n    flag \"--body <body>\" help=\"Request body as JSON (alternative to individual flags). Can also be provided via stdin; @path reads a file, @- reads stdin to EOF. Use --schema to print the exact JSON Schema.\"\n    flag \"--schema\" help=\"Print the exact JSON Schema of the request body and exit\"\n  }\n  cmd \"list\" help=\"List API keys\" {\n    flag \"--page <page>\" help=\"Page number\" default=1\n    flag \"--size <size>\" help=\"Page size\" default=50\n  }\n  cmd \"revoke\" help=\"Revoke an API key\" {\n    flag \"--api-key-id <api_key_id>\" help=\"[required]\"\n  }\n}\n",
+	"ak":                             "cmd \"api-keys\" help=\"Long-lived credentials for callers that cannot hold an AuthKit session — agents, SDKs, CI\" {\n  alias \"ak\"\n  cmd \"create\" help=\"Create an API key\" {\n    flag \"--name <name>\" help=\"What this key is for, in the operator's words [required]\"\n    flag \"--expires-at <expires_at>\" help=\"When the key stops working on its own. Omitted or null for a key that only stops when it is revoked.\"\n    flag \"--body <body>\" help=\"Request body as JSON (alternative to individual flags). Can also be provided via stdin; @path reads a file, @- reads stdin to EOF. Use --schema to print the exact JSON Schema.\"\n    flag \"--schema\" help=\"Print the exact JSON Schema of the request body and exit\"\n  }\n  cmd \"list\" help=\"List API keys\" {\n    flag \"--page <page>\" help=\"Page number\" default=1\n    flag \"--size <size>\" help=\"Page size\" default=50\n  }\n  cmd \"revoke\" help=\"Revoke an API key\" {\n    flag \"--api-key-id <api_key_id>\" help=\"[required]\"\n  }\n}\n",
+	"api-keys create":                "cmd \"create\" help=\"Create an API key\" {\n  flag \"--name <name>\" help=\"What this key is for, in the operator's words [required]\"\n  flag \"--expires-at <expires_at>\" help=\"When the key stops working on its own. Omitted or null for a key that only stops when it is revoked.\"\n  flag \"--body <body>\" help=\"Request body as JSON (alternative to individual flags). Can also be provided via stdin; @path reads a file, @- reads stdin to EOF. Use --schema to print the exact JSON Schema.\"\n  flag \"--schema\" help=\"Print the exact JSON Schema of the request body and exit\"\n}\n",
+	"api-keys list":                  "cmd \"list\" help=\"List API keys\" {\n  flag \"--page <page>\" help=\"Page number\" default=1\n  flag \"--size <size>\" help=\"Page size\" default=50\n}\n",
+	"api-keys revoke":                "cmd \"revoke\" help=\"Revoke an API key\" {\n  flag \"--api-key-id <api_key_id>\" help=\"[required]\"\n}\n",
+	"auth":                           "cmd \"auth\" help=\"Manage authentication credentials\" {\n  cmd \"login\" help=\"Interactively configure authentication credentials\"\n  cmd \"logout\" help=\"Clear all stored authentication credentials\"\n  cmd \"whoami\" help=\"Display current authentication configuration\"\n}\n",
+	"auth login":                     "cmd \"login\" help=\"Interactively configure authentication credentials\"\n",
+	"auth logout":                    "cmd \"logout\" help=\"Clear all stored authentication credentials\"\n",
+	"auth whoami":                    "cmd \"whoami\" help=\"Display current authentication configuration\"\n",
+	"completion":                     "cmd \"completion\" help=\"Generate the autocompletion script for the specified shell\" {\n  cmd \"bash\" help=\"Generate the autocompletion script for bash\"\n  cmd \"fish\" help=\"Generate the autocompletion script for fish\"\n  cmd \"powershell\" help=\"Generate the autocompletion script for powershell\"\n  cmd \"zsh\" help=\"Generate the autocompletion script for zsh\"\n}\n",
+	"completion bash":                "cmd \"bash\" help=\"Generate the autocompletion script for bash\"\n",
+	"completion fish":                "cmd \"fish\" help=\"Generate the autocompletion script for fish\"\n",
+	"completion powershell":          "cmd \"powershell\" help=\"Generate the autocompletion script for powershell\"\n",
+	"completion zsh":                 "cmd \"zsh\" help=\"Generate the autocompletion script for zsh\"\n",
+	"configure":                      "cmd \"configure\" help=\"Configure authentication credentials and preferences\"\n",
+	"explore":                        "cmd \"explore\" help=\"Interactively browse and run commands\"\n",
+	"help":                           "cmd \"help\" help=\"Help about any command\"\n",
+	"organizations":                  "cmd \"organizations\" help=\"Organizations the caller belongs to\" {\n  cmd \"create\" help=\"Create an organization\" {\n    flag \"--name <name>\" help=\"Display name of the new organization [required]\"\n    flag \"--body <body>\" help=\"Request body as JSON (alternative to individual flags). Can also be provided via stdin; @path reads a file, @- reads stdin to EOF. Use --schema to print the exact JSON Schema.\"\n    flag \"--schema\" help=\"Print the exact JSON Schema of the request body and exit\"\n  }\n  cmd \"ensure-default\" help=\"Create your first organization\" {\n    alias \"ed\"\n  }\n  cmd \"list\" help=\"List your organizations\" {\n    flag \"--page <page>\" help=\"Page number\" default=1\n    flag \"--size <size>\" help=\"Page size\" default=50\n  }\n  cmd \"read-current\" help=\"Read the active organization\" {\n    alias \"rc\"\n  }\n  cmd \"rename-current\" help=\"Rename the active organization\" {\n    alias \"rcu\"\n    flag \"--name <name>\" help=\"New display name of the organization [required]\"\n    flag \"--body <body>\" help=\"Request body as JSON (alternative to individual flags). Can also be provided via stdin; @path reads a file, @- reads stdin to EOF. Use --schema to print the exact JSON Schema.\"\n    flag \"--schema\" help=\"Print the exact JSON Schema of the request body and exit\"\n  }\n}\n",
+	"organizations create":           "cmd \"create\" help=\"Create an organization\" {\n  flag \"--name <name>\" help=\"Display name of the new organization [required]\"\n  flag \"--body <body>\" help=\"Request body as JSON (alternative to individual flags). Can also be provided via stdin; @path reads a file, @- reads stdin to EOF. Use --schema to print the exact JSON Schema.\"\n  flag \"--schema\" help=\"Print the exact JSON Schema of the request body and exit\"\n}\n",
+	"organizations ensure-default":   "cmd \"ensure-default\" help=\"Create your first organization\" {\n  alias \"ed\"\n}\n",
+	"organizations ed":               "cmd \"ensure-default\" help=\"Create your first organization\" {\n  alias \"ed\"\n}\n",
+	"organizations list":             "cmd \"list\" help=\"List your organizations\" {\n  flag \"--page <page>\" help=\"Page number\" default=1\n  flag \"--size <size>\" help=\"Page size\" default=50\n}\n",
+	"organizations read-current":     "cmd \"read-current\" help=\"Read the active organization\" {\n  alias \"rc\"\n}\n",
+	"organizations rc":               "cmd \"read-current\" help=\"Read the active organization\" {\n  alias \"rc\"\n}\n",
+	"organizations rename-current":   "cmd \"rename-current\" help=\"Rename the active organization\" {\n  alias \"rcu\"\n  flag \"--name <name>\" help=\"New display name of the organization [required]\"\n  flag \"--body <body>\" help=\"Request body as JSON (alternative to individual flags). Can also be provided via stdin; @path reads a file, @- reads stdin to EOF. Use --schema to print the exact JSON Schema.\"\n  flag \"--schema\" help=\"Print the exact JSON Schema of the request body and exit\"\n}\n",
+	"organizations rcu":              "cmd \"rename-current\" help=\"Rename the active organization\" {\n  alias \"rcu\"\n  flag \"--name <name>\" help=\"New display name of the organization [required]\"\n  flag \"--body <body>\" help=\"Request body as JSON (alternative to individual flags). Can also be provided via stdin; @path reads a file, @- reads stdin to EOF. Use --schema to print the exact JSON Schema.\"\n  flag \"--schema\" help=\"Print the exact JSON Schema of the request body and exit\"\n}\n",
+	"sandboxes":                      "cmd \"sandboxes\" help=\"Create and edit isolated provider sandboxes\" {\n  cmd \"create\" help=\"Create a sandbox\" {\n    flag \"--name <name>\" help=\"Display name of the new sandbox [required]\"\n    flag \"--prompt <prompt>\" help=\"A natural-language description of the scenario the whole sandbox represents. Every twin in it is seeded from this description while it is being provisioned.\"\n    flag \"--twins <twins>\" help=\"Provider twins to provision in the sandbox. Omitted when the sandbox is started from a template, which holds them already.\"\n    flag \"--template <template>\" help=\"A saved sandbox definition to start from, instead of listing twins. Its twins, their curated scenarios and their instructions are used as they were saved.\"\n    flag \"--save-as-template\" help=\"Also save this sandbox's definition, so another sandbox can be started from it later.\" default=#false\n    flag \"--body <body>\" help=\"Request body as JSON (alternative to individual flags). Can also be provided via stdin; @path reads a file, @- reads stdin to EOF. Use --schema to print the exact JSON Schema.\"\n    flag \"--schema\" help=\"Print the exact JSON Schema of the request body and exit\"\n  }\n  cmd \"get\" help=\"Retrieve a sandbox\" {\n    flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n  }\n  cmd \"list\" help=\"List sandboxes\"\n  cmd \"logs\" help=\"Operations for logs\" {\n    cmd \"get\" help=\"Retrieve a sandbox request log\" {\n      flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n      flag \"--request-id <request_id>\" help=\"[required]\"\n    }\n    cmd \"list\" help=\"List recent sandbox request logs\" {\n      flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n      flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"string value\"\n      flag \"--page <page>\" help=\"Page number\" default=1\n      flag \"--size <size>\" help=\"Page size\" default=50\n    }\n  }\n  cmd \"templates\" help=\"Operations for templates\" {\n    cmd \"delete\" help=\"Delete a sandbox template\" {\n      flag \"--template-id <template_id>\" help=\"[required]\"\n    }\n    cmd \"list\" help=\"List sandbox templates\"\n  }\n  cmd \"twins\" help=\"Operations for twins\" {\n    cmd \"advance\" help=\"Advance a deterministic twin lifecycle\" {\n      flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n      flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n      flag \"--at <at>\" help=\"Instant to advance the sandbox to. Defaults to now.\"\n      flag \"--body <body>\" help=\"Request body as JSON (alternative to individual flags). Can also be provided via stdin; @path reads a file, @- reads stdin to EOF. Use --schema to print the exact JSON Schema.\"\n      flag \"--schema\" help=\"Print the exact JSON Schema of the request body and exit\"\n    }\n    cmd \"credential\" help=\"Collect the twin's API key\" {\n      flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n      flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n    }\n    cmd \"records\" help=\"Operations for records\" {\n      cmd \"list\" help=\"List sandbox twin state\" {\n        flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n        flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n        flag \"--resource <resource>\" help=\"[required]\"\n      }\n      cmd \"update\" help=\"Replace a sandbox twin record\" {\n        flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n        flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n        flag \"--resource <resource>\" help=\"[required]\"\n        flag \"--external-id <external_id>\" help=\"[required]\"\n        flag \"--body-param <body_param>\" help=\"[required]\"\n        flag \"--body <body>\" help=\"Request body as JSON (alternative to individual flags). Can also be provided via stdin; @path reads a file, @- reads stdin to EOF. Use --schema to print the exact JSON Schema.\"\n        flag \"--schema\" help=\"Print the exact JSON Schema of the request body and exit\"\n      }\n    }\n    cmd \"start\" help=\"Start a sandbox twin\" {\n      flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n      flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n    }\n    cmd \"stop\" help=\"Stop a sandbox twin\" {\n      flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n      flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n    }\n  }\n}\n",
+	"sandboxes create":               "cmd \"create\" help=\"Create a sandbox\" {\n  flag \"--name <name>\" help=\"Display name of the new sandbox [required]\"\n  flag \"--prompt <prompt>\" help=\"A natural-language description of the scenario the whole sandbox represents. Every twin in it is seeded from this description while it is being provisioned.\"\n  flag \"--twins <twins>\" help=\"Provider twins to provision in the sandbox. Omitted when the sandbox is started from a template, which holds them already.\"\n  flag \"--template <template>\" help=\"A saved sandbox definition to start from, instead of listing twins. Its twins, their curated scenarios and their instructions are used as they were saved.\"\n  flag \"--save-as-template\" help=\"Also save this sandbox's definition, so another sandbox can be started from it later.\" default=#false\n  flag \"--body <body>\" help=\"Request body as JSON (alternative to individual flags). Can also be provided via stdin; @path reads a file, @- reads stdin to EOF. Use --schema to print the exact JSON Schema.\"\n  flag \"--schema\" help=\"Print the exact JSON Schema of the request body and exit\"\n}\n",
+	"sandboxes get":                  "cmd \"get\" help=\"Retrieve a sandbox\" {\n  flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n}\n",
+	"sandboxes list":                 "cmd \"list\" help=\"List sandboxes\"\n",
+	"sandboxes logs":                 "cmd \"logs\" help=\"Operations for logs\" {\n  cmd \"get\" help=\"Retrieve a sandbox request log\" {\n    flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n    flag \"--request-id <request_id>\" help=\"[required]\"\n  }\n  cmd \"list\" help=\"List recent sandbox request logs\" {\n    flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n    flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"string value\"\n    flag \"--page <page>\" help=\"Page number\" default=1\n    flag \"--size <size>\" help=\"Page size\" default=50\n  }\n}\n",
+	"sandboxes logs get":             "cmd \"get\" help=\"Retrieve a sandbox request log\" {\n  flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n  flag \"--request-id <request_id>\" help=\"[required]\"\n}\n",
+	"sandboxes logs list":            "cmd \"list\" help=\"List recent sandbox request logs\" {\n  flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n  flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"string value\"\n  flag \"--page <page>\" help=\"Page number\" default=1\n  flag \"--size <size>\" help=\"Page size\" default=50\n}\n",
+	"sandboxes templates":            "cmd \"templates\" help=\"Operations for templates\" {\n  cmd \"delete\" help=\"Delete a sandbox template\" {\n    flag \"--template-id <template_id>\" help=\"[required]\"\n  }\n  cmd \"list\" help=\"List sandbox templates\"\n}\n",
+	"sandboxes templates delete":     "cmd \"delete\" help=\"Delete a sandbox template\" {\n  flag \"--template-id <template_id>\" help=\"[required]\"\n}\n",
+	"sandboxes templates list":       "cmd \"list\" help=\"List sandbox templates\"\n",
+	"sandboxes twins":                "cmd \"twins\" help=\"Operations for twins\" {\n  cmd \"advance\" help=\"Advance a deterministic twin lifecycle\" {\n    flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n    flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n    flag \"--at <at>\" help=\"Instant to advance the sandbox to. Defaults to now.\"\n    flag \"--body <body>\" help=\"Request body as JSON (alternative to individual flags). Can also be provided via stdin; @path reads a file, @- reads stdin to EOF. Use --schema to print the exact JSON Schema.\"\n    flag \"--schema\" help=\"Print the exact JSON Schema of the request body and exit\"\n  }\n  cmd \"credential\" help=\"Collect the twin's API key\" {\n    flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n    flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n  }\n  cmd \"records\" help=\"Operations for records\" {\n    cmd \"list\" help=\"List sandbox twin state\" {\n      flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n      flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n      flag \"--resource <resource>\" help=\"[required]\"\n    }\n    cmd \"update\" help=\"Replace a sandbox twin record\" {\n      flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n      flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n      flag \"--resource <resource>\" help=\"[required]\"\n      flag \"--external-id <external_id>\" help=\"[required]\"\n      flag \"--body-param <body_param>\" help=\"[required]\"\n      flag \"--body <body>\" help=\"Request body as JSON (alternative to individual flags). Can also be provided via stdin; @path reads a file, @- reads stdin to EOF. Use --schema to print the exact JSON Schema.\"\n      flag \"--schema\" help=\"Print the exact JSON Schema of the request body and exit\"\n    }\n  }\n  cmd \"start\" help=\"Start a sandbox twin\" {\n    flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n    flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n  }\n  cmd \"stop\" help=\"Stop a sandbox twin\" {\n    flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n    flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n  }\n}\n",
+	"sandboxes twins advance":        "cmd \"advance\" help=\"Advance a deterministic twin lifecycle\" {\n  flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n  flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n  flag \"--at <at>\" help=\"Instant to advance the sandbox to. Defaults to now.\"\n  flag \"--body <body>\" help=\"Request body as JSON (alternative to individual flags). Can also be provided via stdin; @path reads a file, @- reads stdin to EOF. Use --schema to print the exact JSON Schema.\"\n  flag \"--schema\" help=\"Print the exact JSON Schema of the request body and exit\"\n}\n",
+	"sandboxes twins credential":     "cmd \"credential\" help=\"Collect the twin's API key\" {\n  flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n  flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n}\n",
+	"sandboxes twins records":        "cmd \"records\" help=\"Operations for records\" {\n  cmd \"list\" help=\"List sandbox twin state\" {\n    flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n    flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n    flag \"--resource <resource>\" help=\"[required]\"\n  }\n  cmd \"update\" help=\"Replace a sandbox twin record\" {\n    flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n    flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n    flag \"--resource <resource>\" help=\"[required]\"\n    flag \"--external-id <external_id>\" help=\"[required]\"\n    flag \"--body-param <body_param>\" help=\"[required]\"\n    flag \"--body <body>\" help=\"Request body as JSON (alternative to individual flags). Can also be provided via stdin; @path reads a file, @- reads stdin to EOF. Use --schema to print the exact JSON Schema.\"\n    flag \"--schema\" help=\"Print the exact JSON Schema of the request body and exit\"\n  }\n}\n",
+	"sandboxes twins records list":   "cmd \"list\" help=\"List sandbox twin state\" {\n  flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n  flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n  flag \"--resource <resource>\" help=\"[required]\"\n}\n",
+	"sandboxes twins records update": "cmd \"update\" help=\"Replace a sandbox twin record\" {\n  flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n  flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n  flag \"--resource <resource>\" help=\"[required]\"\n  flag \"--external-id <external_id>\" help=\"[required]\"\n  flag \"--body-param <body_param>\" help=\"[required]\"\n  flag \"--body <body>\" help=\"Request body as JSON (alternative to individual flags). Can also be provided via stdin; @path reads a file, @- reads stdin to EOF. Use --schema to print the exact JSON Schema.\"\n  flag \"--schema\" help=\"Print the exact JSON Schema of the request body and exit\"\n}\n",
+	"sandboxes twins start":          "cmd \"start\" help=\"Start a sandbox twin\" {\n  flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n  flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n}\n",
+	"sandboxes twins stop":           "cmd \"stop\" help=\"Stop a sandbox twin\" {\n  flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n  flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n}\n",
+	"twins":                          "cmd \"twins\" help=\"Browse the digital twins available for new sandboxes\" {\n  cmd \"get\" help=\"Retrieve a twin\" {\n    flag \"--twin-slug <twin_slug>\" help=\"[required]\"\n  }\n  cmd \"list\" help=\"List available twins\" {\n    flag \"--page <page>\" help=\"integer value\" default=1\n    flag \"--size <size>\" help=\"integer value\" default=50\n  }\n}\n",
+	"twins get":                      "cmd \"get\" help=\"Retrieve a twin\" {\n  flag \"--twin-slug <twin_slug>\" help=\"[required]\"\n}\n",
+	"twins list":                     "cmd \"list\" help=\"List available twins\" {\n  flag \"--page <page>\" help=\"integer value\" default=1\n  flag \"--size <size>\" help=\"integer value\" default=50\n}\n",
 	"users":                          "cmd \"users\" help=\"The current user\" {\n  cmd \"read-me\" help=\"Read the authenticated user\" {\n    alias \"rm\"\n  }\n}\n",
 	"users read-me":                  "cmd \"read-me\" help=\"Read the authenticated user\" {\n  alias \"rm\"\n}\n",
 	"users rm":                       "cmd \"read-me\" help=\"Read the authenticated user\" {\n  alias \"rm\"\n}\n",
-	"organizations":                  "cmd \"organizations\" help=\"Organizations the caller belongs to\" {\n  cmd \"list\" help=\"List your organizations\" {\n    flag \"--page <page>\" help=\"Page number\" default=1\n    flag \"--size <size>\" help=\"Page size\" default=50\n  }\n  cmd \"create\" help=\"Create an organization\" {\n    flag \"--name <name>\" help=\"Display name of the new organization [required]\"\n    flag \"--body <body>\" help=\"Request body as JSON (alternative to individual flags). Can also be provided via stdin.\"\n  }\n  cmd \"ensure-default\" help=\"Create your first organization\" {\n    alias \"ed\"\n  }\n  cmd \"read-current\" help=\"Read the active organization\" {\n    alias \"rc\"\n  }\n  cmd \"rename-current\" help=\"Rename the active organization\" {\n    alias \"rcu\"\n    flag \"--name <name>\" help=\"New display name of the organization [required]\"\n    flag \"--body <body>\" help=\"Request body as JSON (alternative to individual flags). Can also be provided via stdin.\"\n  }\n}\n",
-	"organizations list":             "cmd \"list\" help=\"List your organizations\" {\n  flag \"--page <page>\" help=\"Page number\" default=1\n  flag \"--size <size>\" help=\"Page size\" default=50\n}\n",
-	"organizations create":           "cmd \"create\" help=\"Create an organization\" {\n  flag \"--name <name>\" help=\"Display name of the new organization [required]\"\n  flag \"--body <body>\" help=\"Request body as JSON (alternative to individual flags). Can also be provided via stdin.\"\n}\n",
-	"organizations ensure-default":   "cmd \"ensure-default\" help=\"Create your first organization\" {\n  alias \"ed\"\n}\n",
-	"organizations ed":               "cmd \"ensure-default\" help=\"Create your first organization\" {\n  alias \"ed\"\n}\n",
-	"organizations read-current":     "cmd \"read-current\" help=\"Read the active organization\" {\n  alias \"rc\"\n}\n",
-	"organizations rc":               "cmd \"read-current\" help=\"Read the active organization\" {\n  alias \"rc\"\n}\n",
-	"organizations rename-current":   "cmd \"rename-current\" help=\"Rename the active organization\" {\n  alias \"rcu\"\n  flag \"--name <name>\" help=\"New display name of the organization [required]\"\n  flag \"--body <body>\" help=\"Request body as JSON (alternative to individual flags). Can also be provided via stdin.\"\n}\n",
-	"organizations rcu":              "cmd \"rename-current\" help=\"Rename the active organization\" {\n  alias \"rcu\"\n  flag \"--name <name>\" help=\"New display name of the organization [required]\"\n  flag \"--body <body>\" help=\"Request body as JSON (alternative to individual flags). Can also be provided via stdin.\"\n}\n",
-	"api-keys":                       "cmd \"api-keys\" help=\"Long-lived credentials for callers that cannot hold an AuthKit session — agents, SDKs, CI\" {\n  alias \"ak\"\n  cmd \"create\" help=\"Create an API key\" {\n    flag \"--name <name>\" help=\"What this key is for, in the operator's words [required]\"\n    flag \"--expires-at <expires_at>\" help=\"When the key stops working on its own. Omitted or null for a key that only stops when it is revoked.\"\n    flag \"--body <body>\" help=\"Request body as JSON (alternative to individual flags). Can also be provided via stdin.\"\n  }\n  cmd \"list\" help=\"List API keys\" {\n    flag \"--page <page>\" help=\"Page number\" default=1\n    flag \"--size <size>\" help=\"Page size\" default=50\n  }\n  cmd \"revoke\" help=\"Revoke an API key\" {\n    flag \"--api-key-id <api_key_id>\" help=\"[required]\"\n  }\n}\n",
-	"ak":                             "cmd \"api-keys\" help=\"Long-lived credentials for callers that cannot hold an AuthKit session — agents, SDKs, CI\" {\n  alias \"ak\"\n  cmd \"create\" help=\"Create an API key\" {\n    flag \"--name <name>\" help=\"What this key is for, in the operator's words [required]\"\n    flag \"--expires-at <expires_at>\" help=\"When the key stops working on its own. Omitted or null for a key that only stops when it is revoked.\"\n    flag \"--body <body>\" help=\"Request body as JSON (alternative to individual flags). Can also be provided via stdin.\"\n  }\n  cmd \"list\" help=\"List API keys\" {\n    flag \"--page <page>\" help=\"Page number\" default=1\n    flag \"--size <size>\" help=\"Page size\" default=50\n  }\n  cmd \"revoke\" help=\"Revoke an API key\" {\n    flag \"--api-key-id <api_key_id>\" help=\"[required]\"\n  }\n}\n",
-	"api-keys create":                "cmd \"create\" help=\"Create an API key\" {\n  flag \"--name <name>\" help=\"What this key is for, in the operator's words [required]\"\n  flag \"--expires-at <expires_at>\" help=\"When the key stops working on its own. Omitted or null for a key that only stops when it is revoked.\"\n  flag \"--body <body>\" help=\"Request body as JSON (alternative to individual flags). Can also be provided via stdin.\"\n}\n",
-	"api-keys list":                  "cmd \"list\" help=\"List API keys\" {\n  flag \"--page <page>\" help=\"Page number\" default=1\n  flag \"--size <size>\" help=\"Page size\" default=50\n}\n",
-	"api-keys revoke":                "cmd \"revoke\" help=\"Revoke an API key\" {\n  flag \"--api-key-id <api_key_id>\" help=\"[required]\"\n}\n",
-	"twins":                          "cmd \"twins\" help=\"Browse the digital twins available for new sandboxes\" {\n  cmd \"list\" help=\"List available twins\" {\n    flag \"--page <page>\" help=\"integer value\" default=1\n    flag \"--size <size>\" help=\"integer value\" default=50\n  }\n  cmd \"get\" help=\"Retrieve a twin\" {\n    flag \"--twin-slug <twin_slug>\" help=\"[required]\"\n  }\n}\n",
-	"twins list":                     "cmd \"list\" help=\"List available twins\" {\n  flag \"--page <page>\" help=\"integer value\" default=1\n  flag \"--size <size>\" help=\"integer value\" default=50\n}\n",
-	"twins get":                      "cmd \"get\" help=\"Retrieve a twin\" {\n  flag \"--twin-slug <twin_slug>\" help=\"[required]\"\n}\n",
-	"sandboxes":                      "cmd \"sandboxes\" help=\"Create and edit isolated provider sandboxes\" {\n  cmd \"list\" help=\"List sandboxes\"\n  cmd \"create\" help=\"Create a sandbox\" {\n    flag \"--name <name>\" help=\"Display name of the new sandbox [required]\"\n    flag \"--prompt <prompt>\" help=\"A natural-language description of the scenario the whole sandbox represents. Every twin in it is seeded from this description while it is being provisioned.\"\n    flag \"--twins <twins>\" help=\"Provider twins to provision in the sandbox. Omitted when the sandbox is started from a template, which holds them already.\"\n    flag \"--template <template>\" help=\"A saved sandbox definition to start from, instead of listing twins. Its twins, their curated scenarios and their instructions are used as they were saved.\"\n    flag \"--save-as-template\" help=\"Also save this sandbox's definition, so another sandbox can be started from it later.\" default=#false\n    flag \"--body <body>\" help=\"Request body as JSON (alternative to individual flags). Can also be provided via stdin.\"\n  }\n  cmd \"get\" help=\"Retrieve a sandbox\" {\n    flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n  }\n  cmd \"twins\" help=\"Operations for sandboxes-twins\" {\n    cmd \"start\" help=\"Start a sandbox twin\" {\n      flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n      flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n    }\n    cmd \"stop\" help=\"Stop a sandbox twin\" {\n      flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n      flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n    }\n    cmd \"credential\" help=\"Collect the twin's API key\" {\n      flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n      flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n    }\n    cmd \"advance\" help=\"Advance a deterministic twin lifecycle\" {\n      flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n      flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n      flag \"--at <at>\" help=\"Instant to advance the sandbox to. Defaults to now.\"\n      flag \"--body <body>\" help=\"Request body as JSON (alternative to individual flags). Can also be provided via stdin.\"\n    }\n    cmd \"records\" help=\"Operations for records\" {\n      cmd \"list\" help=\"List sandbox twin state\" {\n        flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n        flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n        flag \"--resource <resource>\" help=\"[required]\"\n      }\n      cmd \"update\" help=\"Replace a sandbox twin record\" {\n        flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n        flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n        flag \"--resource <resource>\" help=\"[required]\"\n        flag \"--external-id <external_id>\" help=\"[required]\"\n        flag \"--body-param <body_param>\" help=\"[required]\"\n        flag \"--body <body>\" help=\"Request body as JSON (alternative to individual flags). Can also be provided via stdin.\"\n      }\n    }\n  }\n  cmd \"templates\" help=\"Operations for templates\" {\n    cmd \"list\" help=\"List sandbox templates\"\n    cmd \"delete\" help=\"Delete a sandbox template\" {\n      flag \"--template-id <template_id>\" help=\"[required]\"\n    }\n  }\n  cmd \"logs\" help=\"Operations for logs\" {\n    cmd \"list\" help=\"List recent sandbox request logs\" {\n      flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n      flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"string value\"\n      flag \"--page <page>\" help=\"Page number\" default=1\n      flag \"--size <size>\" help=\"Page size\" default=50\n    }\n    cmd \"get\" help=\"Retrieve a sandbox request log\" {\n      flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n      flag \"--request-id <request_id>\" help=\"[required]\"\n    }\n  }\n}\n",
-	"sandboxes list":                 "cmd \"list\" help=\"List sandboxes\"\n",
-	"sandboxes create":               "cmd \"create\" help=\"Create a sandbox\" {\n  flag \"--name <name>\" help=\"Display name of the new sandbox [required]\"\n  flag \"--prompt <prompt>\" help=\"A natural-language description of the scenario the whole sandbox represents. Every twin in it is seeded from this description while it is being provisioned.\"\n  flag \"--twins <twins>\" help=\"Provider twins to provision in the sandbox. Omitted when the sandbox is started from a template, which holds them already.\"\n  flag \"--template <template>\" help=\"A saved sandbox definition to start from, instead of listing twins. Its twins, their curated scenarios and their instructions are used as they were saved.\"\n  flag \"--save-as-template\" help=\"Also save this sandbox's definition, so another sandbox can be started from it later.\" default=#false\n  flag \"--body <body>\" help=\"Request body as JSON (alternative to individual flags). Can also be provided via stdin.\"\n}\n",
-	"sandboxes get":                  "cmd \"get\" help=\"Retrieve a sandbox\" {\n  flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n}\n",
-	"sandboxes twins":                "cmd \"twins\" help=\"Operations for sandboxes-twins\" {\n  cmd \"start\" help=\"Start a sandbox twin\" {\n    flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n    flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n  }\n  cmd \"stop\" help=\"Stop a sandbox twin\" {\n    flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n    flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n  }\n  cmd \"credential\" help=\"Collect the twin's API key\" {\n    flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n    flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n  }\n  cmd \"advance\" help=\"Advance a deterministic twin lifecycle\" {\n    flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n    flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n    flag \"--at <at>\" help=\"Instant to advance the sandbox to. Defaults to now.\"\n    flag \"--body <body>\" help=\"Request body as JSON (alternative to individual flags). Can also be provided via stdin.\"\n  }\n  cmd \"records\" help=\"Operations for records\" {\n    cmd \"list\" help=\"List sandbox twin state\" {\n      flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n      flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n      flag \"--resource <resource>\" help=\"[required]\"\n    }\n    cmd \"update\" help=\"Replace a sandbox twin record\" {\n      flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n      flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n      flag \"--resource <resource>\" help=\"[required]\"\n      flag \"--external-id <external_id>\" help=\"[required]\"\n      flag \"--body-param <body_param>\" help=\"[required]\"\n      flag \"--body <body>\" help=\"Request body as JSON (alternative to individual flags). Can also be provided via stdin.\"\n    }\n  }\n}\n",
-	"sandboxes twins start":          "cmd \"start\" help=\"Start a sandbox twin\" {\n  flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n  flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n}\n",
-	"sandboxes twins stop":           "cmd \"stop\" help=\"Stop a sandbox twin\" {\n  flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n  flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n}\n",
-	"sandboxes twins credential":     "cmd \"credential\" help=\"Collect the twin's API key\" {\n  flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n  flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n}\n",
-	"sandboxes twins advance":        "cmd \"advance\" help=\"Advance a deterministic twin lifecycle\" {\n  flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n  flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n  flag \"--at <at>\" help=\"Instant to advance the sandbox to. Defaults to now.\"\n  flag \"--body <body>\" help=\"Request body as JSON (alternative to individual flags). Can also be provided via stdin.\"\n}\n",
-	"sandboxes twins records":        "cmd \"records\" help=\"Operations for records\" {\n  cmd \"list\" help=\"List sandbox twin state\" {\n    flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n    flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n    flag \"--resource <resource>\" help=\"[required]\"\n  }\n  cmd \"update\" help=\"Replace a sandbox twin record\" {\n    flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n    flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n    flag \"--resource <resource>\" help=\"[required]\"\n    flag \"--external-id <external_id>\" help=\"[required]\"\n    flag \"--body-param <body_param>\" help=\"[required]\"\n    flag \"--body <body>\" help=\"Request body as JSON (alternative to individual flags). Can also be provided via stdin.\"\n  }\n}\n",
-	"sandboxes twins records list":   "cmd \"list\" help=\"List sandbox twin state\" {\n  flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n  flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n  flag \"--resource <resource>\" help=\"[required]\"\n}\n",
-	"sandboxes twins records update": "cmd \"update\" help=\"Replace a sandbox twin record\" {\n  flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n  flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"[required]\"\n  flag \"--resource <resource>\" help=\"[required]\"\n  flag \"--external-id <external_id>\" help=\"[required]\"\n  flag \"--body-param <body_param>\" help=\"[required]\"\n  flag \"--body <body>\" help=\"Request body as JSON (alternative to individual flags). Can also be provided via stdin.\"\n}\n",
-	"sandboxes templates":            "cmd \"templates\" help=\"Operations for templates\" {\n  cmd \"list\" help=\"List sandbox templates\"\n  cmd \"delete\" help=\"Delete a sandbox template\" {\n    flag \"--template-id <template_id>\" help=\"[required]\"\n  }\n}\n",
-	"sandboxes templates list":       "cmd \"list\" help=\"List sandbox templates\"\n",
-	"sandboxes templates delete":     "cmd \"delete\" help=\"Delete a sandbox template\" {\n  flag \"--template-id <template_id>\" help=\"[required]\"\n}\n",
-	"sandboxes logs":                 "cmd \"logs\" help=\"Operations for logs\" {\n  cmd \"list\" help=\"List recent sandbox request logs\" {\n    flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n    flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"string value\"\n    flag \"--page <page>\" help=\"Page number\" default=1\n    flag \"--size <size>\" help=\"Page size\" default=50\n  }\n  cmd \"get\" help=\"Retrieve a sandbox request log\" {\n    flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n    flag \"--request-id <request_id>\" help=\"[required]\"\n  }\n}\n",
-	"sandboxes logs list":            "cmd \"list\" help=\"List recent sandbox request logs\" {\n  flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n  flag \"--sandbox-twin-id <sandbox_twin_id>\" help=\"string value\"\n  flag \"--page <page>\" help=\"Page number\" default=1\n  flag \"--size <size>\" help=\"Page size\" default=50\n}\n",
-	"sandboxes logs get":             "cmd \"get\" help=\"Retrieve a sandbox request log\" {\n  flag \"--sandbox-id <sandbox_id>\" help=\"[required]\"\n  flag \"--request-id <request_id>\" help=\"[required]\"\n}\n",
-	"configure":                      "cmd \"configure\" help=\"Configure authentication credentials and preferences\"\n",
-	"whoami":                         "cmd \"whoami\" help=\"Display current authentication configuration\"\n",
 	"version":                        "cmd \"version\" help=\"Print the CLI version\"\n",
+	"whoami":                         "cmd \"whoami\" help=\"Display current authentication configuration\"\n",
 }
 
 func UsageRequested(cmd *cobra.Command) bool {
@@ -68,6 +82,42 @@ func UsageRequested(cmd *cobra.Command) bool {
 	}
 	return false
 }
+
+// DisarmRequiredFlags clears cobra's required-flag annotations so a --usage
+// invocation answers with the command's schema even when required inputs are
+// absent: requiredness is part of the answer, not a precondition for asking.
+// Cobra validates the same annotations itself after the pre-run hooks, so
+// skipping the CLI's own eager validation alone would not be enough. The
+// cleared annotations are kept aside for RearmRequiredFlags, so a reused
+// command tree keeps enforcing requiredness on later executions.
+func DisarmRequiredFlags(cmd *cobra.Command) {
+	saved := map[*pflag.Flag][]string{}
+	cmd.Flags().VisitAll(func(f *pflag.Flag) {
+		if values, ok := f.Annotations[cobra.BashCompOneRequiredFlag]; ok {
+			saved[f] = values
+			delete(f.Annotations, cobra.BashCompOneRequiredFlag)
+		}
+	})
+	if len(saved) > 0 {
+		disarmedRequiredFlags.Store(cmd, saved)
+	}
+}
+
+// RearmRequiredFlags restores the annotations DisarmRequiredFlags removed.
+func RearmRequiredFlags(cmd *cobra.Command) {
+	value, ok := disarmedRequiredFlags.LoadAndDelete(cmd)
+	if !ok {
+		return
+	}
+	for f, values := range value.(map[*pflag.Flag][]string) {
+		if f.Annotations == nil {
+			f.Annotations = map[string][]string{}
+		}
+		f.Annotations[cobra.BashCompOneRequiredFlag] = values
+	}
+}
+
+var disarmedRequiredFlags sync.Map
 
 func selectedCommandPath(cmd *cobra.Command) []string {
 	if cmd == nil {
@@ -88,9 +138,232 @@ func selectedCommandPath(cmd *cobra.Command) []string {
 
 func EmitSchema(cmd *cobra.Command, w io.Writer) error {
 	path := strings.Join(selectedCommandPath(cmd), " ")
+	if cmd.Annotations["speakeasy_usage_dynamic"] == "true" {
+		return emitLiveSchema(cmd, w)
+	}
 	if schema, ok := usageSchemas[path]; ok {
 		_, err := io.WriteString(w, schema)
 		return err
 	}
-	return fmt.Errorf("usage schema not found for command path %q", path)
+	return emitLiveSchema(cmd, w)
+}
+
+// MarkDynamic makes --usage render the command's schema live from its cobra definition.
+func MarkDynamic(cmd *cobra.Command) {
+	if cmd.Annotations == nil {
+		cmd.Annotations = map[string]string{}
+	}
+	cmd.Annotations["speakeasy_usage_dynamic"] = "true"
+}
+
+// Go's %q emits \a, \v, and \xNN escapes that KDL v2 does not define.
+func kdlQuote(s string) string {
+	var b strings.Builder
+	b.WriteByte('"')
+	for _, r := range s {
+		switch r {
+		case '\\':
+			b.WriteString(`\\`)
+		case '"':
+			b.WriteString(`\"`)
+		case '\n':
+			b.WriteString(`\n`)
+		case '\r':
+			b.WriteString(`\r`)
+		case '\t':
+			b.WriteString(`\t`)
+		default:
+			if r < 0x20 || r == 0x7f || r == 0x85 ||
+				r == 0x200e || r == 0x200f || r == 0x2028 || r == 0x2029 ||
+				(r >= 0x202a && r <= 0x202e) || (r >= 0x2066 && r <= 0x2069) ||
+				r == 0xfeff {
+				fmt.Fprintf(&b, `\u{%x}`, r)
+			} else {
+				b.WriteRune(r)
+			}
+		}
+	}
+	b.WriteByte('"')
+	return b.String()
+}
+
+// Two consecutive quotes are legal inside a KDL """ string; a third would terminate it.
+func kdlEscapeMultilineLine(line string) string {
+	var b strings.Builder
+	quoteRun := 0
+	for _, r := range line {
+		if r == '"' {
+			quoteRun++
+			if quoteRun == 3 {
+				b.WriteString(`\"`)
+				quoteRun = 0
+				continue
+			}
+			b.WriteByte('"')
+			continue
+		}
+		quoteRun = 0
+		switch r {
+		case '\\':
+			b.WriteString(`\\`)
+		case '\r':
+			b.WriteString(`\r`)
+		case '\t':
+			b.WriteString(`\t`)
+		default:
+			if r < 0x20 || r == 0x7f || r == 0x85 ||
+				r == 0x200e || r == 0x200f || r == 0x2028 || r == 0x2029 ||
+				(r >= 0x202a && r <= 0x202e) || (r >= 0x2066 && r <= 0x2069) ||
+				r == 0xfeff {
+				fmt.Fprintf(&b, `\u{%x}`, r)
+			} else {
+				b.WriteRune(r)
+			}
+		}
+	}
+	return b.String()
+}
+
+// KDL dedent strips the closing line's indent from every line and empties whitespace-only lines.
+func kdlQuoteAt(s, contentPrefix string) string {
+	if !strings.Contains(s, "\n") {
+		return kdlQuote(s)
+	}
+	lines := strings.Split(s, "\n")
+	for _, line := range lines {
+		if line != "" && (strings.TrimSpace(line) == "" || strings.TrimRight(line, " \t") != line) {
+			return kdlQuote(s)
+		}
+	}
+	var b strings.Builder
+	b.WriteString("\"\"\"\n")
+	for _, line := range lines {
+		if line != "" {
+			b.WriteString(contentPrefix)
+			b.WriteString(kdlEscapeMultilineLine(line))
+		}
+		b.WriteByte('\n')
+	}
+	b.WriteString(contentPrefix)
+	b.WriteString(`"""`)
+	return b.String()
+}
+
+func emitLiveSchema(cmd *cobra.Command, w io.Writer) error {
+	nl := string(rune(10))
+	var b strings.Builder
+	fmt.Fprintf(&b, "cmd %s help=%s {%s", kdlQuote(cmd.Name()), kdlQuoteAt(cmd.Short, "  "), nl)
+	for _, alias := range cmd.Aliases {
+		fmt.Fprintf(&b, "  alias %s%s", kdlQuote(alias), nl)
+	}
+	var promptArgs struct {
+		Version int `json:"version"`
+		Args    []struct {
+			Name     string `json:"name"`
+			Summary  string `json:"summary"`
+			Required bool   `json:"required"`
+			Variadic bool   `json:"variadic"`
+		} `json:"args"`
+	}
+	if raw := cmd.Annotations["speakeasy_prompt_args"]; raw != "" && json.Unmarshal([]byte(raw), &promptArgs) == nil && promptArgs.Version == 1 {
+		for _, arg := range promptArgs.Args {
+			fmt.Fprintf(&b, "  arg %s", kdlQuote(arg.Name))
+			if arg.Summary != "" {
+				fmt.Fprintf(&b, " help=%s", kdlQuoteAt(arg.Summary, "    "))
+			}
+			if arg.Required {
+				b.WriteString(" required=#true")
+			}
+			if arg.Variadic {
+				b.WriteString(" var=#true")
+			}
+			b.WriteString(nl)
+		}
+	} else if args := cmd.Annotations["speakeasy_args_help"]; args != "" {
+		fmt.Fprintf(&b, "  args %s%s", kdlQuoteAt(args, "    "), nl)
+	}
+	cmd.LocalFlags().VisitAll(func(f *pflag.Flag) {
+		if f.Hidden || f.Name == "help" {
+			return
+		}
+		name := "--" + f.Name
+		if f.Shorthand != "" {
+			name = "-" + f.Shorthand + " " + name
+		}
+		_, repeatable := f.Value.(pflag.SliceValue)
+		if f.Value.Type() != "bool" {
+			placeholder := strings.ReplaceAll(f.Name, "-", "_")
+			if repeatable {
+				placeholder += "..."
+			}
+			name += " <" + placeholder + ">"
+		}
+		fmt.Fprintf(&b, "  flag %s help=%s", kdlQuote(name), kdlQuoteAt(f.Usage, "    "))
+		if repeatable {
+			b.WriteString(" var=#true")
+		}
+		b.WriteString(nl)
+	})
+	b.WriteString("}" + nl)
+	_, err := io.WriteString(w, b.String())
+	return err
+}
+
+func Intercept(root *cobra.Command) {
+	for _, child := range root.Commands() {
+		Intercept(child)
+	}
+	if root.RunE == nil && root.Run == nil && root.Args == nil && root.HasSubCommands() {
+		if root.Annotations == nil {
+			root.Annotations = make(map[string]string)
+		}
+		root.Annotations[usageSynthesizedGroupAnnotation] = "true"
+	}
+	root.PersistentPreRunE = skipOnUsageE(root.PersistentPreRunE, root.PersistentPreRun)
+	root.PersistentPreRun = nil
+	root.PreRunE = skipOnUsageE(root.PreRunE, root.PreRun)
+	root.PreRun = nil
+	root.PostRunE = skipOnUsageE(root.PostRunE, root.PostRun)
+	root.PostRun = nil
+	root.PersistentPostRunE = skipOnUsageE(root.PersistentPostRunE, root.PersistentPostRun)
+	root.PersistentPostRun = nil
+
+	runE, run := root.RunE, root.Run
+	root.Run = nil
+	root.RunE = func(cmd *cobra.Command, args []string) error {
+		if UsageRequested(cmd) {
+			return EmitSchema(cmd, cmd.OutOrStdout())
+		}
+		if runE != nil {
+			return runE(cmd, args)
+		}
+		if run != nil {
+			run(cmd, args)
+			return nil
+		}
+		return cmd.Help()
+	}
+}
+
+const usageSynthesizedGroupAnnotation = "speakeasy_usage_synthesized_group"
+
+func GroupMadeRunnable(cmd *cobra.Command) bool {
+	return cmd != nil && cmd.Annotations[usageSynthesizedGroupAnnotation] == "true"
+}
+
+// Returning nil rather than a wrapper keeps Cobra's nearest-PersistentPreRunE lookup intact.
+func skipOnUsageE(hookE func(*cobra.Command, []string) error, hook func(*cobra.Command, []string)) func(*cobra.Command, []string) error {
+	if hookE == nil && hook == nil {
+		return nil
+	}
+	return func(cmd *cobra.Command, args []string) error {
+		if UsageRequested(cmd) {
+			return nil
+		}
+		if hookE != nil {
+			return hookE(cmd, args)
+		}
+		hook(cmd, args)
+		return nil
+	}
 }

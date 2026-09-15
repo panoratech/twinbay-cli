@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/panoratech/twinbay-cli/internal/client"
 	"github.com/panoratech/twinbay-cli/internal/flagutil"
-	"github.com/panoratech/twinbay-cli/internal/interactive"
 	"github.com/panoratech/twinbay-cli/internal/output"
 	"github.com/panoratech/twinbay-cli/internal/sdk"
 	"github.com/panoratech/twinbay-cli/internal/sdk/models/operations"
@@ -25,8 +24,12 @@ func initStartCmd(parent *cobra.Command) error {
 		Use:     "start",
 		Short:   "Start a sandbox twin",
 		Long:    "Queues a fresh container. Its state and credentials are new.",
-		Example: "  twinbay sandboxes-twins start --sandbox-id 6487b8fc-9461-4e43-92a9-daf1ccba9d95 --sandbox-twin-id 63cbc00d-b389-49c5-a459-8c61543273fd",
+		Example: "  twinbay twins start --sandbox-id 6487b8fc-9461-4e43-92a9-daf1ccba9d95 --sandbox-twin-id 63cbc00d-b389-49c5-a459-8c61543273fd",
+		Args:    cobra.NoArgs,
 		RunE:    runStartCmd,
+		Annotations: map[string]string{
+			"speakeasy_operation": "start_sandbox_twin",
+		},
 	}
 	flagutil.RegisterFlags(cmd, startCmdMeta)
 	if err := flagutil.ValidateMeta[operations.StartSandboxTwinRequest](startCmdMeta); err != nil {
@@ -41,14 +44,9 @@ func runStartCmd(cmd *cobra.Command, args []string) error {
 	if usage.UsageRequested(cmd) {
 		return usage.EmitSchema(cmd, cmd.OutOrStdout())
 	}
-	if interactive.ShouldPrompt(cmd, startCmdMeta) {
-		if err := interactive.PromptAndSetFlags(cmd, startCmdMeta); err != nil {
-			return err
-		}
-	}
 	req, err := flagutil.BuildRequest[operations.StartSandboxTwinRequest](cmd, startCmdMeta, "", "")
 	if err != nil {
-		return err
+		return flagutil.WithCLIValidation(err)
 	}
 	s, err := client.NewClient(cmd)
 	if err != nil {

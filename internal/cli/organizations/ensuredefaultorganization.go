@@ -18,8 +18,12 @@ func initEnsureDefaultOrganizationCmd(parent *cobra.Command) error {
 		Short:   "Create your first organization",
 		Long:    "Idempotent: answers with the caller's oldest organization when they already belong to one, and otherwise creates one named after them, with the caller as an admin. This is what signing up calls, so that onboarding never has to ask for a name. Refresh the AuthKit session into the organization to act inside it.",
 		Example: "  twinbay organizations ensure-default",
+		Args:    cobra.NoArgs,
 		RunE:    runEnsureDefaultOrganizationCmd,
 		Aliases: []string{"ed"},
+		Annotations: map[string]string{
+			"speakeasy_operation": "ensure_default_organization",
+		},
 	}
 	parent.AddCommand(cmd)
 	return nil

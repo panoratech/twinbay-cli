@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/panoratech/twinbay-cli/internal/client"
 	"github.com/panoratech/twinbay-cli/internal/flagutil"
-	"github.com/panoratech/twinbay-cli/internal/interactive"
 	"github.com/panoratech/twinbay-cli/internal/output"
 	"github.com/panoratech/twinbay-cli/internal/sdk"
 	"github.com/panoratech/twinbay-cli/internal/sdk/models/operations"
@@ -29,13 +28,24 @@ func initUpdateCmd(parent *cobra.Command) error {
 		Short:   "Replace a sandbox twin record",
 		Long:    "Replace a sandbox twin record",
 		Example: "  twinbay records update --sandbox-id cf2a2465-9cde-4d4d-8896-6719d664c50d --sandbox-twin-id 76434c10-cd55-40e4-b5ac-f1ae38f16ed9 --resource <value> --external-id <id> --body-param '{\"key\":\"<value>\"}'",
+		Args:    cobra.NoArgs,
 		RunE:    runUpdateCmd,
+		Annotations: map[string]string{
+			"speakeasy_operation": "update_sandbox_record",
+		},
 	}
 	flagutil.RegisterFlags(cmd, updateCmdMeta)
 	if err := flagutil.ValidateMeta[operations.UpdateSandboxRecordRequest](updateCmdMeta); err != nil {
 		return fmt.Errorf("invalid metadata for update: %w", err)
 	}
-	cmd.Flags().String("body", "", "Request body as JSON (alternative to individual flags). Can also be provided via stdin.")
+	cmd.Flags().String("body", "", "Request body as JSON (alternative to individual flags). Can also be provided via stdin; @path reads a file, @- reads stdin to EOF. Use --schema to print the exact JSON Schema.")
+	_ = flagutil.AnnotatePromptFlag(cmd, "body", flagutil.PromptFlagSpec{Kind: "json", BodyFlag: true})
+	cmd.Annotations[flagutil.AnnotationWholeBodyFlag] = "body"
+	if err := flagutil.AnnotateBodyFields(cmd, updateCmdMeta, "Body", "body"); err != nil {
+		return fmt.Errorf("annotate body fields for update: %w", err)
+	}
+	cmd.Flags().Bool("schema", false, "Print the exact JSON Schema of the request body and exit")
+	_ = flagutil.AnnotatePromptFlag(cmd, "schema", flagutil.PromptFlagSpec{Kind: "bool", DocSurface: true})
 	parent.AddCommand(cmd)
 	return nil
 }
@@ -45,14 +55,12 @@ func runUpdateCmd(cmd *cobra.Command, args []string) error {
 	if usage.UsageRequested(cmd) {
 		return usage.EmitSchema(cmd, cmd.OutOrStdout())
 	}
-	if interactive.ShouldPrompt(cmd, updateCmdMeta) {
-		if err := interactive.PromptAndSetFlags(cmd, updateCmdMeta); err != nil {
-			return err
-		}
+	if requested, _ := cmd.Flags().GetBool("schema"); requested {
+		return usage.EmitBodySchema(cmd.OutOrStdout(), "update_sandbox_record")
 	}
 	req, err := flagutil.BuildRequest[operations.UpdateSandboxRecordRequest](cmd, updateCmdMeta, "Body", "body")
 	if err != nil {
-		return err
+		return flagutil.WithCLIValidation(err)
 	}
 	s, err := client.NewClient(cmd)
 	if err != nil {

@@ -18,8 +18,12 @@ func initReadCurrentOrganizationCmd(parent *cobra.Command) error {
 		Short:   "Read the active organization",
 		Long:    "The organization the access token acts in, plus the caller's role in it. Fails with 403 when the token names no organization.",
 		Example: "  twinbay organizations read-current",
+		Args:    cobra.NoArgs,
 		RunE:    runReadCurrentOrganizationCmd,
 		Aliases: []string{"rc"},
+		Annotations: map[string]string{
+			"speakeasy_operation": "read_current_organization",
+		},
 	}
 	parent.AddCommand(cmd)
 	return nil

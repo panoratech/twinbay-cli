@@ -7,7 +7,8 @@ import (
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/panoratech/twinbay-cli/internal/config"
-	"github.com/panoratech/twinbay-cli/internal/output"
+	"github.com/panoratech/twinbay-cli/internal/flagutil"
+	"github.com/panoratech/twinbay-cli/internal/interactive"
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
 	"os"
@@ -15,19 +16,37 @@ import (
 
 // initAuthCmd registers the auth command group with login, whoami, and logout subcommands.
 func initAuthCmd(parent *cobra.Command) error {
-	authCmd := &cobra.Command{
-		Use:   "auth",
-		Short: "Manage authentication credentials",
-		Long: `Manage authentication credentials for twinbay.
+	var authCmd *cobra.Command
+	for _, existing := range parent.Commands() {
+		if existing.Name() == "auth" || existing.HasAlias("auth") {
+			authCmd = existing
+			break
+		}
+	}
+	if authCmd == nil {
+		authCmd = &cobra.Command{
+			Use:   "auth",
+			Short: "Manage authentication credentials",
+			Long: `Manage authentication credentials for twinbay.
 
 Subcommands:
   login   - Interactively configure credentials
   whoami  - Display current authentication status
   logout  - Clear all stored credentials`,
+		}
+		parent.AddCommand(authCmd)
 	}
-	parent.AddCommand(authCmd)
 
-	authCmd.AddCommand(&cobra.Command{
+	addAuthSubcommand := func(sub *cobra.Command) {
+		for _, existing := range authCmd.Commands() {
+			if existing.Name() == sub.Name() || existing.HasAlias(sub.Name()) {
+				return
+			}
+		}
+		authCmd.AddCommand(sub)
+	}
+
+	addAuthSubcommand(&cobra.Command{
 		Use:   "login",
 		Short: "Interactively configure authentication credentials",
 		Long: `Interactively configure authentication credentials for twinbay.
@@ -36,10 +55,11 @@ with a config file fallback.
 
 All fields are optional — press Enter to skip any field you don't need.
 Use the configure command for both authentication and global parameters.`,
+		Args: cobra.NoArgs,
 		RunE: runAuthLoginCmd,
 	})
 
-	authCmd.AddCommand(&cobra.Command{
+	addAuthSubcommand(&cobra.Command{
 		Use:   "whoami",
 		Short: "Display current authentication configuration",
 		Long: `Display the currently configured settings and their sources.
@@ -52,15 +72,17 @@ Sources are shown as:
   [unset]   - Not configured
 
 Credential values are masked for security.`,
+		Args: cobra.NoArgs,
 		RunE: runWhoamiCmd,
 	})
 
-	authCmd.AddCommand(&cobra.Command{
+	addAuthSubcommand(&cobra.Command{
 		Use:   "logout",
 		Short: "Clear all stored authentication credentials",
 		Long: `Clear all stored authentication credentials from both the OS keychain and config file.
 
 This removes all credentials previously set via auth login or configure.`,
+		Args: cobra.NoArgs,
 		RunE: runAuthLogoutCmd,
 	})
 
@@ -69,27 +91,18 @@ This removes all credentials previously set via auth login or configure.`,
 
 // runAuthLoginCmd executes the auth login command using huh forms.
 func runAuthLoginCmd(cmd *cobra.Command, args []string) error {
-	// Agent mode: reject interactive auth login — agents should use env vars/flags.
-	if output.IsAgentMode() {
-		return output.AgentModeError(cmd,
-			"auth_login_blocked",
-			"the 'auth login' command is interactive and cannot be used in agent mode",
-			[]string{
-				fmt.Sprintf("Set credentials via environment variables (prefix: %s_)", "CLI_TWINBAY"),
-				"Pass credentials directly as CLI flags for each command",
-				fmt.Sprintf("Run '%s auth whoami' to verify current authentication", "twinbay"),
-			},
-		)
+	if dryRunLocalNoop(cmd, "auth login changes local credentials only (no API request); nothing was changed.") {
+		return nil
 	}
-
 	cfg := config.GetConfig()
 	if cfg == nil {
 		cfg = &config.Config{}
 	}
 
 	keychainStored := false
+	formMode := interactive.Resolve(cmd).FormMode()
 
-	if noInteractive, _ := cmd.Flags().GetBool("no-interactive"); noInteractive {
+	if formMode == interactive.FormOff {
 		// Non-interactive: store any explicitly-set flags without prompting
 		changed := false
 		if f := cmd.Flags().Lookup("organization-api-key"); f != nil && f.Changed {
@@ -101,13 +114,13 @@ func runAuthLoginCmd(cmd *cobra.Command, args []string) error {
 		}
 
 		if !changed {
-			return fmt.Errorf("no flags provided; use flags to set credentials non-interactively, or remove --no-interactive")
+			return flagutil.WithCLIValidation(fmt.Errorf("no flags provided; use flags to store credentials in %s, or pass --interactive to open the form", config.GetConfigPath()))
 		}
 	} else {
 
 		var authOrganizationAPIKey string
 
-		accessible := !authIsInteractive(cmd)
+		accessible := formMode == interactive.FormAccessible
 
 		fields := []huh.Field{
 			huh.NewInput().
@@ -140,7 +153,7 @@ func runAuthLoginCmd(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to save configuration: %w", err)
 	}
 
-	out := cmd.OutOrStderr()
+	out := cmd.OutOrStdout()
 	if keychainStored {
 		fmt.Fprintln(out, "Secret credentials stored in OS keychain")
 	}
@@ -150,6 +163,9 @@ func runAuthLoginCmd(cmd *cobra.Command, args []string) error {
 
 // runAuthLogoutCmd clears all stored authentication credentials.
 func runAuthLogoutCmd(cmd *cobra.Command, args []string) error {
+	if dryRunLocalNoop(cmd, "auth logout removes local credentials only (no API request); nothing was changed.") {
+		return nil
+	}
 	cfg := config.GetConfig()
 	if cfg == nil {
 		cfg = &config.Config{}
@@ -168,19 +184,6 @@ func runAuthLogoutCmd(cmd *cobra.Command, args []string) error {
 	fmt.Fprintln(out, "All authentication credentials have been cleared.")
 	fmt.Fprintf(out, "Configuration saved to %s\n", config.GetConfigPath())
 	return nil
-}
-
-// authIsInteractive returns true when the auth command should use rich TUI forms.
-// When false, huh falls back to accessible text prompts (line-by-line stdin/stdout).
-// Agent mode forces accessible mode — agents should never see TUI rendering.
-func authIsInteractive(cmd *cobra.Command) bool {
-	if noInteractive, _ := cmd.Flags().GetBool("no-interactive"); noInteractive {
-		return false
-	}
-	if output.IsAgentMode() {
-		return false
-	}
-	return term.IsTerminal(int(os.Stdin.Fd())) && term.IsTerminal(int(os.Stdout.Fd()))
 }
 
 // authFormTheme builds the form theme for auth login.

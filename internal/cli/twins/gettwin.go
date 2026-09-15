@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/panoratech/twinbay-cli/internal/client"
 	"github.com/panoratech/twinbay-cli/internal/flagutil"
-	"github.com/panoratech/twinbay-cli/internal/interactive"
 	"github.com/panoratech/twinbay-cli/internal/output"
 	"github.com/panoratech/twinbay-cli/internal/sdk"
 	"github.com/panoratech/twinbay-cli/internal/sdk/models/operations"
@@ -25,7 +24,11 @@ func initGetTwinCmd(parent *cobra.Command) error {
 		Short:   "Retrieve a twin",
 		Long:    "Retrieve a twin",
 		Example: "  twinbay twins get --twin-slug <value>",
+		Args:    cobra.NoArgs,
 		RunE:    runGetTwinCmd,
+		Annotations: map[string]string{
+			"speakeasy_operation": "get_twin",
+		},
 	}
 	flagutil.RegisterFlags(cmd, getTwinCmdMeta)
 	if err := flagutil.ValidateMeta[operations.GetTwinRequest](getTwinCmdMeta); err != nil {
@@ -40,14 +43,9 @@ func runGetTwinCmd(cmd *cobra.Command, args []string) error {
 	if usage.UsageRequested(cmd) {
 		return usage.EmitSchema(cmd, cmd.OutOrStdout())
 	}
-	if interactive.ShouldPrompt(cmd, getTwinCmdMeta) {
-		if err := interactive.PromptAndSetFlags(cmd, getTwinCmdMeta); err != nil {
-			return err
-		}
-	}
 	req, err := flagutil.BuildRequest[operations.GetTwinRequest](cmd, getTwinCmdMeta, "", "")
 	if err != nil {
-		return err
+		return flagutil.WithCLIValidation(err)
 	}
 	s, err := client.NewClient(cmd)
 	if err != nil {

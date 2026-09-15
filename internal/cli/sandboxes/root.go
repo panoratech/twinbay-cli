@@ -12,9 +12,11 @@ import (
 
 func InitSandboxesRoot(parent *cobra.Command) error {
 	var SandboxesCmd = &cobra.Command{
-		Use:   "sandboxes",
-		Short: "Create and edit isolated provider sandboxes",
-		Long:  "Create and edit isolated provider sandboxes. Each sandbox contains behavioural twins from the `twins` package.",
+		Use:         "sandboxes",
+		Short:       "Create and edit isolated provider sandboxes",
+		Long:        "Create and edit isolated provider sandboxes. Each sandbox contains behavioural twins from the `twins` package.",
+		Args:        cobra.NoArgs,
+		Annotations: map[string]string{"speakeasy_cli_group": "true"},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if usage.UsageRequested(cmd) {
 				return usage.EmitSchema(cmd, cmd.OutOrStdout())

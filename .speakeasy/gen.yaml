@@ -31,9 +31,13 @@ generation:
     generateNewTests: true
     skipResponseBodyAssertions: false
 cli:
-  version: 0.1.1
+  version: 0.2.0
   additionalDependencies: {}
+  agentEnvironmentDetection: true
+  classifiedErrors: false
   cliName: twinbay
+  defaultColor: auto
+  defaultTimeout: ""
   distribution:
     homebrew:
       enabled: false
@@ -53,6 +57,7 @@ cli:
   enableCustomCodeRegions: false
   envVarPrefix: CLI_TWINBAY
   generateRelease: true
+  helpStyle: auto
   idiomaticMethodCollisionNames: true
   imports:
     option: openapi
@@ -63,6 +68,7 @@ cli:
       shared: models/components
       webhooks: models/webhooks
   interactiveAuth: true
+  interactiveByDefault: true
   interactiveMode: true
   interactiveTheme:
     accentColor: '#38BDF8'
@@ -70,5 +76,9 @@ cli:
     errorColor: '#F87171'
     subtleColor: '#475569'
     successColor: '#4ADE80'
+  jqRawOutput: false
   packageName: github.com/panoratech/twinbay-cli
   removeStutter: true
+  retryFlagsVisibility: visible
+  retryMethodPolicy: spec
+  serverSelectionFlag: visible

@@ -9,9 +9,11 @@ import (
 
 func InitUsersRoot(parent *cobra.Command) error {
 	var UsersCmd = &cobra.Command{
-		Use:   "users",
-		Short: "The current user",
-		Long:  "The current user. Sign-up and sign-in happen in WorkOS AuthKit, which issues the access tokens this API accepts.",
+		Use:         "users",
+		Short:       "The current user",
+		Long:        "The current user. Sign-up and sign-in happen in WorkOS AuthKit, which issues the access tokens this API accepts.",
+		Args:        cobra.NoArgs,
+		Annotations: map[string]string{"speakeasy_cli_group": "true"},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if usage.UsageRequested(cmd) {
 				return usage.EmitSchema(cmd, cmd.OutOrStdout())

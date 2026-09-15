@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/panoratech/twinbay-cli/internal/client"
 	"github.com/panoratech/twinbay-cli/internal/flagutil"
-	"github.com/panoratech/twinbay-cli/internal/interactive"
 	"github.com/panoratech/twinbay-cli/internal/output"
 	"github.com/panoratech/twinbay-cli/internal/sdk"
 	"github.com/panoratech/twinbay-cli/internal/sdk/models/components"
@@ -16,7 +15,7 @@ import (
 )
 
 var createAPIKeyCmdMeta = []flagutil.FlagMeta{
-	{FlagName: "name", Shorthand: "n", FieldPath: "Name", Kind: flagutil.FlagKindString, Required: true, Description: "What this key is for, in the operator's words [required]"},
+	{FlagName: "name", Shorthand: "n", FieldPath: "Name", Kind: flagutil.FlagKindString, Required: true, MinLength: 1, Description: "What this key is for, in the operator's words [required]"},
 	{FlagName: "expires-at", Shorthand: "e", FieldPath: "ExpiresAt", Kind: flagutil.FlagKindJSON, Optional: true, Annotations: `json:"expires_at,omitempty"`, Description: "When the key stops working on its own. Omitted or null for a key that only stops when it is revoked."},
 }
 
@@ -27,13 +26,24 @@ func initCreateApiKeyCmd(parent *cobra.Command) error {
 		Short:   "Create an API key",
 		Long:    "Mints a key for the active organization. It acts with the caller's role, read from their membership on every request, so it can never outrank them. The response is the only time the token is readable.",
 		Example: "  twinbay api-keys create --name <value>",
+		Args:    cobra.NoArgs,
 		RunE:    runCreateApiKeyCmd,
+		Annotations: map[string]string{
+			"speakeasy_operation": "create_api_key",
+		},
 	}
 	flagutil.RegisterFlags(cmd, createAPIKeyCmdMeta)
 	if err := flagutil.ValidateMeta[components.CreateAPIKeyRequest](createAPIKeyCmdMeta); err != nil {
 		return fmt.Errorf("invalid metadata for create-api-key: %w", err)
 	}
-	cmd.Flags().String("body", "", "Request body as JSON (alternative to individual flags). Can also be provided via stdin.")
+	cmd.Flags().String("body", "", "Request body as JSON (alternative to individual flags). Can also be provided via stdin; @path reads a file, @- reads stdin to EOF. Use --schema to print the exact JSON Schema.")
+	_ = flagutil.AnnotatePromptFlag(cmd, "body", flagutil.PromptFlagSpec{Kind: "json", BodyFlag: true})
+	cmd.Annotations[flagutil.AnnotationWholeBodyFlag] = "body"
+	if err := flagutil.AnnotateBodyFields(cmd, createAPIKeyCmdMeta, "", "body"); err != nil {
+		return fmt.Errorf("annotate body fields for create-api-key: %w", err)
+	}
+	cmd.Flags().Bool("schema", false, "Print the exact JSON Schema of the request body and exit")
+	_ = flagutil.AnnotatePromptFlag(cmd, "schema", flagutil.PromptFlagSpec{Kind: "bool", DocSurface: true})
 	parent.AddCommand(cmd)
 	return nil
 }
@@ -43,14 +53,12 @@ func runCreateApiKeyCmd(cmd *cobra.Command, args []string) error {
 	if usage.UsageRequested(cmd) {
 		return usage.EmitSchema(cmd, cmd.OutOrStdout())
 	}
-	if interactive.ShouldPrompt(cmd, createAPIKeyCmdMeta) {
-		if err := interactive.PromptAndSetFlags(cmd, createAPIKeyCmdMeta); err != nil {
-			return err
-		}
+	if requested, _ := cmd.Flags().GetBool("schema"); requested {
+		return usage.EmitBodySchema(cmd.OutOrStdout(), "create_api_key")
 	}
 	request, err := flagutil.BuildRequest[components.CreateAPIKeyRequest](cmd, createAPIKeyCmdMeta, "", "body")
 	if err != nil {
-		return err
+		return flagutil.WithCLIValidation(err)
 	}
 	s, err := client.NewClient(cmd)
 	if err != nil {
