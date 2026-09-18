@@ -23,7 +23,7 @@ twinbay [flags]
       --interactive                   Prompt for missing inputs and open guided configure/auth forms (forms fall back to line prompts on stdin off-TTY) (default true)
   -q, --jq string                     Filter and transform output using a jq expression (e.g., '.name', '.items[] | .id')
       --no-interactive                Disable all interactive features (auto-prompting, explorer auto-launch, TUI forms)
-      --organization-api-key string   An organization API key, as minted by POST /organizations/current/api-keys.
+      --organization-api-key string   An organization API key. Create one at https://console.twinbay.ai/api-keys
   -o, --output-format string          Specify the output format. Options: pretty, json, yaml, table, toon. (default "pretty")
       --raw-output                    Write --jq string results as raw text instead of JSON strings (like jq -r); non-string results stay JSON
       --server string                 Select a server by index (for indexed servers) or name (for named servers)
@@ -37,14 +37,14 @@ twinbay [flags]
 * [twinbay api-keys](twinbay_api-keys.md)	 - Long-lived credentials for callers that cannot hold an AuthKit session — agents, SDKs, CI
 * [twinbay auth](twinbay_auth.md)	 - Manage authentication credentials
 * [twinbay configure](twinbay_configure.md)	 - Configure authentication credentials and preferences
+* [twinbay environment-logs](twinbay_environment-logs.md)	 - Operations for environment-logs
+* [twinbay environment-records](twinbay_environment-records.md)	 - Operations for environment-records
+* [twinbay environment-templates](twinbay_environment-templates.md)	 - Operations for environment-templates
+* [twinbay environment-twins](twinbay_environment-twins.md)	 - Operations for environment-twins
+* [twinbay environments](twinbay_environments.md)	 - Create and edit isolated provider environments
 * [twinbay explore](twinbay_explore.md)	 - Interactively browse and run commands
 * [twinbay organizations](twinbay_organizations.md)	 - Organizations the caller belongs to
-* [twinbay sandbox-logs](twinbay_sandbox-logs.md)	 - Operations for sandbox-logs
-* [twinbay sandbox-records](twinbay_sandbox-records.md)	 - Operations for sandbox-records
-* [twinbay sandbox-templates](twinbay_sandbox-templates.md)	 - Operations for sandbox-templates
-* [twinbay sandbox-twins](twinbay_sandbox-twins.md)	 - Operations for sandbox-twins
-* [twinbay sandboxes](twinbay_sandboxes.md)	 - Create and edit isolated provider sandboxes
-* [twinbay twins](twinbay_twins.md)	 - Browse the digital twins available for new sandboxes
+* [twinbay twins](twinbay_twins.md)	 - Browse the digital twins available for new environments
 * [twinbay users](twinbay_users.md)	 - The current user
 * [twinbay version](twinbay_version.md)	 - Print the CLI version
 * [twinbay whoami](twinbay_whoami.md)	 - Display current authentication configuration

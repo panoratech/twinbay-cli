@@ -124,11 +124,11 @@ This CLI is built to be driven by AI coding agents as well as people: everything
 
 | Run | You get |
 |-----|---------|
-| `twinbay --help`, `twinbay sandbox-templates list --help` | Commands by category, runnable examples, flags |
-| `twinbay --usage`, `twinbay sandbox-templates list --usage` | The command surface as machine-readable [KDL](https://kdl.dev): commands, aliases, flags, defaults, env vars, config keys |
+| `twinbay --help`, `twinbay environment-templates list --help` | Commands by category, runnable examples, flags |
+| `twinbay --usage`, `twinbay environment-templates list --usage` | The command surface as machine-readable [KDL](https://kdl.dev): commands, aliases, flags, defaults, env vars, config keys |
 | `twinbay api-keys create --schema` | The exact JSON Schema of the command's request body (all `$ref`s bundled) — build a valid `--body` from it |
-| `twinbay sandbox-templates list --dry-run` | The exact HTTP request (method, URL, headers, body), with no credentials or network call |
-| `twinbay sandbox-templates list --output-format json` (or `--jq`) | Machine-readable output |
+| `twinbay environment-templates list --dry-run` | The exact HTTP request (method, URL, headers, body), with no credentials or network call |
+| `twinbay environment-templates list --output-format json` (or `--jq`) | Machine-readable output |
 
 ### Discover the command surface
 
@@ -137,7 +137,7 @@ This CLI is built to be driven by AI coding agents as well as people: everything
 twinbay --usage
 
 # One command's subtree only
-twinbay sandbox-templates list --usage
+twinbay environment-templates list --usage
 ```
 
 ### Read the exact request schema
@@ -155,10 +155,10 @@ Start quota-spending commands with `--dry-run`. It validates inputs, resolves th
 
 ```bash
 # Human preview: the [DRY-RUN] block is on stderr and stdout is empty
-twinbay sandbox-templates list --dry-run
+twinbay environment-templates list --dry-run
 
 # Machine preview: compact JSON on stdout and silent stderr
-twinbay sandbox-templates list --dry-run --output-format json
+twinbay environment-templates list --dry-run --output-format json
 ```
 
 The machine form writes one object per would-be request, one per line (NDJSON for multi-request commands), with exactly this shape:
@@ -175,13 +175,13 @@ Local mutation commands make no request under `--dry-run`: instead of a preview 
 
 ```bash
 # JSON on stdout
-twinbay sandbox-templates list --output-format json
+twinbay environment-templates list --output-format json
 
 # Filter or reshape with a jq expression (always emits JSON, overrides --output-format)
-twinbay sandbox-templates list --jq '.'
+twinbay environment-templates list --jq '.'
 
 # Print jq string results as plain text instead of JSON strings (like jq -r)
-twinbay sandbox-templates list --jq '.' --raw-output
+twinbay environment-templates list --jq '.' --raw-output
 ```
 
 `--output-format toon` emits [TOON](https://github.com/toon-format/spec), a compact line-oriented format that uses fewer tokens than JSON; it is the default in agent mode.
@@ -191,7 +191,7 @@ Required-input prompts and guided `configure` / `auth login` forms are enabled b
 
 ```bash
 # Prompt for missing command inputs
-twinbay sandbox-templates list --interactive
+twinbay environment-templates list --interactive
 
 # Open the guided configuration form
 twinbay configure --interactive
@@ -229,7 +229,7 @@ Authentication credentials can be configured in four ways (in order of priority)
 Pass credentials directly as flags to any command:
 
 ```bash
-twinbay --organization-api-key "$CLI_TWINBAY_ORGANIZATION_API_KEY" sandbox-templates list
+twinbay --organization-api-key "$CLI_TWINBAY_ORGANIZATION_API_KEY" environment-templates list
 ```
 
 ### 2. Environment variables
@@ -238,7 +238,7 @@ Set credentials via environment variables:
 
 | Variable | Description |
 |----------|-------------|
-| `CLI_TWINBAY_ORGANIZATION_API_KEY` | An organization API key, as minted by POST /organizations/current/api-keys. |
+| `CLI_TWINBAY_ORGANIZATION_API_KEY` | An organization API key. Create one at https://console.twinbay.ai/api-keys |
 
 ### 3. OS Keychain (recommended for workstations)
 
@@ -283,28 +283,28 @@ Configuration is stored in `~/.config/twinbay/config.yaml`.
   * [`create`](docs/twinbay_api-keys_create.md) - Create an API key
   * [`list`](docs/twinbay_api-keys_list.md) - List API keys
   * [`revoke`](docs/twinbay_api-keys_revoke.md) - Revoke an API key
-* [`twins`](docs/twinbay_twins.md) - Browse the digital twins available for new sandboxes
+* [`twins`](docs/twinbay_twins.md) - Browse the digital twins available for new environments
   * [`list`](docs/twinbay_twins_list.md) - List available twins
   * [`retrieve`](docs/twinbay_twins_retrieve.md) - Retrieve a twin
-* [`sandboxes`](docs/twinbay_sandboxes.md) - Create and edit isolated provider sandboxes
-  * [`list`](docs/twinbay_sandboxes_list.md) - List sandboxes
-  * [`create`](docs/twinbay_sandboxes_create.md) - Create a sandbox
-  * [`retrieve`](docs/twinbay_sandboxes_retrieve.md) - Retrieve a sandbox
-* [`sandbox-twins`](docs/twinbay_sandbox-twins.md) - Operations for sandbox-twins
-  * [`retrieve`](docs/twinbay_sandbox-twins_retrieve.md) - Retrieve a sandbox twin
-  * [`start`](docs/twinbay_sandbox-twins_start.md) - Start a sandbox twin
-  * [`stop`](docs/twinbay_sandbox-twins_stop.md) - Stop a sandbox twin
-  * [`collect-credential`](docs/twinbay_sandbox-twins_collect-credential.md) - Collect the twin's API key
-  * [`advance`](docs/twinbay_sandbox-twins_advance.md) - Advance a deterministic twin lifecycle
-* [`sandbox-records`](docs/twinbay_sandbox-records.md) - Operations for sandbox-records
-  * [`list`](docs/twinbay_sandbox-records_list.md) - List sandbox twin state
-  * [`update`](docs/twinbay_sandbox-records_update.md) - Replace a sandbox twin record
-* [`sandbox-templates`](docs/twinbay_sandbox-templates.md) - Operations for sandbox-templates
-  * [`list`](docs/twinbay_sandbox-templates_list.md) - List sandbox templates
-  * [`delete`](docs/twinbay_sandbox-templates_delete.md) - Delete a sandbox template
-* [`sandbox-logs`](docs/twinbay_sandbox-logs.md) - Operations for sandbox-logs
-  * [`list`](docs/twinbay_sandbox-logs_list.md) - List recent sandbox request logs
-  * [`retrieve`](docs/twinbay_sandbox-logs_retrieve.md) - Retrieve a sandbox request log
+* [`environments`](docs/twinbay_environments.md) - Create and edit isolated provider environments
+  * [`list`](docs/twinbay_environments_list.md) - List environments
+  * [`create`](docs/twinbay_environments_create.md) - Create an environment
+  * [`retrieve`](docs/twinbay_environments_retrieve.md) - Retrieve an environment
+* [`environment-twins`](docs/twinbay_environment-twins.md) - Operations for environment-twins
+  * [`retrieve`](docs/twinbay_environment-twins_retrieve.md) - Retrieve an environment twin
+  * [`start`](docs/twinbay_environment-twins_start.md) - Start an environment twin
+  * [`stop`](docs/twinbay_environment-twins_stop.md) - Stop an environment twin
+  * [`collect-credential`](docs/twinbay_environment-twins_collect-credential.md) - Collect the twin's API key
+  * [`advance`](docs/twinbay_environment-twins_advance.md) - Advance a deterministic twin lifecycle
+* [`environment-records`](docs/twinbay_environment-records.md) - Operations for environment-records
+  * [`list`](docs/twinbay_environment-records_list.md) - List environment twin state
+  * [`update`](docs/twinbay_environment-records_update.md) - Replace an environment twin record
+* [`environment-templates`](docs/twinbay_environment-templates.md) - Operations for environment-templates
+  * [`list`](docs/twinbay_environment-templates_list.md) - List environment templates
+  * [`delete`](docs/twinbay_environment-templates_delete.md) - Delete an environment template
+* [`environment-logs`](docs/twinbay_environment-logs.md) - Operations for environment-logs
+  * [`list`](docs/twinbay_environment-logs_list.md) - List recent environment request logs
+  * [`retrieve`](docs/twinbay_environment-logs_retrieve.md) - Retrieve an environment request log
 
 </details>
 <!-- End Commands [operations] -->
@@ -323,7 +323,7 @@ Commands that accept a request body take it three ways, with a clear priority ch
 Use `--server-url` to override the server URL entirely, bypassing any named or indexed server selection:
 
 ```bash
-twinbay --server-url https://custom-api.example.com sandbox-templates list
+twinbay --server-url https://custom-api.example.com environment-templates list
 ```
 
 **Precedence**: `--server-url` > `--server` > default
@@ -346,16 +346,16 @@ Every command supports a `--output-format` flag that controls how the response i
 
 ```bash
 # Default pretty output
-twinbay sandbox-templates list
+twinbay environment-templates list
 
 # Machine-readable JSON
-twinbay sandbox-templates list --output-format json
+twinbay environment-templates list --output-format json
 
 # TOON for LLM-friendly compact output
-twinbay sandbox-templates list --output-format toon
+twinbay environment-templates list --output-format toon
 
 # Pipe JSON to jq without using --output-format
-twinbay sandbox-templates list --output-format json | jq '.'
+twinbay environment-templates list --output-format json | jq '.'
 ```
 
 ### jq filtering
@@ -364,10 +364,10 @@ Use `--jq` to filter or transform the response inline using a [jq](https://jqlan
 
 ```bash
 # Extract a single field
-twinbay sandbox-templates list --jq '.'
+twinbay environment-templates list --jq '.'
 
 # Reshape with any jq program; --raw-output prints string results as plain text (like jq -r)
-twinbay sandbox-templates list --jq '.' --raw-output
+twinbay environment-templates list --jq '.' --raw-output
 ```
 
 ### Color control
@@ -410,7 +410,7 @@ On success, the response data is printed to **stdout** as JSON. On failure, erro
 
 ```bash
 # Capture output and handle errors
-twinbay sandbox-templates list --output-format json > output.json 2> error.log
+twinbay environment-templates list --output-format json > output.json 2> error.log
 if [ $? -ne 0 ]; then
   echo "Error occurred, see error.log"
 fi
@@ -428,7 +428,7 @@ The CLI includes two diagnostic flags available on all commands:
 Preview what would be sent without making any network calls:
 
 ```bash
-twinbay sandbox-templates list --dry-run
+twinbay environment-templates list --dry-run
 ```
 
 In human output modes, stdout is empty and the `[DRY-RUN]` block goes to stderr. It includes:
@@ -451,7 +451,7 @@ Local mutation commands emit one `{"dry_run":true,"local":true,"command":"…","
 Log request and response diagnostics while running normally:
 
 ```bash
-twinbay sandbox-templates list --debug
+twinbay environment-templates list --debug
 ```
 
 Debug output goes to stderr and includes:

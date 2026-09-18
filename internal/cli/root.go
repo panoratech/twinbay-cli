@@ -6,12 +6,12 @@ import (
 	"context"
 	"fmt"
 	"github.com/panoratech/twinbay-cli/internal/cli/apikeys"
+	"github.com/panoratech/twinbay-cli/internal/cli/environmentlogs"
+	"github.com/panoratech/twinbay-cli/internal/cli/environmentrecords"
+	"github.com/panoratech/twinbay-cli/internal/cli/environments"
+	"github.com/panoratech/twinbay-cli/internal/cli/environmenttemplates"
+	"github.com/panoratech/twinbay-cli/internal/cli/environmenttwins"
 	"github.com/panoratech/twinbay-cli/internal/cli/organizations"
-	"github.com/panoratech/twinbay-cli/internal/cli/sandboxes"
-	"github.com/panoratech/twinbay-cli/internal/cli/sandboxlogs"
-	"github.com/panoratech/twinbay-cli/internal/cli/sandboxrecords"
-	"github.com/panoratech/twinbay-cli/internal/cli/sandboxtemplates"
-	"github.com/panoratech/twinbay-cli/internal/cli/sandboxtwins"
 	"github.com/panoratech/twinbay-cli/internal/cli/twins"
 	"github.com/panoratech/twinbay-cli/internal/cli/users"
 	"github.com/panoratech/twinbay-cli/internal/clierrors"
@@ -77,20 +77,20 @@ func NewRootCommand() (*cobra.Command, error) {
 	if err := twins.InitTwinsRoot(rootCmd); err != nil {
 		return nil, fmt.Errorf("init twins: %w", err)
 	}
-	if err := sandboxes.InitSandboxesRoot(rootCmd); err != nil {
-		return nil, fmt.Errorf("init sandboxes: %w", err)
+	if err := environments.InitEnvironmentsRoot(rootCmd); err != nil {
+		return nil, fmt.Errorf("init environments: %w", err)
 	}
-	if err := sandboxtwins.InitSandboxTwinsRoot(rootCmd); err != nil {
-		return nil, fmt.Errorf("init sandbox-twins: %w", err)
+	if err := environmenttwins.InitEnvironmentTwinsRoot(rootCmd); err != nil {
+		return nil, fmt.Errorf("init environment-twins: %w", err)
 	}
-	if err := sandboxrecords.InitSandboxRecordsRoot(rootCmd); err != nil {
-		return nil, fmt.Errorf("init sandbox-records: %w", err)
+	if err := environmentrecords.InitEnvironmentRecordsRoot(rootCmd); err != nil {
+		return nil, fmt.Errorf("init environment-records: %w", err)
 	}
-	if err := sandboxtemplates.InitSandboxTemplatesRoot(rootCmd); err != nil {
-		return nil, fmt.Errorf("init sandbox-templates: %w", err)
+	if err := environmenttemplates.InitEnvironmentTemplatesRoot(rootCmd); err != nil {
+		return nil, fmt.Errorf("init environment-templates: %w", err)
 	}
-	if err := sandboxlogs.InitSandboxLogsRoot(rootCmd); err != nil {
-		return nil, fmt.Errorf("init sandbox-logs: %w", err)
+	if err := environmentlogs.InitEnvironmentLogsRoot(rootCmd); err != nil {
+		return nil, fmt.Errorf("init environment-logs: %w", err)
 	}
 	if err := initConfigureCmd(rootCmd); err != nil {
 		return nil, fmt.Errorf("init configure: %w", err)
@@ -147,7 +147,7 @@ func NewRootCommand() (*cobra.Command, error) {
 			"Use --agent-mode=false to disable.")
 
 	// Global security flags
-	rootCmd.PersistentFlags().String("organization-api-key", "", "An organization API key, as minted by POST /organizations/current/api-keys.")
+	rootCmd.PersistentFlags().String("organization-api-key", "", "An organization API key. Create one at https://console.twinbay.ai/api-keys")
 	_ = rootCmd.PersistentFlags().SetAnnotation("organization-api-key", "speakeasy:group", []string{"Authentication"})
 
 	// Annotate persistent flags for grouped help display

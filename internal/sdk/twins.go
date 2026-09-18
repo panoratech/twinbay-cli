@@ -16,7 +16,7 @@ import (
 	"net/url"
 )
 
-// Twins - Browse the digital twins available for new sandboxes.
+// Twins - Browse the digital twins available for new environments.
 type Twins struct {
 	rootSDK          *Twinbay
 	sdkConfiguration config.SDKConfiguration

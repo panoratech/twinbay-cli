@@ -9,8 +9,8 @@ import (
 )
 
 type ListRequestLogsRequest struct {
-	SandboxID     string                                    `pathParam:"style=simple,explode=false,name=sandbox_id"`
-	SandboxTwinID optionalnullable.OptionalNullable[string] `queryParam:"style=form,explode=true,name=sandbox_twin_id"`
+	EnvironmentID     string                                    `pathParam:"style=simple,explode=false,name=environment_id"`
+	EnvironmentTwinID optionalnullable.OptionalNullable[string] `queryParam:"style=form,explode=true,name=environment_twin_id"`
 	// Page number
 	Page *int64 `default:"1" queryParam:"style=form,explode=true,name=page"`
 	// Page size
@@ -28,18 +28,18 @@ func (l *ListRequestLogsRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (l *ListRequestLogsRequest) GetSandboxID() string {
+func (l *ListRequestLogsRequest) GetEnvironmentID() string {
 	if l == nil {
 		return ""
 	}
-	return l.SandboxID
+	return l.EnvironmentID
 }
 
-func (l *ListRequestLogsRequest) GetSandboxTwinID() optionalnullable.OptionalNullable[string] {
+func (l *ListRequestLogsRequest) GetEnvironmentTwinID() optionalnullable.OptionalNullable[string] {
 	if l == nil {
 		return nil
 	}
-	return l.SandboxTwinID
+	return l.EnvironmentTwinID
 }
 
 func (l *ListRequestLogsRequest) GetPage() *int64 {

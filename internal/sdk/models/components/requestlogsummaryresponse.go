@@ -8,15 +8,15 @@ import (
 )
 
 type RequestLogSummaryResponse struct {
-	ID            string    `json:"id"`
-	SandboxID     string    `json:"sandbox_id"`
-	SandboxTwinID string    `json:"sandbox_twin_id"`
-	Method        string    `json:"method"`
-	Path          string    `json:"path"`
-	QueryString   string    `json:"query_string"`
-	StatusCode    int64     `json:"status_code"`
-	DurationMs    int64     `json:"duration_ms"`
-	OccurredAt    time.Time `json:"occurred_at"`
+	ID                string    `json:"id"`
+	EnvironmentID     string    `json:"environment_id"`
+	EnvironmentTwinID string    `json:"environment_twin_id"`
+	Method            string    `json:"method"`
+	Path              string    `json:"path"`
+	QueryString       string    `json:"query_string"`
+	StatusCode        int64     `json:"status_code"`
+	DurationMs        int64     `json:"duration_ms"`
+	OccurredAt        time.Time `json:"occurred_at"`
 }
 
 func (r RequestLogSummaryResponse) MarshalJSON() ([]byte, error) {
@@ -37,18 +37,18 @@ func (r *RequestLogSummaryResponse) GetID() string {
 	return r.ID
 }
 
-func (r *RequestLogSummaryResponse) GetSandboxID() string {
+func (r *RequestLogSummaryResponse) GetEnvironmentID() string {
 	if r == nil {
 		return ""
 	}
-	return r.SandboxID
+	return r.EnvironmentID
 }
 
-func (r *RequestLogSummaryResponse) GetSandboxTwinID() string {
+func (r *RequestLogSummaryResponse) GetEnvironmentTwinID() string {
 	if r == nil {
 		return ""
 	}
-	return r.SandboxTwinID
+	return r.EnvironmentTwinID
 }
 
 func (r *RequestLogSummaryResponse) GetMethod() string {

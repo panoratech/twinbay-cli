@@ -8,15 +8,15 @@ import (
 )
 
 type GetRequestLogRequest struct {
-	SandboxID string `pathParam:"style=simple,explode=false,name=sandbox_id"`
-	RequestID string `pathParam:"style=simple,explode=false,name=request_id"`
+	EnvironmentID string `pathParam:"style=simple,explode=false,name=environment_id"`
+	RequestID     string `pathParam:"style=simple,explode=false,name=request_id"`
 }
 
-func (g *GetRequestLogRequest) GetSandboxID() string {
+func (g *GetRequestLogRequest) GetEnvironmentID() string {
 	if g == nil {
 		return ""
 	}
-	return g.SandboxID
+	return g.EnvironmentID
 }
 
 func (g *GetRequestLogRequest) GetRequestID() string {
