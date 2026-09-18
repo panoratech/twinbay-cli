@@ -10,8 +10,8 @@ import (
 func InitTwinsRoot(parent *cobra.Command) error {
 	var TwinsCmd = &cobra.Command{
 		Use:         "twins",
-		Short:       "Browse the digital twins available for new sandboxes",
-		Long:        "Browse the digital twins available for new sandboxes.",
+		Short:       "Browse the digital twins available for new environments",
+		Long:        "Browse the digital twins available for new environments.",
 		Args:        cobra.NoArgs,
 		Annotations: map[string]string{"speakeasy_cli_group": "true"},
 		RunE: func(cmd *cobra.Command, args []string) error {

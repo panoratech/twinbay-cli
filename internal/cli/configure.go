@@ -73,7 +73,7 @@ func runConfigureCmd(cmd *cobra.Command, args []string) error {
 		var groups []*huh.Group
 		securityFields := []huh.Field{
 			huh.NewInput().
-				Title("An organization API key, as minted by POST /organizations/current/api-keys.").
+				Title("An organization API key. Create one at https://console.twinbay.ai/api-keys").
 				Description("--organization-api-key").
 				EchoMode(huh.EchoModePassword).
 				Placeholder(maskSecret(config.GetStoredSecret("organization-api-key", cfg.Security.OrganizationAPIKey))).

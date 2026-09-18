@@ -365,12 +365,12 @@ paths:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
       x-speakeasy-name-override: "retrieve"
-  /sandboxes:
+  /environments:
     get:
       tags:
-        - "sandboxes"
-      summary: "List sandboxes"
-      operationId: "list_sandboxes"
+        - "environments"
+      summary: "List environments"
+      operationId: "list_environments"
       responses:
         "200":
           description: "Successful Response"
@@ -378,9 +378,9 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: "#/components/schemas/SandboxResponse"
+                  $ref: "#/components/schemas/EnvironmentResponse"
                 type: "array"
-                title: "Response List Sandboxes"
+                title: "Response List Environments"
         "401":
           description: "The credential is missing, malformed, expired, or not trusted"
         "403":
@@ -390,15 +390,15 @@ paths:
       x-speakeasy-name-override: "list"
     post:
       tags:
-        - "sandboxes"
-      summary: "Create a sandbox"
-      description: "Records the sandbox and queues each twin for provisioning. The twins are not serving yet: read each one with `wait_for=ready`, then collect its API key."
-      operationId: "create_sandbox"
+        - "environments"
+      summary: "Create an environment"
+      description: "Records the environment and queues each twin for provisioning. The twins are not serving yet: read each one with `wait_for=ready`, then collect its API key."
+      operationId: "create_environment"
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateSandboxRequest"
+              $ref: "#/components/schemas/CreateEnvironmentRequest"
         required: true
       responses:
         "202":
@@ -406,7 +406,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SandboxResponse"
+                $ref: "#/components/schemas/EnvironmentResponse"
         "401":
           description: "The credential is missing, malformed, expired, or not trusted"
         "403":
@@ -420,29 +420,29 @@ paths:
       security:
         - Organization API key: []
       x-speakeasy-name-override: "create"
-  /sandboxes/{sandbox_id}:
+  /environments/{environment_id}:
     get:
       tags:
-        - "sandboxes"
-      summary: "Retrieve a sandbox"
-      operationId: "get_sandbox"
+        - "environments"
+      summary: "Retrieve an environment"
+      operationId: "get_environment"
       security:
         - Organization API key: []
       parameters:
-        - name: "sandbox_id"
+        - name: "environment_id"
           in: "path"
           required: true
           schema:
             type: "string"
             format: "uuid"
-            title: "Sandbox Id"
+            title: "Environment Id"
       responses:
         "200":
           description: "Successful Response"
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SandboxResponse"
+                $ref: "#/components/schemas/EnvironmentResponse"
         "401":
           description: "The credential is missing, malformed, expired, or not trusted"
         "403":
@@ -454,30 +454,30 @@ paths:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
       x-speakeasy-name-override: "retrieve"
-  /sandboxes/{sandbox_id}/twins/{sandbox_twin_id}:
+  /environments/{environment_id}/twins/{environment_twin_id}:
     get:
       tags:
-        - "sandboxes"
-      summary: "Retrieve a sandbox twin"
+        - "environments"
+      summary: "Retrieve an environment twin"
       description: "With `wait_for`, the answer is held until the twin reaches that state, a run of it settles, or the wait runs out — so a caller waiting for a twin to serve sends one request rather than polling."
-      operationId: "get_sandbox_twin"
+      operationId: "get_environment_twin"
       security:
         - Organization API key: []
       parameters:
-        - name: "sandbox_id"
+        - name: "environment_id"
           in: "path"
           required: true
           schema:
             type: "string"
             format: "uuid"
-            title: "Sandbox Id"
-        - name: "sandbox_twin_id"
+            title: "Environment Id"
+        - name: "environment_twin_id"
           in: "path"
           required: true
           schema:
             type: "string"
             format: "uuid"
-            title: "Sandbox Twin Id"
+            title: "Environment Twin Id"
         - name: "wait_for"
           in: "query"
           required: false
@@ -495,7 +495,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SandboxTwinResponse"
+                $ref: "#/components/schemas/EnvironmentTwinResponse"
         "401":
           description: "The credential is missing, malformed, expired, or not trusted"
         "403":
@@ -506,39 +506,39 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-      x-speakeasy-group: "sandbox_twins"
+      x-speakeasy-group: "environment_twins"
       x-speakeasy-name-override: "retrieve"
-  /sandboxes/{sandbox_id}/twins/{sandbox_twin_id}/start:
+  /environments/{environment_id}/twins/{environment_twin_id}/start:
     post:
       tags:
-        - "sandboxes"
-      summary: "Start a sandbox twin"
+        - "environments"
+      summary: "Start an environment twin"
       description: "Queues a fresh container. Its state and credentials are new."
-      operationId: "start_sandbox_twin"
+      operationId: "start_environment_twin"
       security:
         - Organization API key: []
       parameters:
-        - name: "sandbox_id"
+        - name: "environment_id"
           in: "path"
           required: true
           schema:
             type: "string"
             format: "uuid"
-            title: "Sandbox Id"
-        - name: "sandbox_twin_id"
+            title: "Environment Id"
+        - name: "environment_twin_id"
           in: "path"
           required: true
           schema:
             type: "string"
             format: "uuid"
-            title: "Sandbox Twin Id"
+            title: "Environment Twin Id"
       responses:
         "202":
           description: "Successful Response"
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SandboxTwinResponse"
+                $ref: "#/components/schemas/EnvironmentTwinResponse"
         "401":
           description: "The credential is missing, malformed, expired, or not trusted"
         "403":
@@ -549,39 +549,39 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-      x-speakeasy-group: "sandbox_twins"
+      x-speakeasy-group: "environment_twins"
       x-speakeasy-name-override: "start"
-  /sandboxes/{sandbox_id}/twins/{sandbox_twin_id}/stop:
+  /environments/{environment_id}/twins/{environment_twin_id}/stop:
     post:
       tags:
-        - "sandboxes"
-      summary: "Stop a sandbox twin"
+        - "environments"
+      summary: "Stop an environment twin"
       description: "Queues the container for destruction. Everything it holds is lost."
-      operationId: "stop_sandbox_twin"
+      operationId: "stop_environment_twin"
       security:
         - Organization API key: []
       parameters:
-        - name: "sandbox_id"
+        - name: "environment_id"
           in: "path"
           required: true
           schema:
             type: "string"
             format: "uuid"
-            title: "Sandbox Id"
-        - name: "sandbox_twin_id"
+            title: "Environment Id"
+        - name: "environment_twin_id"
           in: "path"
           required: true
           schema:
             type: "string"
             format: "uuid"
-            title: "Sandbox Twin Id"
+            title: "Environment Twin Id"
       responses:
         "202":
           description: "Successful Response"
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SandboxTwinResponse"
+                $ref: "#/components/schemas/EnvironmentTwinResponse"
         "401":
           description: "The credential is missing, malformed, expired, or not trusted"
         "403":
@@ -592,39 +592,39 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-      x-speakeasy-group: "sandbox_twins"
+      x-speakeasy-group: "environment_twins"
       x-speakeasy-name-override: "stop"
-  /sandboxes/{sandbox_id}/twins/{sandbox_twin_id}/credential:
+  /environments/{environment_id}/twins/{environment_twin_id}/credential:
     post:
       tags:
-        - "sandboxes"
+        - "environments"
       summary: "Collect the twin's API key"
       description: "Returns the key once. A second call is refused."
-      operationId: "collect_sandbox_twin_credential"
+      operationId: "collect_environment_twin_credential"
       security:
         - Organization API key: []
       parameters:
-        - name: "sandbox_id"
+        - name: "environment_id"
           in: "path"
           required: true
           schema:
             type: "string"
             format: "uuid"
-            title: "Sandbox Id"
-        - name: "sandbox_twin_id"
+            title: "Environment Id"
+        - name: "environment_twin_id"
           in: "path"
           required: true
           schema:
             type: "string"
             format: "uuid"
-            title: "Sandbox Twin Id"
+            title: "Environment Twin Id"
       responses:
         "200":
           description: "Successful Response"
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SandboxCredentialResponse"
+                $ref: "#/components/schemas/EnvironmentCredentialResponse"
         "401":
           description: "The credential is missing, malformed, expired, or not trusted"
         "403":
@@ -635,31 +635,31 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-      x-speakeasy-group: "sandbox_twins"
+      x-speakeasy-group: "environment_twins"
       x-speakeasy-name-override: "collect_credential"
-  /sandboxes/{sandbox_id}/twins/{sandbox_twin_id}/records/{resource}:
+  /environments/{environment_id}/twins/{environment_twin_id}/records/{resource}:
     get:
       tags:
-        - "sandboxes"
-      summary: "List sandbox twin state"
-      operationId: "list_sandbox_records"
+        - "environments"
+      summary: "List environment twin state"
+      operationId: "list_environment_records"
       security:
         - Organization API key: []
       parameters:
-        - name: "sandbox_id"
+        - name: "environment_id"
           in: "path"
           required: true
           schema:
             type: "string"
             format: "uuid"
-            title: "Sandbox Id"
-        - name: "sandbox_twin_id"
+            title: "Environment Id"
+        - name: "environment_twin_id"
           in: "path"
           required: true
           schema:
             type: "string"
             format: "uuid"
-            title: "Sandbox Twin Id"
+            title: "Environment Twin Id"
         - name: "resource"
           in: "path"
           required: true
@@ -674,8 +674,8 @@ paths:
               schema:
                 type: "array"
                 items:
-                  $ref: "#/components/schemas/SandboxRecordResponse"
-                title: "Response List Sandbox Records"
+                  $ref: "#/components/schemas/EnvironmentRecordResponse"
+                title: "Response List Environment Records"
         "401":
           description: "The credential is missing, malformed, expired, or not trusted"
         "403":
@@ -686,31 +686,31 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-      x-speakeasy-group: "sandbox_records"
+      x-speakeasy-group: "environment_records"
       x-speakeasy-name-override: "list"
-  /sandboxes/{sandbox_id}/twins/{sandbox_twin_id}/records/{resource}/{external_id}:
+  /environments/{environment_id}/twins/{environment_twin_id}/records/{resource}/{external_id}:
     put:
       tags:
-        - "sandboxes"
-      summary: "Replace a sandbox twin record"
-      operationId: "update_sandbox_record"
+        - "environments"
+      summary: "Replace an environment twin record"
+      operationId: "update_environment_record"
       security:
         - Organization API key: []
       parameters:
-        - name: "sandbox_id"
+        - name: "environment_id"
           in: "path"
           required: true
           schema:
             type: "string"
             format: "uuid"
-            title: "Sandbox Id"
-        - name: "sandbox_twin_id"
+            title: "Environment Id"
+        - name: "environment_twin_id"
           in: "path"
           required: true
           schema:
             type: "string"
             format: "uuid"
-            title: "Sandbox Twin Id"
+            title: "Environment Twin Id"
         - name: "resource"
           in: "path"
           required: true
@@ -728,14 +728,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdateSandboxRecordRequest"
+              $ref: "#/components/schemas/UpdateEnvironmentRecordRequest"
       responses:
         "200":
           description: "Successful Response"
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SandboxRecordResponse"
+                $ref: "#/components/schemas/EnvironmentRecordResponse"
         "401":
           description: "The credential is missing, malformed, expired, or not trusted"
         "403":
@@ -746,37 +746,37 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-      x-speakeasy-group: "sandbox_records"
+      x-speakeasy-group: "environment_records"
       x-speakeasy-name-override: "update"
-  /sandboxes/{sandbox_id}/twins/{sandbox_twin_id}/advance:
+  /environments/{environment_id}/twins/{environment_twin_id}/advance:
     post:
       tags:
-        - "sandboxes"
+        - "environments"
       summary: "Advance a deterministic twin lifecycle"
-      operationId: "advance_sandbox"
+      operationId: "advance_environment"
       security:
         - Organization API key: []
       parameters:
-        - name: "sandbox_id"
+        - name: "environment_id"
           in: "path"
           required: true
           schema:
             type: "string"
             format: "uuid"
-            title: "Sandbox Id"
-        - name: "sandbox_twin_id"
+            title: "Environment Id"
+        - name: "environment_twin_id"
           in: "path"
           required: true
           schema:
             type: "string"
             format: "uuid"
-            title: "Sandbox Twin Id"
+            title: "Environment Twin Id"
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AdvanceSandboxRequest"
+              $ref: "#/components/schemas/AdvanceEnvironmentRequest"
       responses:
         "200":
           description: "Successful Response"
@@ -786,7 +786,7 @@ paths:
                 type: "object"
                 additionalProperties:
                   type: "integer"
-                title: "Response Advance Sandbox"
+                title: "Response Advance Environment"
         "401":
           description: "The credential is missing, malformed, expired, or not trusted"
         "403":
@@ -797,15 +797,15 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-      x-speakeasy-group: "sandbox_twins"
+      x-speakeasy-group: "environment_twins"
       x-speakeasy-name-override: "advance"
-  /sandbox-templates:
+  /environment-templates:
     get:
       tags:
-        - "sandboxes"
-      summary: "List sandbox templates"
-      description: "Saved sandbox definitions. Start a sandbox from one by sending its id as `template` to `POST /sandboxes`."
-      operationId: "list_sandbox_templates"
+        - "environments"
+      summary: "List environment templates"
+      description: "Saved environment definitions. Start an environment from one by sending its id as `template` to `POST /environments`."
+      operationId: "list_environment_templates"
       responses:
         "200":
           description: "Successful Response"
@@ -813,24 +813,24 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: "#/components/schemas/SandboxTemplateResponse"
+                  $ref: "#/components/schemas/EnvironmentTemplateResponse"
                 type: "array"
-                title: "Response List Sandbox Templates"
+                title: "Response List Environment Templates"
         "401":
           description: "The credential is missing, malformed, expired, or not trusted"
         "403":
           description: "The credential does not act inside an organization"
       security:
         - Organization API key: []
-      x-speakeasy-group: "sandbox_templates"
+      x-speakeasy-group: "environment_templates"
       x-speakeasy-name-override: "list"
-  /sandbox-templates/{template_id}:
+  /environment-templates/{template_id}:
     delete:
       tags:
-        - "sandboxes"
-      summary: "Delete a sandbox template"
-      description: "Sandboxes already started from it are untouched."
-      operationId: "delete_sandbox_template"
+        - "environments"
+      summary: "Delete an environment template"
+      description: "Environments already started from it are untouched."
+      operationId: "delete_environment_template"
       security:
         - Organization API key: []
       parameters:
@@ -854,25 +854,25 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-      x-speakeasy-group: "sandbox_templates"
+      x-speakeasy-group: "environment_templates"
       x-speakeasy-name-override: "delete"
-  /sandboxes/{sandbox_id}/logs:
+  /environments/{environment_id}/logs:
     get:
       tags:
-        - "sandboxes"
-      summary: "List recent sandbox request logs"
+        - "environments"
+      summary: "List recent environment request logs"
       operationId: "list_request_logs"
       security:
         - Organization API key: []
       parameters:
-        - name: "sandbox_id"
+        - name: "environment_id"
           in: "path"
           required: true
           schema:
             type: "string"
             format: "uuid"
-            title: "Sandbox Id"
-        - name: "sandbox_twin_id"
+            title: "Environment Id"
+        - name: "environment_twin_id"
           in: "query"
           required: false
           schema:
@@ -880,7 +880,7 @@ paths:
               - type: "string"
                 format: "uuid"
               - type: "null"
-            title: "Sandbox Twin Id"
+            title: "Environment Twin Id"
         - name: "page"
           in: "query"
           required: false
@@ -919,24 +919,24 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-      x-speakeasy-group: "sandbox_logs"
+      x-speakeasy-group: "environment_logs"
       x-speakeasy-name-override: "list"
-  /sandboxes/{sandbox_id}/logs/{request_id}:
+  /environments/{environment_id}/logs/{request_id}:
     get:
       tags:
-        - "sandboxes"
-      summary: "Retrieve a sandbox request log"
+        - "environments"
+      summary: "Retrieve an environment request log"
       operationId: "get_request_log"
       security:
         - Organization API key: []
       parameters:
-        - name: "sandbox_id"
+        - name: "environment_id"
           in: "path"
           required: true
           schema:
             type: "string"
             format: "uuid"
-            title: "Sandbox Id"
+            title: "Environment Id"
         - name: "request_id"
           in: "path"
           required: true
@@ -963,7 +963,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-      x-speakeasy-group: "sandbox_logs"
+      x-speakeasy-group: "environment_logs"
       x-speakeasy-name-override: "retrieve"
   /:
     get:
@@ -1001,7 +1001,7 @@ paths:
       x-speakeasy-ignore: true
 components:
   schemas:
-    AdvanceSandboxRequest:
+    AdvanceEnvironmentRequest:
       properties:
         at:
           anyOf:
@@ -1009,10 +1009,10 @@ components:
               format: "date-time"
             - type: "null"
           title: "At"
-          description: "Instant to advance the sandbox to. Defaults to now."
+          description: "Instant to advance the environment to. Defaults to now."
       additionalProperties: false
       type: "object"
-      title: "AdvanceSandboxRequest"
+      title: "AdvanceEnvironmentRequest"
     ApiKeyResponse:
       properties:
         id:
@@ -1064,27 +1064,14 @@ components:
       required:
         - "name"
       title: "CreateApiKeyRequest"
-    CreateOrganizationRequest:
+    CreateEnvironmentRequest:
       properties:
         name:
           type: "string"
           maxLength: 100
           minLength: 1
           title: "Name"
-          description: "Display name of the new organization"
-      additionalProperties: false
-      type: "object"
-      required:
-        - "name"
-      title: "CreateOrganizationRequest"
-    CreateSandboxRequest:
-      properties:
-        name:
-          type: "string"
-          maxLength: 100
-          minLength: 1
-          title: "Name"
-          description: "Display name of the new sandbox"
+          description: "Display name of the new environment"
         prompt:
           anyOf:
             - type: "string"
@@ -1092,35 +1079,35 @@ components:
               minLength: 1
             - type: "null"
           title: "Prompt"
-          description: "A natural-language description of the scenario the whole sandbox represents. Every twin in it is seeded from this description while it is being provisioned."
+          description: "A natural-language description of the scenario the whole environment represents. Every twin in it is seeded from this description while it is being provisioned."
         twins:
           anyOf:
             - items:
-                $ref: "#/components/schemas/CreateSandboxTwinRequest"
+                $ref: "#/components/schemas/CreateEnvironmentTwinRequest"
               type: "array"
-              maxItems: 5
+              maxItems: 25
               minItems: 1
             - type: "null"
           title: "Twins"
-          description: "Provider twins to provision in the sandbox. Omitted when the sandbox is started from a template, which holds them already."
+          description: "Provider twins to provision in the environment. Omitted when the environment is started from a template, which holds them already."
         template:
           anyOf:
             - type: "string"
               format: "uuid"
             - type: "null"
           title: "Template"
-          description: "A saved sandbox definition to start from, instead of listing twins. Its twins, their curated scenarios and their instructions are used as they were saved."
+          description: "A saved environment definition to start from, instead of listing twins. Its twins, their curated scenarios and their instructions are used as they were saved."
         save_as_template:
           type: "boolean"
           title: "Save As Template"
-          description: "Also save this sandbox's definition, so another sandbox can be started from it later."
+          description: "Also save this environment's definition, so another environment can be started from it later."
           default: false
       additionalProperties: false
       type: "object"
       required:
         - "name"
-      title: "CreateSandboxRequest"
-    CreateSandboxTwinRequest:
+      title: "CreateEnvironmentRequest"
+    CreateEnvironmentTwinRequest:
       properties:
         twin:
           type: "string"
@@ -1143,12 +1130,25 @@ components:
               minLength: 1
             - type: "null"
           title: "Prompt"
-          description: "What this twin adds to the sandbox's instruction, for a provider that needs a note of its own. It is appended to the sandbox instruction rather than replacing it."
+          description: "What this twin adds to the environment's instruction, for a provider that needs a note of its own. It is appended to the environment instruction rather than replacing it."
       additionalProperties: false
       type: "object"
       required:
         - "twin"
-      title: "CreateSandboxTwinRequest"
+      title: "CreateEnvironmentTwinRequest"
+    CreateOrganizationRequest:
+      properties:
+        name:
+          type: "string"
+          maxLength: 100
+          minLength: 1
+          title: "Name"
+          description: "Display name of the new organization"
+      additionalProperties: false
+      type: "object"
+      required:
+        - "name"
+      title: "CreateOrganizationRequest"
     CreatedApiKeyResponse:
       properties:
         id:
@@ -1185,6 +1185,174 @@ components:
         - "created_by"
         - "token"
       title: "CreatedApiKeyResponse"
+    EnvironmentCredentialResponse:
+      properties:
+        api_key:
+          type: "string"
+          title: "Api Key"
+      type: "object"
+      required:
+        - "api_key"
+      title: "EnvironmentCredentialResponse"
+      description: "The provider key a container minted, handed over exactly once."
+    EnvironmentRecordResponse:
+      properties:
+        external_id:
+          type: "string"
+          title: "External Id"
+        resource:
+          type: "string"
+          title: "Resource"
+        body:
+          additionalProperties: true
+          type: "object"
+          title: "Body"
+      type: "object"
+      required:
+        - "external_id"
+        - "resource"
+        - "body"
+      title: "EnvironmentRecordResponse"
+    EnvironmentResponse:
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+          title: "Id"
+        slug:
+          type: "string"
+          title: "Slug"
+        name:
+          type: "string"
+          title: "Name"
+        status:
+          type: "string"
+          title: "Status"
+        twins:
+          items:
+            $ref: "#/components/schemas/EnvironmentTwinResponse"
+          type: "array"
+          title: "Twins"
+        created_at:
+          type: "string"
+          format: "date-time"
+          title: "Created At"
+        expires_at:
+          anyOf:
+            - type: "string"
+              format: "date-time"
+            - type: "null"
+          title: "Expires At"
+      type: "object"
+      required:
+        - "id"
+        - "slug"
+        - "name"
+        - "status"
+        - "twins"
+        - "created_at"
+      title: "EnvironmentResponse"
+    EnvironmentTemplateResponse:
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+          title: "Id"
+        name:
+          type: "string"
+          title: "Name"
+        prompt:
+          anyOf:
+            - type: "string"
+            - type: "null"
+          title: "Prompt"
+        twins:
+          items:
+            $ref: "#/components/schemas/EnvironmentTemplateTwinResponse"
+          type: "array"
+          title: "Twins"
+        created_at:
+          type: "string"
+          format: "date-time"
+          title: "Created At"
+      type: "object"
+      required:
+        - "id"
+        - "name"
+        - "twins"
+        - "created_at"
+      title: "EnvironmentTemplateResponse"
+    EnvironmentTemplateTwinResponse:
+      properties:
+        twin:
+          type: "string"
+          title: "Twin"
+        scenario_template:
+          anyOf:
+            - type: "string"
+            - type: "null"
+          title: "Scenario Template"
+        prompt:
+          anyOf:
+            - type: "string"
+            - type: "null"
+          title: "Prompt"
+      type: "object"
+      required:
+        - "twin"
+      title: "EnvironmentTemplateTwinResponse"
+      description: "A slot a template asks for, named as a create request names it."
+    EnvironmentTwinResponse:
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+          title: "Id"
+        twin_slug:
+          type: "string"
+          title: "Twin Slug"
+        twin_version:
+          anyOf:
+            - type: "string"
+            - type: "null"
+          title: "Twin Version"
+          description: "The release the current container was started from."
+        desired_state:
+          type: "string"
+          title: "Desired State"
+          description: "running or stopped"
+        state:
+          type: "string"
+          title: "State"
+          description: "What the twin is actually doing: pending, provisioning, starting, ready, stopping, stopped or failed."
+        url:
+          type: "string"
+          title: "Url"
+        failure:
+          anyOf:
+            - type: "string"
+            - type: "null"
+          title: "Failure"
+          description: "Why the current run is not serving, if it is not."
+        created_at:
+          type: "string"
+          format: "date-time"
+          title: "Created At"
+        ready_at:
+          anyOf:
+            - type: "string"
+              format: "date-time"
+            - type: "null"
+          title: "Ready At"
+      type: "object"
+      required:
+        - "id"
+        - "twin_slug"
+        - "desired_state"
+        - "state"
+        - "url"
+        - "created_at"
+      title: "EnvironmentTwinResponse"
     HTTPValidationError:
       properties:
         detail:
@@ -1417,14 +1585,14 @@ components:
           type: "string"
           format: "uuid"
           title: "Id"
-        sandbox_id:
+        environment_id:
           type: "string"
           format: "uuid"
-          title: "Sandbox Id"
-        sandbox_twin_id:
+          title: "Environment Id"
+        environment_twin_id:
           type: "string"
           format: "uuid"
-          title: "Sandbox Twin Id"
+          title: "Environment Twin Id"
         method:
           type: "string"
           title: "Method"
@@ -1455,8 +1623,8 @@ components:
       type: "object"
       required:
         - "id"
-        - "sandbox_id"
-        - "sandbox_twin_id"
+        - "environment_id"
+        - "environment_twin_id"
         - "method"
         - "path"
         - "query_string"
@@ -1472,14 +1640,14 @@ components:
           type: "string"
           format: "uuid"
           title: "Id"
-        sandbox_id:
+        environment_id:
           type: "string"
           format: "uuid"
-          title: "Sandbox Id"
-        sandbox_twin_id:
+          title: "Environment Id"
+        environment_twin_id:
           type: "string"
           format: "uuid"
-          title: "Sandbox Twin Id"
+          title: "Environment Twin Id"
         method:
           type: "string"
           title: "Method"
@@ -1502,8 +1670,8 @@ components:
       type: "object"
       required:
         - "id"
-        - "sandbox_id"
-        - "sandbox_twin_id"
+        - "environment_id"
+        - "environment_twin_id"
         - "method"
         - "path"
         - "query_string"
@@ -1511,174 +1679,6 @@ components:
         - "duration_ms"
         - "occurred_at"
       title: "RequestLogSummaryResponse"
-    SandboxCredentialResponse:
-      properties:
-        api_key:
-          type: "string"
-          title: "Api Key"
-      type: "object"
-      required:
-        - "api_key"
-      title: "SandboxCredentialResponse"
-      description: "The provider key a container minted, handed over exactly once."
-    SandboxRecordResponse:
-      properties:
-        external_id:
-          type: "string"
-          title: "External Id"
-        resource:
-          type: "string"
-          title: "Resource"
-        body:
-          additionalProperties: true
-          type: "object"
-          title: "Body"
-      type: "object"
-      required:
-        - "external_id"
-        - "resource"
-        - "body"
-      title: "SandboxRecordResponse"
-    SandboxResponse:
-      properties:
-        id:
-          type: "string"
-          format: "uuid"
-          title: "Id"
-        slug:
-          type: "string"
-          title: "Slug"
-        name:
-          type: "string"
-          title: "Name"
-        status:
-          type: "string"
-          title: "Status"
-        twins:
-          items:
-            $ref: "#/components/schemas/SandboxTwinResponse"
-          type: "array"
-          title: "Twins"
-        created_at:
-          type: "string"
-          format: "date-time"
-          title: "Created At"
-        expires_at:
-          anyOf:
-            - type: "string"
-              format: "date-time"
-            - type: "null"
-          title: "Expires At"
-      type: "object"
-      required:
-        - "id"
-        - "slug"
-        - "name"
-        - "status"
-        - "twins"
-        - "created_at"
-      title: "SandboxResponse"
-    SandboxTemplateResponse:
-      properties:
-        id:
-          type: "string"
-          format: "uuid"
-          title: "Id"
-        name:
-          type: "string"
-          title: "Name"
-        prompt:
-          anyOf:
-            - type: "string"
-            - type: "null"
-          title: "Prompt"
-        twins:
-          items:
-            $ref: "#/components/schemas/SandboxTemplateTwinResponse"
-          type: "array"
-          title: "Twins"
-        created_at:
-          type: "string"
-          format: "date-time"
-          title: "Created At"
-      type: "object"
-      required:
-        - "id"
-        - "name"
-        - "twins"
-        - "created_at"
-      title: "SandboxTemplateResponse"
-    SandboxTemplateTwinResponse:
-      properties:
-        twin:
-          type: "string"
-          title: "Twin"
-        scenario_template:
-          anyOf:
-            - type: "string"
-            - type: "null"
-          title: "Scenario Template"
-        prompt:
-          anyOf:
-            - type: "string"
-            - type: "null"
-          title: "Prompt"
-      type: "object"
-      required:
-        - "twin"
-      title: "SandboxTemplateTwinResponse"
-      description: "A slot a template asks for, named as a create request names it."
-    SandboxTwinResponse:
-      properties:
-        id:
-          type: "string"
-          format: "uuid"
-          title: "Id"
-        twin_slug:
-          type: "string"
-          title: "Twin Slug"
-        twin_version:
-          anyOf:
-            - type: "string"
-            - type: "null"
-          title: "Twin Version"
-          description: "The release the current container was started from."
-        desired_state:
-          type: "string"
-          title: "Desired State"
-          description: "running or stopped"
-        state:
-          type: "string"
-          title: "State"
-          description: "What the twin is actually doing: pending, provisioning, starting, ready, stopping, stopped or failed."
-        url:
-          type: "string"
-          title: "Url"
-        failure:
-          anyOf:
-            - type: "string"
-            - type: "null"
-          title: "Failure"
-          description: "Why the current run is not serving, if it is not."
-        created_at:
-          type: "string"
-          format: "date-time"
-          title: "Created At"
-        ready_at:
-          anyOf:
-            - type: "string"
-              format: "date-time"
-            - type: "null"
-          title: "Ready At"
-      type: "object"
-      required:
-        - "id"
-        - "twin_slug"
-        - "desired_state"
-        - "state"
-        - "url"
-        - "created_at"
-      title: "SandboxTwinResponse"
     ScenarioResponse:
       properties:
         slug:
@@ -1723,6 +1723,18 @@ components:
         - "version"
         - "scenarios"
       title: "TwinResponse"
+    UpdateEnvironmentRecordRequest:
+      properties:
+        fields:
+          additionalProperties: true
+          type: "object"
+          title: "Fields"
+          description: "The record's fields, as the provider's API returns them."
+      additionalProperties: false
+      type: "object"
+      required:
+        - "fields"
+      title: "UpdateEnvironmentRecordRequest"
     UpdateOrganizationRequest:
       properties:
         name:
@@ -1736,18 +1748,6 @@ components:
       required:
         - "name"
       title: "UpdateOrganizationRequest"
-    UpdateSandboxRecordRequest:
-      properties:
-        fields:
-          additionalProperties: true
-          type: "object"
-          title: "Fields"
-          description: "The record's fields, as the provider's API returns them."
-      additionalProperties: false
-      type: "object"
-      required:
-        - "fields"
-      title: "UpdateSandboxRecordRequest"
     UserResponse:
       properties:
         id:
@@ -1800,7 +1800,7 @@ components:
   securitySchemes:
     Organization API key:
       type: "apiKey"
-      description: "An organization API key, as minted by POST /organizations/current/api-keys."
+      description: "An organization API key. Create one at https://console.twinbay.ai/api-keys"
       in: "header"
       name: "X-API-Key"
 tags:
@@ -1812,7 +1812,7 @@ tags:
     description: "Organizations the caller belongs to. Every authenticated request acts inside exactly one organization — the one its access token names — so these routes address it as `current`."
   - name: "api-keys"
     description: "Long-lived credentials for callers that cannot hold an AuthKit session — agents, SDKs, CI. A key is accepted wherever an access token is, and acts with the role its creator holds when the request arrives."
-  - name: "sandboxes"
-    description: "Create and edit isolated provider sandboxes. Each sandbox contains behavioural twins from the `twins` package."
+  - name: "environments"
+    description: "Create and edit isolated provider environments. Each environment contains behavioural twins from the `twins` package."
   - name: "twins"
-    description: "Browse the digital twins available for new sandboxes."
+    description: "Browse the digital twins available for new environments."
