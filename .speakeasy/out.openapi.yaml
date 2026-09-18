@@ -1098,7 +1098,7 @@ components:
             - items:
                 $ref: "#/components/schemas/CreateSandboxTwinRequest"
               type: "array"
-              maxItems: 5
+              maxItems: 25
               minItems: 1
             - type: "null"
           title: "Twins"
@@ -1800,7 +1800,7 @@ components:
   securitySchemes:
     Organization API key:
       type: "apiKey"
-      description: "An organization API key, as minted by POST /organizations/current/api-keys."
+      description: "An organization API key. Create one at https://console.twinbay.ai/api-keys"
       in: "header"
       name: "X-API-Key"
 tags:

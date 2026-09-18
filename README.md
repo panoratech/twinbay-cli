@@ -238,7 +238,7 @@ Set credentials via environment variables:
 
 | Variable | Description |
 |----------|-------------|
-| `CLI_TWINBAY_ORGANIZATION_API_KEY` | An organization API key, as minted by POST /organizations/current/api-keys. |
+| `CLI_TWINBAY_ORGANIZATION_API_KEY` | An organization API key. Create one at https://console.twinbay.ai/api-keys |
 
 ### 3. OS Keychain (recommended for workstations)
 

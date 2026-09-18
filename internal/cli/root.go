@@ -147,7 +147,7 @@ func NewRootCommand() (*cobra.Command, error) {
 			"Use --agent-mode=false to disable.")
 
 	// Global security flags
-	rootCmd.PersistentFlags().String("organization-api-key", "", "An organization API key, as minted by POST /organizations/current/api-keys.")
+	rootCmd.PersistentFlags().String("organization-api-key", "", "An organization API key. Create one at https://console.twinbay.ai/api-keys")
 	_ = rootCmd.PersistentFlags().SetAnnotation("organization-api-key", "speakeasy:group", []string{"Authentication"})
 
 	// Annotate persistent flags for grouped help display
