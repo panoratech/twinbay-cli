@@ -1,16 +1,22 @@
-## twinbay
+## twinbay environment-exports
 
-Twinbay: Backend API
+Operations for environment-exports
 
 ### Synopsis
 
-Twinbay: Backend API
+Operations for environment-exports
 
 ```
-twinbay [flags]
+twinbay environment-exports [flags]
 ```
 
 ### Options
+
+```
+  -h, --help   help for environment-exports
+```
+
+### Options inherited from parent commands
 
 ```
       --agent-mode                    Enable structured errors and default TOON output for AI coding agents. Automatically enabled when a known agent environment is detected (CLAUDECODE, CURSOR_AGENT, etc.). Use --agent-mode=false to disable.
@@ -18,7 +24,6 @@ twinbay [flags]
   -d, --debug                         Log request and response diagnostics to stderr
       --dry-run                       Preview API requests without sending them (no network, no OS keychain). Human preview on stderr; with -o json or --jq, one JSON object per request on stdout. Local mutation commands (auth login, auth logout and configure) make no request: they skip prompts and writes and report a no-op (stderr, or one JSON object on stdout in the machine form)
   -H, --header stringArray            Set a custom HTTP request header (format: "Key: Value"). Can be specified multiple times.
-  -h, --help                          help for twinbay
       --include-headers               Include HTTP response headers in the output
       --interactive                   Prompt for missing inputs and open guided configure/auth forms (forms fall back to line prompts on stdin off-TTY) (default true)
   -q, --jq string                     Filter and transform output using a jq expression (e.g., '.name', '.items[] | .id')
@@ -34,20 +39,10 @@ twinbay [flags]
 
 ### SEE ALSO
 
-* [twinbay api-keys](twinbay_api-keys.md)	 - Long-lived credentials for callers that cannot hold an AuthKit session — agents, SDKs, CI
-* [twinbay auth](twinbay_auth.md)	 - Manage authentication credentials
-* [twinbay configure](twinbay_configure.md)	 - Configure authentication credentials and preferences
-* [twinbay environment-exports](twinbay_environment-exports.md)	 - Operations for environment-exports
-* [twinbay environment-logs](twinbay_environment-logs.md)	 - Operations for environment-logs
-* [twinbay environment-records](twinbay_environment-records.md)	 - Operations for environment-records
-* [twinbay environment-templates](twinbay_environment-templates.md)	 - Operations for environment-templates
-* [twinbay environment-twins](twinbay_environment-twins.md)	 - Operations for environment-twins
-* [twinbay environments](twinbay_environments.md)	 - Create and edit isolated provider environments
-* [twinbay explore](twinbay_explore.md)	 - Interactively browse and run commands
-* [twinbay organizations](twinbay_organizations.md)	 - Organizations the caller belongs to
-* [twinbay twins](twinbay_twins.md)	 - Browse the digital twins available for new environments
-* [twinbay users](twinbay_users.md)	 - The current user
-* [twinbay version](twinbay_version.md)	 - Print the CLI version
-* [twinbay whoami](twinbay_whoami.md)	 - Display current authentication configuration
+* [twinbay](twinbay.md)	 - Twinbay: Backend API
+* [twinbay environment-exports create](twinbay_environment-exports_create.md)	 - Export an environment's traffic
+* [twinbay environment-exports download](twinbay_environment-exports_download.md)	 - Sign a link to an exported file
+* [twinbay environment-exports list](twinbay_environment-exports_list.md)	 - List an environment's exports
+* [twinbay environment-exports retrieve](twinbay_environment-exports_retrieve.md)	 - Retrieve an export
 
 Exit codes: 0 ok · 1 runtime · 2 usage · 3 authentication/authorization

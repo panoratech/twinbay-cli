@@ -65,6 +65,7 @@ type Twinbay struct {
 	EnvironmentRecords   *EnvironmentRecords
 	EnvironmentTemplates *EnvironmentTemplates
 	EnvironmentLogs      *EnvironmentLogs
+	EnvironmentExports   *EnvironmentExports
 
 	sdkConfiguration config.SDKConfiguration
 	hooks            *hooks.Hooks
@@ -140,10 +141,10 @@ func WithTimeout(timeout time.Duration) SDKOption {
 // New creates a new instance of the SDK with the provided options
 func New(opts ...SDKOption) *Twinbay {
 	sdk := &Twinbay{
-		SDKVersion: "0.2.1",
+		SDKVersion: "0.2.2",
 		sdkConfiguration: config.SDKConfiguration{
-			UserAgent:         "speakeasy-sdk/go 0.2.1 2.938.0 0.1.0 github.com/panoratech/twinbay-cli/internal/sdk",
-			SDKVersion:        "0.2.1",
+			UserAgent:         "speakeasy-sdk/go 0.2.2 2.938.0 0.1.0 github.com/panoratech/twinbay-cli/internal/sdk",
+			SDKVersion:        "0.2.2",
 			GenVersion:        "2.938.0",
 			OpenAPIDocVersion: "0.1.0",
 			ServerList:        ServerList,
@@ -170,6 +171,7 @@ func New(opts ...SDKOption) *Twinbay {
 	sdk.EnvironmentRecords = newEnvironmentRecords(sdk, sdk.sdkConfiguration, sdk.hooks)
 	sdk.EnvironmentTemplates = newEnvironmentTemplates(sdk, sdk.sdkConfiguration, sdk.hooks)
 	sdk.EnvironmentLogs = newEnvironmentLogs(sdk, sdk.sdkConfiguration, sdk.hooks)
+	sdk.EnvironmentExports = newEnvironmentExports(sdk, sdk.sdkConfiguration, sdk.hooks)
 
 	return sdk
 }

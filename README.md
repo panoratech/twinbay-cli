@@ -305,6 +305,11 @@ Configuration is stored in `~/.config/twinbay/config.yaml`.
 * [`environment-logs`](docs/twinbay_environment-logs.md) - Operations for environment-logs
   * [`list`](docs/twinbay_environment-logs_list.md) - List recent environment request logs
   * [`retrieve`](docs/twinbay_environment-logs_retrieve.md) - Retrieve an environment request log
+* [`environment-exports`](docs/twinbay_environment-exports.md) - Operations for environment-exports
+  * [`create`](docs/twinbay_environment-exports_create.md) - Export an environment's traffic
+  * [`list`](docs/twinbay_environment-exports_list.md) - List an environment's exports
+  * [`retrieve`](docs/twinbay_environment-exports_retrieve.md) - Retrieve an export
+  * [`download`](docs/twinbay_environment-exports_download.md) - Sign a link to an exported file
 
 </details>
 <!-- End Commands [operations] -->
