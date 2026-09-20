@@ -1,16 +1,30 @@
-## twinbay
+## twinbay environment-exports download
 
-Twinbay: Backend API
+Sign a link to an exported file
 
 ### Synopsis
 
-Twinbay: Backend API
+A short-lived download URL for a ready export. JSON rather than a redirect, so the expiry is visible and no client has to follow one.
 
 ```
-twinbay [flags]
+twinbay environment-exports download [flags]
+```
+
+### Examples
+
+```
+  twinbay environment-exports download --environment-id 3095548f-a900-4ecc-b7b9-1d0a53fc56cf --export-id e70e6526-151b-4421-81e1-fe64143d167a
 ```
 
 ### Options
+
+```
+      --environment-id string   [required]
+      --export-id string        [required]
+  -h, --help                    help for download
+```
+
+### Options inherited from parent commands
 
 ```
       --agent-mode                    Enable structured errors and default TOON output for AI coding agents. Automatically enabled when a known agent environment is detected (CLAUDECODE, CURSOR_AGENT, etc.). Use --agent-mode=false to disable.
@@ -18,7 +32,6 @@ twinbay [flags]
   -d, --debug                         Log request and response diagnostics to stderr
       --dry-run                       Preview API requests without sending them (no network, no OS keychain). Human preview on stderr; with -o json or --jq, one JSON object per request on stdout. Local mutation commands (auth login, auth logout and configure) make no request: they skip prompts and writes and report a no-op (stderr, or one JSON object on stdout in the machine form)
   -H, --header stringArray            Set a custom HTTP request header (format: "Key: Value"). Can be specified multiple times.
-  -h, --help                          help for twinbay
       --include-headers               Include HTTP response headers in the output
       --interactive                   Prompt for missing inputs and open guided configure/auth forms (forms fall back to line prompts on stdin off-TTY) (default true)
   -q, --jq string                     Filter and transform output using a jq expression (e.g., '.name', '.items[] | .id')
@@ -34,20 +47,13 @@ twinbay [flags]
 
 ### SEE ALSO
 
-* [twinbay api-keys](twinbay_api-keys.md)	 - Long-lived credentials for callers that cannot hold an AuthKit session — agents, SDKs, CI
-* [twinbay auth](twinbay_auth.md)	 - Manage authentication credentials
-* [twinbay configure](twinbay_configure.md)	 - Configure authentication credentials and preferences
 * [twinbay environment-exports](twinbay_environment-exports.md)	 - Operations for environment-exports
-* [twinbay environment-logs](twinbay_environment-logs.md)	 - Operations for environment-logs
-* [twinbay environment-records](twinbay_environment-records.md)	 - Operations for environment-records
-* [twinbay environment-templates](twinbay_environment-templates.md)	 - Operations for environment-templates
-* [twinbay environment-twins](twinbay_environment-twins.md)	 - Operations for environment-twins
-* [twinbay environments](twinbay_environments.md)	 - Create and edit isolated provider environments
-* [twinbay explore](twinbay_explore.md)	 - Interactively browse and run commands
-* [twinbay organizations](twinbay_organizations.md)	 - Organizations the caller belongs to
-* [twinbay twins](twinbay_twins.md)	 - Browse the digital twins available for new environments
-* [twinbay users](twinbay_users.md)	 - The current user
-* [twinbay version](twinbay_version.md)	 - Print the CLI version
-* [twinbay whoami](twinbay_whoami.md)	 - Display current authentication configuration
+
+### Machine interface
+
+* `twinbay environment-exports download --usage` — this command's flags, defaults and env vars as machine-readable KDL
+* `twinbay environment-exports download --dry-run` — preview the request without OS-keychain access or a network call (human preview on stderr)
+* `--dry-run --output-format json` (or a caller-explicit `--jq`) writes one preview object per request as NDJSON on stdout; jq is not applied to previews
+* `--output-format json` or `--jq <expr>` for machine-readable live output; in agent mode errors are a JSON envelope on stderr
 
 Exit codes: 0 ok · 1 runtime · 2 usage · 3 authentication/authorization
