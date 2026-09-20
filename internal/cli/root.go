@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/panoratech/twinbay-cli/internal/cli/apikeys"
+	"github.com/panoratech/twinbay-cli/internal/cli/environmentexports"
 	"github.com/panoratech/twinbay-cli/internal/cli/environmentlogs"
 	"github.com/panoratech/twinbay-cli/internal/cli/environmentrecords"
 	"github.com/panoratech/twinbay-cli/internal/cli/environments"
@@ -91,6 +92,9 @@ func NewRootCommand() (*cobra.Command, error) {
 	}
 	if err := environmentlogs.InitEnvironmentLogsRoot(rootCmd); err != nil {
 		return nil, fmt.Errorf("init environment-logs: %w", err)
+	}
+	if err := environmentexports.InitEnvironmentExportsRoot(rootCmd); err != nil {
+		return nil, fmt.Errorf("init environment-exports: %w", err)
 	}
 	if err := initConfigureCmd(rootCmd); err != nil {
 		return nil, fmt.Errorf("init configure: %w", err)
