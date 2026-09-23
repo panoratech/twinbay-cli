@@ -3,17 +3,15 @@
 package components
 
 import (
-	"github.com/panoratech/twinbay-cli/internal/sdk/optionalnullable"
 	"github.com/panoratech/twinbay-cli/internal/sdk/sdkinternal/utils"
 	"time"
 )
 
 type EnvironmentTemplateResponse struct {
-	ID        string                                    `json:"id"`
-	Name      string                                    `json:"name"`
-	Prompt    optionalnullable.OptionalNullable[string] `json:"prompt,omitzero"`
-	Twins     []EnvironmentTemplateTwinResponse         `json:"twins"`
-	CreatedAt time.Time                                 `json:"created_at"`
+	ID        string                            `json:"id"`
+	Name      string                            `json:"name"`
+	Twins     []EnvironmentTemplateTwinResponse `json:"twins"`
+	CreatedAt time.Time                         `json:"created_at"`
 }
 
 func (e EnvironmentTemplateResponse) MarshalJSON() ([]byte, error) {
@@ -39,13 +37,6 @@ func (e *EnvironmentTemplateResponse) GetName() string {
 		return ""
 	}
 	return e.Name
-}
-
-func (e *EnvironmentTemplateResponse) GetPrompt() optionalnullable.OptionalNullable[string] {
-	if e == nil {
-		return nil
-	}
-	return e.Prompt
 }
 
 func (e *EnvironmentTemplateResponse) GetTwins() []EnvironmentTemplateTwinResponse {

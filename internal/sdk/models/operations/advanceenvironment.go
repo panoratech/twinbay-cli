@@ -8,23 +8,15 @@ import (
 )
 
 type AdvanceEnvironmentRequest struct {
-	EnvironmentID     string                               `pathParam:"style=simple,explode=false,name=environment_id"`
-	EnvironmentTwinID string                               `pathParam:"style=simple,explode=false,name=environment_twin_id"`
-	Body              components.AdvanceEnvironmentRequest `request:"mediaType=application/json"`
+	TwinID string                               `pathParam:"style=simple,explode=false,name=twin_id"`
+	Body   components.AdvanceEnvironmentRequest `request:"mediaType=application/json"`
 }
 
-func (a *AdvanceEnvironmentRequest) GetEnvironmentID() string {
+func (a *AdvanceEnvironmentRequest) GetTwinID() string {
 	if a == nil {
 		return ""
 	}
-	return a.EnvironmentID
-}
-
-func (a *AdvanceEnvironmentRequest) GetEnvironmentTwinID() string {
-	if a == nil {
-		return ""
-	}
-	return a.EnvironmentTwinID
+	return a.TwinID
 }
 
 func (a *AdvanceEnvironmentRequest) GetBody() components.AdvanceEnvironmentRequest {

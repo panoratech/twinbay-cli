@@ -14,7 +14,8 @@ import (
 )
 
 var retrieveCmdMeta = []flagutil.FlagMeta{
-	{FlagName: "twin-slug", Shorthand: "t", FieldPath: "TwinSlug", Kind: flagutil.FlagKindString, Required: true, Description: "[required]"},
+	{FlagName: "twin-id", Shorthand: "t", FieldPath: "TwinID", Kind: flagutil.FlagKindString, Required: true, Description: "[required]"},
+	{FlagName: "wait-for", Shorthand: "w", FieldPath: "WaitFor", Kind: flagutil.FlagKindJSON, Optional: true, Annotations: `queryParam:"style=form,explode=true,name=wait_for"`, Description: "options: ready, stopped"},
 }
 
 // initRetrieveCmd initializes the retrieve command.
@@ -22,16 +23,16 @@ func initRetrieveCmd(parent *cobra.Command) error {
 	var cmd = &cobra.Command{
 		Use:     "retrieve",
 		Short:   "Retrieve a twin",
-		Long:    "Retrieve a twin",
-		Example: "  twinbay twins retrieve --twin-slug <value>",
+		Long:    "With `wait_for`, the answer is held until the twin reaches that state, a run of it settles, or the wait runs out — so a caller waiting for a twin to serve sends one request rather than polling.",
+		Example: "  twinbay twins retrieve --twin-id 976bd5dd-5c1a-4781-9b8f-3e0e0de5753c",
 		Args:    cobra.NoArgs,
 		RunE:    runRetrieveCmd,
 		Annotations: map[string]string{
-			"speakeasy_operation": "get_twin",
+			"speakeasy_operation": "get_environment_twin",
 		},
 	}
 	flagutil.RegisterFlags(cmd, retrieveCmdMeta)
-	if err := flagutil.ValidateMeta[operations.GetTwinRequest](retrieveCmdMeta); err != nil {
+	if err := flagutil.ValidateMeta[operations.GetEnvironmentTwinRequest](retrieveCmdMeta); err != nil {
 		return fmt.Errorf("invalid metadata for retrieve: %w", err)
 	}
 	parent.AddCommand(cmd)
@@ -43,7 +44,7 @@ func runRetrieveCmd(cmd *cobra.Command, args []string) error {
 	if usage.UsageRequested(cmd) {
 		return usage.EmitSchema(cmd, cmd.OutOrStdout())
 	}
-	req, err := flagutil.BuildRequest[operations.GetTwinRequest](cmd, retrieveCmdMeta, "", "")
+	req, err := flagutil.BuildRequest[operations.GetEnvironmentTwinRequest](cmd, retrieveCmdMeta, "", "")
 	if err != nil {
 		return flagutil.WithCLIValidation(err)
 	}

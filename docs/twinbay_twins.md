@@ -1,10 +1,10 @@
 ## twinbay twins
 
-Browse the digital twins available for new environments
+Manage provisioned twins by their IDs
 
 ### Synopsis
 
-Browse the digital twins available for new environments.
+Manage provisioned twins by their IDs.
 
 ```
 twinbay twins [flags]
@@ -40,7 +40,10 @@ twinbay twins [flags]
 ### SEE ALSO
 
 * [twinbay](twinbay.md)	 - Twinbay: Backend API
-* [twinbay twins list](twinbay_twins_list.md)	 - List available twins
+* [twinbay twins advance](twinbay_twins_advance.md)	 - Advance a deterministic twin lifecycle
+* [twinbay twins collect-credential](twinbay_twins_collect-credential.md)	 - Collect the twin's API key
 * [twinbay twins retrieve](twinbay_twins_retrieve.md)	 - Retrieve a twin
+* [twinbay twins start](twinbay_twins_start.md)	 - Start a twin
+* [twinbay twins stop](twinbay_twins_stop.md)	 - Stop a twin
 
 Exit codes: 0 ok · 1 runtime · 2 usage · 3 authentication/authorization

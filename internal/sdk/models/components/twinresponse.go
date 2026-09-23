@@ -3,11 +3,10 @@
 package components
 
 type TwinResponse struct {
-	Slug        string             `json:"slug"`
-	Name        string             `json:"name"`
-	Description string             `json:"description"`
-	Version     string             `json:"version"`
-	Scenarios   []ScenarioResponse `json:"scenarios"`
+	Slug        string `json:"slug"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Version     string `json:"version"`
 }
 
 func (t *TwinResponse) GetSlug() string {
@@ -36,11 +35,4 @@ func (t *TwinResponse) GetVersion() string {
 		return ""
 	}
 	return t.Version
-}
-
-func (t *TwinResponse) GetScenarios() []ScenarioResponse {
-	if t == nil {
-		return []ScenarioResponse{}
-	}
-	return t.Scenarios
 }

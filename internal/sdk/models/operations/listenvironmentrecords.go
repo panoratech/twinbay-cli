@@ -8,23 +8,15 @@ import (
 )
 
 type ListEnvironmentRecordsRequest struct {
-	EnvironmentID     string `pathParam:"style=simple,explode=false,name=environment_id"`
-	EnvironmentTwinID string `pathParam:"style=simple,explode=false,name=environment_twin_id"`
-	Resource          string `pathParam:"style=simple,explode=false,name=resource"`
+	TwinID   string `pathParam:"style=simple,explode=false,name=twin_id"`
+	Resource string `pathParam:"style=simple,explode=false,name=resource"`
 }
 
-func (l *ListEnvironmentRecordsRequest) GetEnvironmentID() string {
+func (l *ListEnvironmentRecordsRequest) GetTwinID() string {
 	if l == nil {
 		return ""
 	}
-	return l.EnvironmentID
-}
-
-func (l *ListEnvironmentRecordsRequest) GetEnvironmentTwinID() string {
-	if l == nil {
-		return ""
-	}
-	return l.EnvironmentTwinID
+	return l.TwinID
 }
 
 func (l *ListEnvironmentRecordsRequest) GetResource() string {

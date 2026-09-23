@@ -36,16 +36,17 @@ twinbay [flags]
 
 * [twinbay api-keys](twinbay_api-keys.md)	 - Long-lived credentials for callers that cannot hold an AuthKit session — agents, SDKs, CI
 * [twinbay auth](twinbay_auth.md)	 - Manage authentication credentials
+* [twinbay catalog](twinbay_catalog.md)	 - Browse the digital twins available for new environments
 * [twinbay configure](twinbay_configure.md)	 - Configure authentication credentials and preferences
 * [twinbay environment-exports](twinbay_environment-exports.md)	 - Operations for environment-exports
 * [twinbay environment-logs](twinbay_environment-logs.md)	 - Operations for environment-logs
-* [twinbay environment-records](twinbay_environment-records.md)	 - Operations for environment-records
 * [twinbay environment-templates](twinbay_environment-templates.md)	 - Operations for environment-templates
-* [twinbay environment-twins](twinbay_environment-twins.md)	 - Operations for environment-twins
 * [twinbay environments](twinbay_environments.md)	 - Create and edit isolated provider environments
 * [twinbay explore](twinbay_explore.md)	 - Interactively browse and run commands
 * [twinbay organizations](twinbay_organizations.md)	 - Organizations the caller belongs to
-* [twinbay twins](twinbay_twins.md)	 - Browse the digital twins available for new environments
+* [twinbay seeds](twinbay_seeds.md)	 - Starting states for a twin
+* [twinbay twin-records](twinbay_twin-records.md)	 - Operations for twin-records
+* [twinbay twins](twinbay_twins.md)	 - Manage provisioned twins by their IDs
 * [twinbay users](twinbay_users.md)	 - The current user
 * [twinbay version](twinbay_version.md)	 - Print the CLI version
 * [twinbay whoami](twinbay_whoami.md)	 - Display current authentication configuration

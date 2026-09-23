@@ -126,7 +126,7 @@ This CLI is built to be driven by AI coding agents as well as people: everything
 |-----|---------|
 | `twinbay --help`, `twinbay environment-templates list --help` | Commands by category, runnable examples, flags |
 | `twinbay --usage`, `twinbay environment-templates list --usage` | The command surface as machine-readable [KDL](https://kdl.dev): commands, aliases, flags, defaults, env vars, config keys |
-| `twinbay api-keys create --schema` | The exact JSON Schema of the command's request body (all `$ref`s bundled) — build a valid `--body` from it |
+| `twinbay environments create --schema` | The exact JSON Schema of the command's request body (all `$ref`s bundled) — build a valid `--body` from it |
 | `twinbay environment-templates list --dry-run` | The exact HTTP request (method, URL, headers, body), with no credentials or network call |
 | `twinbay environment-templates list --output-format json` (or `--jq`) | Machine-readable output |
 
@@ -146,7 +146,7 @@ twinbay environment-templates list --usage
 
 ```bash
 # JSON Schema (draft 2020-12) of the request body, with every $ref bundled under $defs
-twinbay api-keys create --schema
+twinbay environments create --schema
 ```
 
 ### Probe before you spend
@@ -283,25 +283,31 @@ Configuration is stored in `~/.config/twinbay/config.yaml`.
   * [`create`](docs/twinbay_api-keys_create.md) - Create an API key
   * [`list`](docs/twinbay_api-keys_list.md) - List API keys
   * [`revoke`](docs/twinbay_api-keys_revoke.md) - Revoke an API key
-* [`twins`](docs/twinbay_twins.md) - Browse the digital twins available for new environments
-  * [`list`](docs/twinbay_twins_list.md) - List available twins
-  * [`retrieve`](docs/twinbay_twins_retrieve.md) - Retrieve a twin
+* [`catalog`](docs/twinbay_catalog.md) - Browse the digital twins available for new environments
+  * [`list`](docs/twinbay_catalog_list.md) - List available twins
+  * [`retrieve`](docs/twinbay_catalog_retrieve.md) - Retrieve a twin
 * [`environments`](docs/twinbay_environments.md) - Create and edit isolated provider environments
   * [`list`](docs/twinbay_environments_list.md) - List environments
   * [`create`](docs/twinbay_environments_create.md) - Create an environment
   * [`retrieve`](docs/twinbay_environments_retrieve.md) - Retrieve an environment
-* [`environment-twins`](docs/twinbay_environment-twins.md) - Operations for environment-twins
-  * [`retrieve`](docs/twinbay_environment-twins_retrieve.md) - Retrieve an environment twin
-  * [`start`](docs/twinbay_environment-twins_start.md) - Start an environment twin
-  * [`stop`](docs/twinbay_environment-twins_stop.md) - Stop an environment twin
-  * [`collect-credential`](docs/twinbay_environment-twins_collect-credential.md) - Collect the twin's API key
-  * [`advance`](docs/twinbay_environment-twins_advance.md) - Advance a deterministic twin lifecycle
-* [`environment-records`](docs/twinbay_environment-records.md) - Operations for environment-records
-  * [`list`](docs/twinbay_environment-records_list.md) - List environment twin state
-  * [`update`](docs/twinbay_environment-records_update.md) - Replace an environment twin record
+* [`twins`](docs/twinbay_twins.md) - Manage provisioned twins by their IDs
+  * [`retrieve`](docs/twinbay_twins_retrieve.md) - Retrieve a twin
+  * [`start`](docs/twinbay_twins_start.md) - Start a twin
+  * [`stop`](docs/twinbay_twins_stop.md) - Stop a twin
+  * [`collect-credential`](docs/twinbay_twins_collect-credential.md) - Collect the twin's API key
+  * [`advance`](docs/twinbay_twins_advance.md) - Advance a deterministic twin lifecycle
+* [`twin-records`](docs/twinbay_twin-records.md) - Operations for twin-records
+  * [`list`](docs/twinbay_twin-records_list.md) - List twin state
+  * [`update`](docs/twinbay_twin-records_update.md) - Replace a twin record
 * [`environment-templates`](docs/twinbay_environment-templates.md) - Operations for environment-templates
   * [`list`](docs/twinbay_environment-templates_list.md) - List environment templates
   * [`delete`](docs/twinbay_environment-templates_delete.md) - Delete an environment template
+* [`seeds`](docs/twinbay_seeds.md) - Starting states for a twin
+  * [`create`](docs/twinbay_seeds_create.md) - Generate a seed
+  * [`list`](docs/twinbay_seeds_list.md) - List seeds
+  * [`list-suggestions`](docs/twinbay_seeds_list-suggestions.md) - List suggested starting states
+  * [`retrieve`](docs/twinbay_seeds_retrieve.md) - Retrieve a seed
+  * [`delete`](docs/twinbay_seeds_delete.md) - Delete a seed
 * [`environment-logs`](docs/twinbay_environment-logs.md) - Operations for environment-logs
   * [`list`](docs/twinbay_environment-logs_list.md) - List recent environment request logs
   * [`retrieve`](docs/twinbay_environment-logs_retrieve.md) - Retrieve an environment request log
@@ -317,7 +323,65 @@ Configuration is stored in `~/.config/twinbay/config.yaml`.
 <!-- Start Request Body Input [stdinpiping] -->
 ## Request Body Input
 
-Commands that accept a request body take it three ways, with a clear priority chain: individual field flags (highest priority), the whole body as JSON via `--body`, and JSON piped on stdin (lowest priority). Later sources never override earlier ones; a body-bearing command prints its exact request schema with `--schema`.
+Commands that accept a request body take it three ways, with a clear priority chain. The examples use `twinbay environments create`; every body-bearing command works the same way and prints its exact request schema with `--schema`.
+
+### Individual flags (highest priority)
+
+Each top-level body field is a flag:
+
+```bash
+twinbay environments create --save-as-template=false
+```
+
+### `--body` flag
+
+Provide the entire request body as a JSON string:
+
+```bash
+twinbay environments create --body '{"save_as_template":false}'
+```
+
+Individual flags override `--body` values:
+
+```bash
+# Sends {"save_as_template":true}
+twinbay environments create --body '{"save_as_template":false}' --save-as-template=true
+```
+
+### Stdin piping (lowest priority)
+
+Pipe JSON into any command that accepts a request body:
+
+```bash
+echo '{"save_as_template":false}' | twinbay environments create
+```
+
+Individual flags override stdin values:
+
+```bash
+# Sends {"save_as_template":true}
+echo '{"save_as_template":false}' | twinbay environments create --save-as-template=true
+```
+
+This is useful for chaining commands, reading from files, or scripting:
+
+```bash
+# Read body from a file
+twinbay environments create < request.json
+
+# Pipe from another command
+curl -s https://example.com/request.json | twinbay environments create
+```
+
+### Priority
+
+When multiple input methods are used, the priority is:
+
+| Priority | Source | Description |
+|----------|--------|-------------|
+| 1 (highest) | Individual flags | `--save-as-template ...` always wins |
+| 2 | `--body` flag | Whole-body JSON via flag |
+| 3 (lowest) | Stdin | Piped JSON input |
 <!-- End Request Body Input [stdinpiping] -->
 
 <!-- Start Server Selection [server] -->

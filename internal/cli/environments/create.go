@@ -15,10 +15,9 @@ import (
 )
 
 var createCmdMeta = []flagutil.FlagMeta{
-	{FlagName: "name", Shorthand: "n", FieldPath: "Name", Kind: flagutil.FlagKindString, Required: true, MinLength: 1, Description: "Display name of the new environment [required]"},
-	{FlagName: "prompt", Shorthand: "p", FieldPath: "Prompt", Kind: flagutil.FlagKindJSON, Optional: true, Annotations: `json:"prompt,omitempty"`, Description: "A natural-language description of the scenario the whole environment represents. Every twin in it is seeded from this description while it is being provisioned."},
-	{FlagName: "twins", FieldPath: "Twins", Kind: flagutil.FlagKindJSON, Optional: true, Annotations: `json:"twins,omitempty"`, Description: "Provider twins to provision in the environment. Omitted when the environment is started from a template, which holds them already."},
-	{FlagName: "template", FieldPath: "Template", Kind: flagutil.FlagKindJSON, Optional: true, Annotations: `json:"template,omitempty"`, Description: "A saved environment definition to start from, instead of listing twins. Its twins, their curated scenarios and their instructions are used as they were saved."},
+	{FlagName: "name", Shorthand: "n", FieldPath: "Name", Kind: flagutil.FlagKindString, Optional: true, MinLength: 1, Description: "Display name of the new environment. Generated when omitted."},
+	{FlagName: "twins", FieldPath: "Twins", Kind: flagutil.FlagKindJSON, Optional: true, Annotations: `json:"twins,omitempty"`, Description: "Provider twins to provision, as slugs or objects with an optional seed. Omitted when a template supplies the twins."},
+	{FlagName: "template", FieldPath: "Template", Kind: flagutil.FlagKindJSON, Optional: true, Annotations: `json:"template,omitempty"`, Description: "A saved environment definition to start from, instead of listing twins. Its twins are used as they were saved."},
 	{FlagName: "save-as-template", Shorthand: "s", FieldPath: "SaveAsTemplate", Kind: flagutil.FlagKindBool, Optional: true, HasDefault: true, Description: "Also save this environment's definition, so another environment can be started from it later."},
 }
 
@@ -28,7 +27,7 @@ func initCreateCmd(parent *cobra.Command) error {
 		Use:     "create",
 		Short:   "Create an environment",
 		Long:    "Records the environment and queues each twin for provisioning. The twins are not serving yet: read each one with `wait_for=ready`, then collect its API key.",
-		Example: "  twinbay environments create --name <value>",
+		Example: "  twinbay environments create",
 		Args:    cobra.NoArgs,
 		RunE:    runCreateCmd,
 		Annotations: map[string]string{
