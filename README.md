@@ -302,6 +302,12 @@ Configuration is stored in `~/.config/twinbay/config.yaml`.
 * [`environment-templates`](docs/twinbay_environment-templates.md) - Operations for environment-templates
   * [`list`](docs/twinbay_environment-templates_list.md) - List environment templates
   * [`delete`](docs/twinbay_environment-templates_delete.md) - Delete an environment template
+* [`seeds`](docs/twinbay_seeds.md) - Starting states for a twin
+  * [`create`](docs/twinbay_seeds_create.md) - Generate a seed
+  * [`list`](docs/twinbay_seeds_list.md) - List seeds
+  * [`list-suggestions`](docs/twinbay_seeds_list-suggestions.md) - List suggested starting states
+  * [`retrieve`](docs/twinbay_seeds_retrieve.md) - Retrieve a seed
+  * [`delete`](docs/twinbay_seeds_delete.md) - Delete a seed
 * [`environment-logs`](docs/twinbay_environment-logs.md) - Operations for environment-logs
   * [`list`](docs/twinbay_environment-logs_list.md) - List recent environment request logs
   * [`retrieve`](docs/twinbay_environment-logs_retrieve.md) - Retrieve an environment request log

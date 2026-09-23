@@ -10,11 +10,9 @@ import (
 type CreateEnvironmentRequest struct {
 	// Display name of the new environment
 	Name string `json:"name"`
-	// A natural-language description of the scenario the whole environment represents. Every twin in it is seeded from this description while it is being provisioned.
-	Prompt optionalnullable.OptionalNullable[string] `json:"prompt,omitzero"`
 	// Provider twins to provision in the environment. Omitted when the environment is started from a template, which holds them already.
 	Twins optionalnullable.OptionalNullable[[]CreateEnvironmentTwinRequest] `json:"twins,omitzero"`
-	// A saved environment definition to start from, instead of listing twins. Its twins, their curated scenarios and their instructions are used as they were saved.
+	// A saved environment definition to start from, instead of listing twins. Its twins are used as they were saved.
 	Template optionalnullable.OptionalNullable[string] `json:"template,omitzero"`
 	// Also save this environment's definition, so another environment can be started from it later.
 	SaveAsTemplate *bool `default:"false" json:"save_as_template"`
@@ -36,13 +34,6 @@ func (c *CreateEnvironmentRequest) GetName() string {
 		return ""
 	}
 	return c.Name
-}
-
-func (c *CreateEnvironmentRequest) GetPrompt() optionalnullable.OptionalNullable[string] {
-	if c == nil {
-		return nil
-	}
-	return c.Prompt
 }
 
 func (c *CreateEnvironmentRequest) GetTwins() optionalnullable.OptionalNullable[[]CreateEnvironmentTwinRequest] {

@@ -4,7 +4,7 @@ Collect the twin's API key
 
 ### Synopsis
 
-Returns the key once. A second call is refused.
+Returns the key the twin's current container minted.
 
 ```
 twinbay environment-twins collect-credential [flags]

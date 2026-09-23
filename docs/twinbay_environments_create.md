@@ -22,10 +22,9 @@ twinbay environments create [flags]
       --body string        Request body as JSON (alternative to individual flags). Can also be provided via stdin; @path reads a file, @- reads stdin to EOF. Use --schema to print the exact JSON Schema.
   -h, --help               help for create
   -n, --name string        Display name of the new environment [required]
-  -p, --prompt string      A natural-language description of the scenario the whole environment represents. Every twin in it is seeded from this description while it is being provisioned.
   -s, --save-as-template   Also save this environment's definition, so another environment can be started from it later.
       --schema             Print the exact JSON Schema of the request body and exit
-      --template string    A saved environment definition to start from, instead of listing twins. Its twins, their curated scenarios and their instructions are used as they were saved.
+      --template string    A saved environment definition to start from, instead of listing twins. Its twins are used as they were saved.
       --twins string       Provider twins to provision in the environment. Omitted when the environment is started from a template, which holds them already.
 ```
 

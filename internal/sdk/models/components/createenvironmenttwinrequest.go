@@ -9,10 +9,8 @@ import (
 type CreateEnvironmentTwinRequest struct {
 	// Slug of the twin to serve
 	Twin string `json:"twin"`
-	// A curated scenario offered by the selected twin.
-	ScenarioTemplate optionalnullable.OptionalNullable[string] `json:"scenario_template,omitzero"`
-	// What this twin adds to the environment's instruction, for a provider that needs a note of its own. It is appended to the environment instruction rather than replacing it.
-	Prompt optionalnullable.OptionalNullable[string] `json:"prompt,omitzero"`
+	// A generated starting state to load into this twin, by `seeds.id`. Omitted starts the twin with its own state and nothing else.
+	Seed optionalnullable.OptionalNullable[string] `json:"seed,omitzero"`
 }
 
 func (c *CreateEnvironmentTwinRequest) GetTwin() string {
@@ -22,16 +20,9 @@ func (c *CreateEnvironmentTwinRequest) GetTwin() string {
 	return c.Twin
 }
 
-func (c *CreateEnvironmentTwinRequest) GetScenarioTemplate() optionalnullable.OptionalNullable[string] {
+func (c *CreateEnvironmentTwinRequest) GetSeed() optionalnullable.OptionalNullable[string] {
 	if c == nil {
 		return nil
 	}
-	return c.ScenarioTemplate
-}
-
-func (c *CreateEnvironmentTwinRequest) GetPrompt() optionalnullable.OptionalNullable[string] {
-	if c == nil {
-		return nil
-	}
-	return c.Prompt
+	return c.Seed
 }

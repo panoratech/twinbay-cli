@@ -13,6 +13,7 @@ import (
 	"github.com/panoratech/twinbay-cli/internal/cli/environmenttemplates"
 	"github.com/panoratech/twinbay-cli/internal/cli/environmenttwins"
 	"github.com/panoratech/twinbay-cli/internal/cli/organizations"
+	"github.com/panoratech/twinbay-cli/internal/cli/seeds"
 	"github.com/panoratech/twinbay-cli/internal/cli/twins"
 	"github.com/panoratech/twinbay-cli/internal/cli/users"
 	"github.com/panoratech/twinbay-cli/internal/clierrors"
@@ -89,6 +90,9 @@ func NewRootCommand() (*cobra.Command, error) {
 	}
 	if err := environmenttemplates.InitEnvironmentTemplatesRoot(rootCmd); err != nil {
 		return nil, fmt.Errorf("init environment-templates: %w", err)
+	}
+	if err := seeds.InitSeedsRoot(rootCmd); err != nil {
+		return nil, fmt.Errorf("init seeds: %w", err)
 	}
 	if err := environmentlogs.InitEnvironmentLogsRoot(rootCmd); err != nil {
 		return nil, fmt.Errorf("init environment-logs: %w", err)

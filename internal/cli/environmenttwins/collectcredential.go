@@ -23,7 +23,7 @@ func initCollectCredentialCmd(parent *cobra.Command) error {
 	var cmd = &cobra.Command{
 		Use:     "collect-credential",
 		Short:   "Collect the twin's API key",
-		Long:    "Returns the key once. A second call is refused.",
+		Long:    "Returns the key the twin's current container minted.",
 		Example: "  twinbay environment-twins collect-credential --environment-id 82039d56-bcef-4032-8747-2d336ff541c0 --environment-twin-id 239718c7-8988-47de-99fd-f55463367d54",
 		Args:    cobra.NoArgs,
 		RunE:    runCollectCredentialCmd,
