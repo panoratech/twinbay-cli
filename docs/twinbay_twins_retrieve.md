@@ -4,7 +4,7 @@ Retrieve a twin
 
 ### Synopsis
 
-Retrieve a twin
+With `wait_for`, the answer is held until the twin reaches that state, a run of it settles, or the wait runs out — so a caller waiting for a twin to serve sends one request rather than polling.
 
 ```
 twinbay twins retrieve [flags]
@@ -13,14 +13,15 @@ twinbay twins retrieve [flags]
 ### Examples
 
 ```
-  twinbay twins retrieve --twin-slug <value>
+  twinbay twins retrieve --twin-id 976bd5dd-5c1a-4781-9b8f-3e0e0de5753c
 ```
 
 ### Options
 
 ```
-  -h, --help               help for retrieve
-  -t, --twin-slug string   [required]
+  -h, --help              help for retrieve
+  -t, --twin-id string    [required]
+  -w, --wait-for string   options: ready, stopped
 ```
 
 ### Options inherited from parent commands
@@ -46,7 +47,7 @@ twinbay twins retrieve [flags]
 
 ### SEE ALSO
 
-* [twinbay twins](twinbay_twins.md)	 - Browse the digital twins available for new environments
+* [twinbay twins](twinbay_twins.md)	 - Manage provisioned twins by their IDs
 
 ### Machine interface
 

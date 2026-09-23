@@ -8,22 +8,14 @@ import (
 )
 
 type StartEnvironmentTwinRequest struct {
-	EnvironmentID     string `pathParam:"style=simple,explode=false,name=environment_id"`
-	EnvironmentTwinID string `pathParam:"style=simple,explode=false,name=environment_twin_id"`
+	TwinID string `pathParam:"style=simple,explode=false,name=twin_id"`
 }
 
-func (s *StartEnvironmentTwinRequest) GetEnvironmentID() string {
+func (s *StartEnvironmentTwinRequest) GetTwinID() string {
 	if s == nil {
 		return ""
 	}
-	return s.EnvironmentID
-}
-
-func (s *StartEnvironmentTwinRequest) GetEnvironmentTwinID() string {
-	if s == nil {
-		return ""
-	}
-	return s.EnvironmentTwinID
+	return s.TwinID
 }
 
 type StartEnvironmentTwinResponse struct {

@@ -286,10 +286,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /twins:
+  /twins/catalog:
     get:
       tags:
-        - "twins"
+        - "catalog"
       summary: "List available twins"
       description: "Returns the registered code twins ordered by display name."
       operationId: "list_twins"
@@ -330,10 +330,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /twins/{twin_slug}:
+      x-speakeasy-group: "catalog"
+      x-speakeasy-name-override: "list"
+  /twins/catalog/{twin_slug}:
     get:
       tags:
-        - "twins"
+        - "catalog"
       summary: "Retrieve a twin"
       operationId: "get_twin"
       security:
@@ -364,6 +366,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
+      x-speakeasy-group: "catalog"
       x-speakeasy-name-override: "retrieve"
   /environments:
     get:
@@ -454,30 +457,23 @@ paths:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
       x-speakeasy-name-override: "retrieve"
-  /environments/{environment_id}/twins/{environment_twin_id}:
+  /twins/{twin_id}:
     get:
       tags:
-        - "environments"
-      summary: "Retrieve an environment twin"
+        - "twins"
+      summary: "Retrieve a twin"
       description: "With `wait_for`, the answer is held until the twin reaches that state, a run of it settles, or the wait runs out — so a caller waiting for a twin to serve sends one request rather than polling."
       operationId: "get_environment_twin"
       security:
         - Organization API key: []
       parameters:
-        - name: "environment_id"
+        - name: "twin_id"
           in: "path"
           required: true
           schema:
             type: "string"
             format: "uuid"
-            title: "Environment Id"
-        - name: "environment_twin_id"
-          in: "path"
-          required: true
-          schema:
-            type: "string"
-            format: "uuid"
-            title: "Environment Twin Id"
+            title: "Twin Id"
         - name: "wait_for"
           in: "query"
           required: false
@@ -506,32 +502,25 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-      x-speakeasy-group: "environment_twins"
+      x-speakeasy-group: "twins"
       x-speakeasy-name-override: "retrieve"
-  /environments/{environment_id}/twins/{environment_twin_id}/start:
+  /twins/{twin_id}/start:
     post:
       tags:
-        - "environments"
-      summary: "Start an environment twin"
+        - "twins"
+      summary: "Start a twin"
       description: "Queues a fresh container. Its state and credentials are new."
       operationId: "start_environment_twin"
       security:
         - Organization API key: []
       parameters:
-        - name: "environment_id"
+        - name: "twin_id"
           in: "path"
           required: true
           schema:
             type: "string"
             format: "uuid"
-            title: "Environment Id"
-        - name: "environment_twin_id"
-          in: "path"
-          required: true
-          schema:
-            type: "string"
-            format: "uuid"
-            title: "Environment Twin Id"
+            title: "Twin Id"
       responses:
         "202":
           description: "Successful Response"
@@ -549,32 +538,25 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-      x-speakeasy-group: "environment_twins"
+      x-speakeasy-group: "twins"
       x-speakeasy-name-override: "start"
-  /environments/{environment_id}/twins/{environment_twin_id}/stop:
+  /twins/{twin_id}/stop:
     post:
       tags:
-        - "environments"
-      summary: "Stop an environment twin"
+        - "twins"
+      summary: "Stop a twin"
       description: "Queues the container for destruction. Everything it holds is lost."
       operationId: "stop_environment_twin"
       security:
         - Organization API key: []
       parameters:
-        - name: "environment_id"
+        - name: "twin_id"
           in: "path"
           required: true
           schema:
             type: "string"
             format: "uuid"
-            title: "Environment Id"
-        - name: "environment_twin_id"
-          in: "path"
-          required: true
-          schema:
-            type: "string"
-            format: "uuid"
-            title: "Environment Twin Id"
+            title: "Twin Id"
       responses:
         "202":
           description: "Successful Response"
@@ -592,32 +574,25 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-      x-speakeasy-group: "environment_twins"
+      x-speakeasy-group: "twins"
       x-speakeasy-name-override: "stop"
-  /environments/{environment_id}/twins/{environment_twin_id}/credential:
+  /twins/{twin_id}/credential:
     post:
       tags:
-        - "environments"
+        - "twins"
       summary: "Collect the twin's API key"
-      description: "Returns the key once. A second call is refused."
+      description: "Returns the key the twin's current container minted."
       operationId: "collect_environment_twin_credential"
       security:
         - Organization API key: []
       parameters:
-        - name: "environment_id"
+        - name: "twin_id"
           in: "path"
           required: true
           schema:
             type: "string"
             format: "uuid"
-            title: "Environment Id"
-        - name: "environment_twin_id"
-          in: "path"
-          required: true
-          schema:
-            type: "string"
-            format: "uuid"
-            title: "Environment Twin Id"
+            title: "Twin Id"
       responses:
         "200":
           description: "Successful Response"
@@ -635,31 +610,24 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-      x-speakeasy-group: "environment_twins"
+      x-speakeasy-group: "twins"
       x-speakeasy-name-override: "collect_credential"
-  /environments/{environment_id}/twins/{environment_twin_id}/records/{resource}:
+  /twins/{twin_id}/records/{resource}:
     get:
       tags:
-        - "environments"
-      summary: "List environment twin state"
+        - "twins"
+      summary: "List twin state"
       operationId: "list_environment_records"
       security:
         - Organization API key: []
       parameters:
-        - name: "environment_id"
+        - name: "twin_id"
           in: "path"
           required: true
           schema:
             type: "string"
             format: "uuid"
-            title: "Environment Id"
-        - name: "environment_twin_id"
-          in: "path"
-          required: true
-          schema:
-            type: "string"
-            format: "uuid"
-            title: "Environment Twin Id"
+            title: "Twin Id"
         - name: "resource"
           in: "path"
           required: true
@@ -686,31 +654,24 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-      x-speakeasy-group: "environment_records"
+      x-speakeasy-group: "twin_records"
       x-speakeasy-name-override: "list"
-  /environments/{environment_id}/twins/{environment_twin_id}/records/{resource}/{external_id}:
+  /twins/{twin_id}/records/{resource}/{external_id}:
     put:
       tags:
-        - "environments"
-      summary: "Replace an environment twin record"
+        - "twins"
+      summary: "Replace a twin record"
       operationId: "update_environment_record"
       security:
         - Organization API key: []
       parameters:
-        - name: "environment_id"
+        - name: "twin_id"
           in: "path"
           required: true
           schema:
             type: "string"
             format: "uuid"
-            title: "Environment Id"
-        - name: "environment_twin_id"
-          in: "path"
-          required: true
-          schema:
-            type: "string"
-            format: "uuid"
-            title: "Environment Twin Id"
+            title: "Twin Id"
         - name: "resource"
           in: "path"
           required: true
@@ -746,31 +707,24 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-      x-speakeasy-group: "environment_records"
+      x-speakeasy-group: "twin_records"
       x-speakeasy-name-override: "update"
-  /environments/{environment_id}/twins/{environment_twin_id}/advance:
+  /twins/{twin_id}/advance:
     post:
       tags:
-        - "environments"
+        - "twins"
       summary: "Advance a deterministic twin lifecycle"
       operationId: "advance_environment"
       security:
         - Organization API key: []
       parameters:
-        - name: "environment_id"
+        - name: "twin_id"
           in: "path"
           required: true
           schema:
             type: "string"
             format: "uuid"
-            title: "Environment Id"
-        - name: "environment_twin_id"
-          in: "path"
-          required: true
-          schema:
-            type: "string"
-            format: "uuid"
-            title: "Environment Twin Id"
+            title: "Twin Id"
       requestBody:
         required: true
         content:
@@ -797,7 +751,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-      x-speakeasy-group: "environment_twins"
+      x-speakeasy-group: "twins"
       x-speakeasy-name-override: "advance"
   /environment-templates:
     get:
@@ -855,6 +809,189 @@ paths:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
       x-speakeasy-group: "environment_templates"
+      x-speakeasy-name-override: "delete"
+  /seeds:
+    post:
+      tags:
+        - "seeds"
+      summary: "Generate a seed"
+      description: "Describes the starting state you want and answers immediately; a worker expands it into rows. Read the seed until it is `ready`, then pass its id as a twin's `seed` when you create an environment."
+      operationId: "create_seed"
+      security:
+        - Organization API key: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSeedRequest"
+      responses:
+        "202":
+          description: "Successful Response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SeedResponse"
+        "401":
+          description: "The credential is missing, malformed, expired, or not trusted"
+        "403":
+          description: "The credential does not act inside an organization"
+        "404":
+          description: "Unknown twin"
+        "422":
+          description: "This twin cannot be seeded"
+        "503":
+          description: "Seed generation is not configured"
+      x-speakeasy-name-override: "create"
+    get:
+      tags:
+        - "seeds"
+      summary: "List seeds"
+      operationId: "list_seeds"
+      security:
+        - Organization API key: []
+      parameters:
+        - name: "twin"
+          in: "query"
+          required: false
+          schema:
+            anyOf:
+              - type: "string"
+              - type: "null"
+            description: "Only seeds for this twin's slug."
+            title: "Twin"
+          description: "Only seeds for this twin's slug."
+      responses:
+        "200":
+          description: "Successful Response"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/SeedResponse"
+                title: "Response List Seeds"
+        "401":
+          description: "The credential is missing, malformed, expired, or not trusted"
+        "403":
+          description: "The credential does not act inside an organization"
+        "422":
+          description: "Validation Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+      x-speakeasy-name-override: "list"
+  /seeds/suggestions:
+    get:
+      tags:
+        - "seeds"
+      summary: "List suggested starting states"
+      description: "Described states the product ships for each twin that can be seeded. Send one back as a seed's `prompt`, edited or as it stands."
+      operationId: "list_seed_suggestions"
+      security:
+        - Organization API key: []
+      parameters:
+        - name: "twin"
+          in: "query"
+          required: false
+          schema:
+            anyOf:
+              - type: "string"
+              - type: "null"
+            description: "Only suggestions for this twin's slug."
+            title: "Twin"
+          description: "Only suggestions for this twin's slug."
+      responses:
+        "200":
+          description: "Successful Response"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/SeedSuggestionResponse"
+                title: "Response List Seed Suggestions"
+        "401":
+          description: "The credential is missing, malformed, expired, or not trusted"
+        "403":
+          description: "The credential does not act inside an organization"
+        "422":
+          description: "Validation Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+      x-speakeasy-name-override: "list_suggestions"
+  /seeds/{seed_id}:
+    get:
+      tags:
+        - "seeds"
+      summary: "Retrieve a seed"
+      operationId: "get_seed"
+      security:
+        - Organization API key: []
+      parameters:
+        - name: "seed_id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+            title: "Seed Id"
+      responses:
+        "200":
+          description: "Successful Response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SeedResponse"
+        "401":
+          description: "The credential is missing, malformed, expired, or not trusted"
+        "403":
+          description: "The credential does not act inside an organization"
+        "404":
+          description: "Seed not found"
+        "422":
+          description: "Validation Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+      x-speakeasy-name-override: "retrieve"
+    delete:
+      tags:
+        - "seeds"
+      summary: "Delete a seed"
+      description: "Refused while an environment or a template still uses it."
+      operationId: "delete_seed"
+      security:
+        - Organization API key: []
+      parameters:
+        - name: "seed_id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+            title: "Seed Id"
+      responses:
+        "204":
+          description: "Successful Response"
+        "401":
+          description: "The credential is missing, malformed, expired, or not trusted"
+        "403":
+          description: "The credential does not act inside an organization"
+        "404":
+          description: "Seed not found"
+        "409":
+          description: "This seed is still in use"
+        "422":
+          description: "Validation Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
       x-speakeasy-name-override: "delete"
   /environments/{environment_id}/logs:
     get:
@@ -1263,32 +1400,28 @@ components:
           maxLength: 100
           minLength: 1
           title: "Name"
-          description: "Display name of the new environment"
-        prompt:
-          anyOf:
-            - type: "string"
-              maxLength: 4000
-              minLength: 1
-            - type: "null"
-          title: "Prompt"
-          description: "A natural-language description of the scenario the whole environment represents. Every twin in it is seeded from this description while it is being provisioned."
+          description: "Display name of the new environment. Generated when omitted."
         twins:
           anyOf:
             - items:
-                $ref: "#/components/schemas/CreateEnvironmentTwinRequest"
+                anyOf:
+                  - type: "string"
+                    maxLength: 100
+                    minLength: 1
+                  - $ref: "#/components/schemas/CreateEnvironmentTwinRequest"
               type: "array"
               maxItems: 25
               minItems: 1
             - type: "null"
           title: "Twins"
-          description: "Provider twins to provision in the environment. Omitted when the environment is started from a template, which holds them already."
+          description: "Provider twins to provision, as slugs or objects with an optional seed. Omitted when a template supplies the twins."
         template:
           anyOf:
             - type: "string"
               format: "uuid"
             - type: "null"
           title: "Template"
-          description: "A saved environment definition to start from, instead of listing twins. Its twins, their curated scenarios and their instructions are used as they were saved."
+          description: "A saved environment definition to start from, instead of listing twins. Its twins are used as they were saved."
         save_as_template:
           type: "boolean"
           title: "Save As Template"
@@ -1296,8 +1429,6 @@ components:
           default: false
       additionalProperties: false
       type: "object"
-      required:
-        - "name"
       title: "CreateEnvironmentRequest"
     CreateEnvironmentTwinRequest:
       properties:
@@ -1307,22 +1438,13 @@ components:
           minLength: 1
           title: "Twin"
           description: "Slug of the twin to serve"
-        scenario_template:
+        seed:
           anyOf:
             - type: "string"
-              maxLength: 100
-              minLength: 1
+              format: "uuid"
             - type: "null"
-          title: "Scenario Template"
-          description: "A curated scenario offered by the selected twin."
-        prompt:
-          anyOf:
-            - type: "string"
-              maxLength: 4000
-              minLength: 1
-            - type: "null"
-          title: "Prompt"
-          description: "What this twin adds to the environment's instruction, for a provider that needs a note of its own. It is appended to the environment instruction rather than replacing it."
+          title: "Seed"
+          description: "A generated starting state to load into this twin, by `seeds.id`. Omitted starts the twin with its own state and nothing else."
       additionalProperties: false
       type: "object"
       required:
@@ -1370,6 +1492,33 @@ components:
       required:
         - "name"
       title: "CreateOrganizationRequest"
+    CreateSeedRequest:
+      properties:
+        name:
+          type: "string"
+          maxLength: 100
+          minLength: 1
+          title: "Name"
+          description: "Display name of the seed"
+        twin:
+          type: "string"
+          maxLength: 100
+          minLength: 1
+          title: "Twin"
+          description: "Slug of the twin this seed is for"
+        prompt:
+          type: "string"
+          maxLength: 2000
+          minLength: 1
+          title: "Prompt"
+          description: "The starting state you want, in your own words. \"50 open tickets, half of them aging past 90 days.\""
+      additionalProperties: false
+      type: "object"
+      required:
+        - "name"
+        - "twin"
+        - "prompt"
+      title: "CreateSeedRequest"
     CreatedApiKeyResponse:
       properties:
         id:
@@ -1482,11 +1631,6 @@ components:
         name:
           type: "string"
           title: "Name"
-        prompt:
-          anyOf:
-            - type: "string"
-            - type: "null"
-          title: "Prompt"
         twins:
           items:
             $ref: "#/components/schemas/EnvironmentTemplateTwinResponse"
@@ -1508,16 +1652,12 @@ components:
         twin:
           type: "string"
           title: "Twin"
-        scenario_template:
+        seed:
           anyOf:
             - type: "string"
+              format: "uuid"
             - type: "null"
-          title: "Scenario Template"
-        prompt:
-          anyOf:
-            - type: "string"
-            - type: "null"
-          title: "Prompt"
+          title: "Seed"
       type: "object"
       required:
         - "twin"
@@ -1529,6 +1669,10 @@ components:
           type: "string"
           format: "uuid"
           title: "Id"
+        environment_id:
+          type: "string"
+          format: "uuid"
+          title: "Environment Id"
         twin_slug:
           type: "string"
           title: "Twin Slug"
@@ -1538,6 +1682,13 @@ components:
             - type: "null"
           title: "Twin Version"
           description: "The release the current container was started from."
+        seed:
+          anyOf:
+            - type: "string"
+              format: "uuid"
+            - type: "null"
+          title: "Seed"
+          description: "The starting state this twin was created with, if any."
         desired_state:
           type: "string"
           title: "Desired State"
@@ -1568,6 +1719,7 @@ components:
       type: "object"
       required:
         - "id"
+        - "environment_id"
         - "twin_slug"
         - "desired_state"
         - "state"
@@ -2016,23 +2168,86 @@ components:
         - "duration_ms"
         - "occurred_at"
       title: "RequestLogSummaryResponse"
-    ScenarioResponse:
+    SeedResponse:
       properties:
-        slug:
+        id:
           type: "string"
-          title: "Slug"
+          format: "uuid"
+          title: "Id"
         name:
           type: "string"
           title: "Name"
-        description:
+        twin:
           type: "string"
-          title: "Description"
+          title: "Twin"
+          description: "The twin this seed can be loaded into."
+        prompt:
+          type: "string"
+          title: "Prompt"
+          description: "The starting state this seed was asked for."
+        status:
+          type: "string"
+          title: "Status"
+          description: "pending, running, ready or failed"
+        failure:
+          anyOf:
+            - type: "string"
+            - type: "null"
+          title: "Failure"
+          description: "Why generation failed, if it did."
+        twin_version:
+          anyOf:
+            - type: "string"
+            - type: "null"
+          title: "Twin Version"
+          description: "The release this seed was generated against."
+        usable:
+          type: "boolean"
+          title: "Usable"
+          description: "Whether the twin's current release can still load this seed. False means the twin's storage changed since it was generated, so it has to be generated again."
+        size_bytes:
+          anyOf:
+            - type: "integer"
+            - type: "null"
+          title: "Size Bytes"
+        created_at:
+          type: "string"
+          format: "date-time"
+          title: "Created At"
+        completed_at:
+          anyOf:
+            - type: "string"
+              format: "date-time"
+            - type: "null"
+          title: "Completed At"
       type: "object"
       required:
-        - "slug"
+        - "id"
         - "name"
-        - "description"
-      title: "ScenarioResponse"
+        - "twin"
+        - "prompt"
+        - "status"
+        - "usable"
+        - "created_at"
+      title: "SeedResponse"
+    SeedSuggestionResponse:
+      properties:
+        twin:
+          type: "string"
+          title: "Twin"
+        name:
+          type: "string"
+          title: "Name"
+        prompt:
+          type: "string"
+          title: "Prompt"
+      type: "object"
+      required:
+        - "twin"
+        - "name"
+        - "prompt"
+      title: "SeedSuggestionResponse"
+      description: "A starting state the product suggests, as a name and a description to edit.\n\nBuilt-in starters are not a second mechanism: they are described states a\ncaller can send straight back to `POST /seeds`, so there is one store, one\napply path and no seed that belongs to nobody."
     TwinResponse:
       properties:
         slug:
@@ -2047,18 +2262,12 @@ components:
         version:
           type: "string"
           title: "Version"
-        scenarios:
-          items:
-            $ref: "#/components/schemas/ScenarioResponse"
-          type: "array"
-          title: "Scenarios"
       type: "object"
       required:
         - "slug"
         - "name"
         - "description"
         - "version"
-        - "scenarios"
       title: "TwinResponse"
     UpdateEnvironmentRecordRequest:
       properties:
@@ -2152,4 +2361,8 @@ tags:
   - name: "environments"
     description: "Create and edit isolated provider environments. Each environment contains behavioural twins from the `twins` package."
   - name: "twins"
+    description: "Manage provisioned twins by their IDs."
+  - name: "catalog"
     description: "Browse the digital twins available for new environments."
+  - name: "seeds"
+    description: "Starting states for a twin. Describe the data you want in your own words, and a worker expands it into rows once; pass the seed's id when you create an environment to start a twin holding it."

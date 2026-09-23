@@ -8,25 +8,17 @@ import (
 )
 
 type UpdateEnvironmentRecordRequest struct {
-	EnvironmentID     string                                    `pathParam:"style=simple,explode=false,name=environment_id"`
-	EnvironmentTwinID string                                    `pathParam:"style=simple,explode=false,name=environment_twin_id"`
-	Resource          string                                    `pathParam:"style=simple,explode=false,name=resource"`
-	ExternalID        string                                    `pathParam:"style=simple,explode=false,name=external_id"`
-	Body              components.UpdateEnvironmentRecordRequest `request:"mediaType=application/json"`
+	TwinID     string                                    `pathParam:"style=simple,explode=false,name=twin_id"`
+	Resource   string                                    `pathParam:"style=simple,explode=false,name=resource"`
+	ExternalID string                                    `pathParam:"style=simple,explode=false,name=external_id"`
+	Body       components.UpdateEnvironmentRecordRequest `request:"mediaType=application/json"`
 }
 
-func (u *UpdateEnvironmentRecordRequest) GetEnvironmentID() string {
+func (u *UpdateEnvironmentRecordRequest) GetTwinID() string {
 	if u == nil {
 		return ""
 	}
-	return u.EnvironmentID
-}
-
-func (u *UpdateEnvironmentRecordRequest) GetEnvironmentTwinID() string {
-	if u == nil {
-		return ""
-	}
-	return u.EnvironmentTwinID
+	return u.TwinID
 }
 
 func (u *UpdateEnvironmentRecordRequest) GetResource() string {

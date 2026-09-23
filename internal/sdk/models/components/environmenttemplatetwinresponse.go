@@ -8,9 +8,8 @@ import (
 
 // EnvironmentTemplateTwinResponse - A slot a template asks for, named as a create request names it.
 type EnvironmentTemplateTwinResponse struct {
-	Twin             string                                    `json:"twin"`
-	ScenarioTemplate optionalnullable.OptionalNullable[string] `json:"scenario_template,omitzero"`
-	Prompt           optionalnullable.OptionalNullable[string] `json:"prompt,omitzero"`
+	Twin string                                    `json:"twin"`
+	Seed optionalnullable.OptionalNullable[string] `json:"seed,omitzero"`
 }
 
 func (e *EnvironmentTemplateTwinResponse) GetTwin() string {
@@ -20,16 +19,9 @@ func (e *EnvironmentTemplateTwinResponse) GetTwin() string {
 	return e.Twin
 }
 
-func (e *EnvironmentTemplateTwinResponse) GetScenarioTemplate() optionalnullable.OptionalNullable[string] {
+func (e *EnvironmentTemplateTwinResponse) GetSeed() optionalnullable.OptionalNullable[string] {
 	if e == nil {
 		return nil
 	}
-	return e.ScenarioTemplate
-}
-
-func (e *EnvironmentTemplateTwinResponse) GetPrompt() optionalnullable.OptionalNullable[string] {
-	if e == nil {
-		return nil
-	}
-	return e.Prompt
+	return e.Seed
 }

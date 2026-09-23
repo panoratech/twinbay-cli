@@ -10,8 +10,8 @@ import (
 func InitTwinsRoot(parent *cobra.Command) error {
 	var TwinsCmd = &cobra.Command{
 		Use:         "twins",
-		Short:       "Browse the digital twins available for new environments",
-		Long:        "Browse the digital twins available for new environments.",
+		Short:       "Manage provisioned twins by their IDs",
+		Long:        "Manage provisioned twins by their IDs.",
 		Args:        cobra.NoArgs,
 		Annotations: map[string]string{"speakeasy_cli_group": "true"},
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -22,11 +22,23 @@ func InitTwinsRoot(parent *cobra.Command) error {
 		},
 	}
 
-	if err := initListTwinsCmd(TwinsCmd); err != nil {
+	if err := initRetrieveCmd(TwinsCmd); err != nil {
 		return err
 	}
 
-	if err := initRetrieveCmd(TwinsCmd); err != nil {
+	if err := initStartCmd(TwinsCmd); err != nil {
+		return err
+	}
+
+	if err := initStopCmd(TwinsCmd); err != nil {
+		return err
+	}
+
+	if err := initCollectCredentialCmd(TwinsCmd); err != nil {
+		return err
+	}
+
+	if err := initAdvanceCmd(TwinsCmd); err != nil {
 		return err
 	}
 

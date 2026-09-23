@@ -6,13 +6,14 @@ import (
 	"context"
 	"fmt"
 	"github.com/panoratech/twinbay-cli/internal/cli/apikeys"
+	"github.com/panoratech/twinbay-cli/internal/cli/catalog"
 	"github.com/panoratech/twinbay-cli/internal/cli/environmentexports"
 	"github.com/panoratech/twinbay-cli/internal/cli/environmentlogs"
-	"github.com/panoratech/twinbay-cli/internal/cli/environmentrecords"
 	"github.com/panoratech/twinbay-cli/internal/cli/environments"
 	"github.com/panoratech/twinbay-cli/internal/cli/environmenttemplates"
-	"github.com/panoratech/twinbay-cli/internal/cli/environmenttwins"
 	"github.com/panoratech/twinbay-cli/internal/cli/organizations"
+	"github.com/panoratech/twinbay-cli/internal/cli/seeds"
+	"github.com/panoratech/twinbay-cli/internal/cli/twinrecords"
 	"github.com/panoratech/twinbay-cli/internal/cli/twins"
 	"github.com/panoratech/twinbay-cli/internal/cli/users"
 	"github.com/panoratech/twinbay-cli/internal/clierrors"
@@ -75,20 +76,23 @@ func NewRootCommand() (*cobra.Command, error) {
 	if err := apikeys.InitApiKeysRoot(rootCmd); err != nil {
 		return nil, fmt.Errorf("init api-keys: %w", err)
 	}
-	if err := twins.InitTwinsRoot(rootCmd); err != nil {
-		return nil, fmt.Errorf("init twins: %w", err)
+	if err := catalog.InitCatalogRoot(rootCmd); err != nil {
+		return nil, fmt.Errorf("init catalog: %w", err)
 	}
 	if err := environments.InitEnvironmentsRoot(rootCmd); err != nil {
 		return nil, fmt.Errorf("init environments: %w", err)
 	}
-	if err := environmenttwins.InitEnvironmentTwinsRoot(rootCmd); err != nil {
-		return nil, fmt.Errorf("init environment-twins: %w", err)
+	if err := twins.InitTwinsRoot(rootCmd); err != nil {
+		return nil, fmt.Errorf("init twins: %w", err)
 	}
-	if err := environmentrecords.InitEnvironmentRecordsRoot(rootCmd); err != nil {
-		return nil, fmt.Errorf("init environment-records: %w", err)
+	if err := twinrecords.InitTwinRecordsRoot(rootCmd); err != nil {
+		return nil, fmt.Errorf("init twin-records: %w", err)
 	}
 	if err := environmenttemplates.InitEnvironmentTemplatesRoot(rootCmd); err != nil {
 		return nil, fmt.Errorf("init environment-templates: %w", err)
+	}
+	if err := seeds.InitSeedsRoot(rootCmd); err != nil {
+		return nil, fmt.Errorf("init seeds: %w", err)
 	}
 	if err := environmentlogs.InitEnvironmentLogsRoot(rootCmd); err != nil {
 		return nil, fmt.Errorf("init environment-logs: %w", err)

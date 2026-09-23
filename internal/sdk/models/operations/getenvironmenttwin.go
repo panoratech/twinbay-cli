@@ -37,23 +37,15 @@ func (e *WaitFor) UnmarshalJSON(data []byte) error {
 }
 
 type GetEnvironmentTwinRequest struct {
-	EnvironmentID     string                                     `pathParam:"style=simple,explode=false,name=environment_id"`
-	EnvironmentTwinID string                                     `pathParam:"style=simple,explode=false,name=environment_twin_id"`
-	WaitFor           optionalnullable.OptionalNullable[WaitFor] `queryParam:"style=form,explode=true,name=wait_for"`
+	TwinID  string                                     `pathParam:"style=simple,explode=false,name=twin_id"`
+	WaitFor optionalnullable.OptionalNullable[WaitFor] `queryParam:"style=form,explode=true,name=wait_for"`
 }
 
-func (g *GetEnvironmentTwinRequest) GetEnvironmentID() string {
+func (g *GetEnvironmentTwinRequest) GetTwinID() string {
 	if g == nil {
 		return ""
 	}
-	return g.EnvironmentID
-}
-
-func (g *GetEnvironmentTwinRequest) GetEnvironmentTwinID() string {
-	if g == nil {
-		return ""
-	}
-	return g.EnvironmentTwinID
+	return g.TwinID
 }
 
 func (g *GetEnvironmentTwinRequest) GetWaitFor() optionalnullable.OptionalNullable[WaitFor] {

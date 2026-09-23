@@ -9,10 +9,13 @@ import (
 )
 
 type EnvironmentTwinResponse struct {
-	ID       string `json:"id"`
-	TwinSlug string `json:"twin_slug"`
+	ID            string `json:"id"`
+	EnvironmentID string `json:"environment_id"`
+	TwinSlug      string `json:"twin_slug"`
 	// The release the current container was started from.
 	TwinVersion optionalnullable.OptionalNullable[string] `json:"twin_version,omitzero"`
+	// The starting state this twin was created with, if any.
+	Seed optionalnullable.OptionalNullable[string] `json:"seed,omitzero"`
 	// running or stopped
 	DesiredState string `json:"desired_state"`
 	// What the twin is actually doing: pending, provisioning, starting, ready, stopping, stopped or failed.
@@ -42,6 +45,13 @@ func (e *EnvironmentTwinResponse) GetID() string {
 	return e.ID
 }
 
+func (e *EnvironmentTwinResponse) GetEnvironmentID() string {
+	if e == nil {
+		return ""
+	}
+	return e.EnvironmentID
+}
+
 func (e *EnvironmentTwinResponse) GetTwinSlug() string {
 	if e == nil {
 		return ""
@@ -54,6 +64,13 @@ func (e *EnvironmentTwinResponse) GetTwinVersion() optionalnullable.OptionalNull
 		return nil
 	}
 	return e.TwinVersion
+}
+
+func (e *EnvironmentTwinResponse) GetSeed() optionalnullable.OptionalNullable[string] {
+	if e == nil {
+		return nil
+	}
+	return e.Seed
 }
 
 func (e *EnvironmentTwinResponse) GetDesiredState() string {
