@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/panoratech/twinbay-cli/internal/client"
 	"github.com/panoratech/twinbay-cli/internal/flagutil"
+	"github.com/panoratech/twinbay-cli/internal/interactive"
 	"github.com/panoratech/twinbay-cli/internal/output"
 	"github.com/panoratech/twinbay-cli/internal/sdk"
 	"github.com/panoratech/twinbay-cli/internal/sdk/models/operations"
@@ -21,11 +22,11 @@ var retrieveCmdMeta = []flagutil.FlagMeta{
 // initRetrieveCmd initializes the retrieve command.
 func initRetrieveCmd(parent *cobra.Command) error {
 	var cmd = &cobra.Command{
-		Use:     "retrieve",
+		Use:     "retrieve [twin-id]",
 		Short:   "Retrieve a twin",
 		Long:    "With `wait_for`, the answer is held until the twin reaches that state, a run of it settles, or the wait runs out — so a caller waiting for a twin to serve sends one request rather than polling.",
 		Example: "  twinbay twins retrieve --twin-id 976bd5dd-5c1a-4781-9b8f-3e0e0de5753c",
-		Args:    cobra.NoArgs,
+		Args:    flagutil.PositionalFlagArgs,
 		RunE:    runRetrieveCmd,
 		Annotations: map[string]string{
 			"speakeasy_operation": "get_environment_twin",
@@ -35,6 +36,14 @@ func initRetrieveCmd(parent *cobra.Command) error {
 	if err := flagutil.ValidateMeta[operations.GetEnvironmentTwinRequest](retrieveCmdMeta); err != nil {
 		return fmt.Errorf("invalid metadata for retrieve: %w", err)
 	}
+	if err := flagutil.DeclarePositionalFlag(cmd, "twin-id", "string value (or pass it as the [twin-id] argument)", true); err != nil {
+		return err
+	}
+	if err := interactive.Declare(cmd, interactive.CommandSpec{Args: []interactive.ArgSpec{
+		{Name: "twin-id", Summary: "string value", Required: true, SatisfiedBy: []string{"twin-id"}},
+	}}); err != nil {
+		return fmt.Errorf("declare interactive arguments for retrieve: %w", err)
+	}
 	parent.AddCommand(cmd)
 	return nil
 }
@@ -43,6 +52,9 @@ func initRetrieveCmd(parent *cobra.Command) error {
 func runRetrieveCmd(cmd *cobra.Command, args []string) error {
 	if usage.UsageRequested(cmd) {
 		return usage.EmitSchema(cmd, cmd.OutOrStdout())
+	}
+	if err := flagutil.ResolvePositionalFlag(cmd, args); err != nil {
+		return err
 	}
 	req, err := flagutil.BuildRequest[operations.GetEnvironmentTwinRequest](cmd, retrieveCmdMeta, "", "")
 	if err != nil {

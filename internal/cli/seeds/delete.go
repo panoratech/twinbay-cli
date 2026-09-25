@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/panoratech/twinbay-cli/internal/client"
 	"github.com/panoratech/twinbay-cli/internal/flagutil"
+	"github.com/panoratech/twinbay-cli/internal/interactive"
 	"github.com/panoratech/twinbay-cli/internal/output"
 	"github.com/panoratech/twinbay-cli/internal/sdk"
 	"github.com/panoratech/twinbay-cli/internal/sdk/models/operations"
@@ -20,11 +21,11 @@ var deleteCmdMeta = []flagutil.FlagMeta{
 // initDeleteCmd initializes the delete command.
 func initDeleteCmd(parent *cobra.Command) error {
 	var cmd = &cobra.Command{
-		Use:     "delete",
+		Use:     "delete [seed-id]",
 		Short:   "Delete a seed",
-		Long:    "Refused while an environment or a template still uses it.",
+		Long:    "Refused while an environment or a scenario still uses it.",
 		Example: "  twinbay seeds delete --seed-id 5d49d1d3-2fc7-49ba-b48d-971469142aed",
-		Args:    cobra.NoArgs,
+		Args:    flagutil.PositionalFlagArgs,
 		RunE:    runDeleteCmd,
 		Annotations: map[string]string{
 			"speakeasy_operation": "delete_seed",
@@ -34,6 +35,14 @@ func initDeleteCmd(parent *cobra.Command) error {
 	if err := flagutil.ValidateMeta[operations.DeleteSeedRequest](deleteCmdMeta); err != nil {
 		return fmt.Errorf("invalid metadata for delete: %w", err)
 	}
+	if err := flagutil.DeclarePositionalFlag(cmd, "seed-id", "string value (or pass it as the [seed-id] argument)", true); err != nil {
+		return err
+	}
+	if err := interactive.Declare(cmd, interactive.CommandSpec{Args: []interactive.ArgSpec{
+		{Name: "seed-id", Summary: "string value", Required: true, SatisfiedBy: []string{"seed-id"}},
+	}}); err != nil {
+		return fmt.Errorf("declare interactive arguments for delete: %w", err)
+	}
 	parent.AddCommand(cmd)
 	return nil
 }
@@ -42,6 +51,9 @@ func initDeleteCmd(parent *cobra.Command) error {
 func runDeleteCmd(cmd *cobra.Command, args []string) error {
 	if usage.UsageRequested(cmd) {
 		return usage.EmitSchema(cmd, cmd.OutOrStdout())
+	}
+	if err := flagutil.ResolvePositionalFlag(cmd, args); err != nil {
+		return err
 	}
 	req, err := flagutil.BuildRequest[operations.DeleteSeedRequest](cmd, deleteCmdMeta, "", "")
 	if err != nil {

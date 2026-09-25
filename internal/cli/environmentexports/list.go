@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/panoratech/twinbay-cli/internal/client"
 	"github.com/panoratech/twinbay-cli/internal/flagutil"
+	"github.com/panoratech/twinbay-cli/internal/interactive"
 	"github.com/panoratech/twinbay-cli/internal/output"
 	"github.com/panoratech/twinbay-cli/internal/sdk"
 	"github.com/panoratech/twinbay-cli/internal/sdk/models/operations"
@@ -22,11 +23,11 @@ var listCmdMeta = []flagutil.FlagMeta{
 // initListCmd initializes the list command.
 func initListCmd(parent *cobra.Command) error {
 	var cmd = &cobra.Command{
-		Use:     "list",
+		Use:     "list [environment-id]",
 		Short:   "List an environment's exports",
 		Long:    "List an environment's exports",
 		Example: "  twinbay environment-exports list --environment-id 78ebcd53-8df0-4789-a058-9e6fefab4b68",
-		Args:    cobra.NoArgs,
+		Args:    flagutil.PositionalFlagArgs,
 		RunE:    runListCmd,
 		Annotations: map[string]string{
 			"speakeasy_operation": "list_exports",
@@ -36,6 +37,14 @@ func initListCmd(parent *cobra.Command) error {
 	if err := flagutil.ValidateMeta[operations.ListExportsRequest](listCmdMeta); err != nil {
 		return fmt.Errorf("invalid metadata for list: %w", err)
 	}
+	if err := flagutil.DeclarePositionalFlag(cmd, "environment-id", "string value (or pass it as the [environment-id] argument)", true); err != nil {
+		return err
+	}
+	if err := interactive.Declare(cmd, interactive.CommandSpec{Args: []interactive.ArgSpec{
+		{Name: "environment-id", Summary: "string value", Required: true, SatisfiedBy: []string{"environment-id"}},
+	}}); err != nil {
+		return fmt.Errorf("declare interactive arguments for list: %w", err)
+	}
 	parent.AddCommand(cmd)
 	return nil
 }
@@ -44,6 +53,9 @@ func initListCmd(parent *cobra.Command) error {
 func runListCmd(cmd *cobra.Command, args []string) error {
 	if usage.UsageRequested(cmd) {
 		return usage.EmitSchema(cmd, cmd.OutOrStdout())
+	}
+	if err := flagutil.ResolvePositionalFlag(cmd, args); err != nil {
+		return err
 	}
 	req, err := flagutil.BuildRequest[operations.ListExportsRequest](cmd, listCmdMeta, "", "")
 	if err != nil {

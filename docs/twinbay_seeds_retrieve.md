@@ -7,7 +7,7 @@ Retrieve a seed
 Retrieve a seed
 
 ```
-twinbay seeds retrieve [flags]
+twinbay seeds retrieve [seed-id] [flags]
 ```
 
 ### Examples
@@ -20,7 +20,7 @@ twinbay seeds retrieve [flags]
 
 ```
   -h, --help             help for retrieve
-  -s, --seed-id string   [required]
+  -s, --seed-id string   string value (or pass it as the [seed-id] argument)
 ```
 
 ### Options inherited from parent commands

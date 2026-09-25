@@ -347,7 +347,7 @@ func (s *Seeds) List(ctx context.Context, request *operations.ListSeedsRequest, 
 
 			var out sdkerrors.HTTPValidationError
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out, ""); err != nil {
-				return nil, err
+				return nil, sdkerrors.NewResponseValidationError("response did not match the declared error schema", httpRes.StatusCode, string(rawBody), httpRes, err)
 			}
 
 			out.HTTPMeta = components.HTTPMetadata{
@@ -535,7 +535,7 @@ func (s *Seeds) ListSuggestions(ctx context.Context, request *operations.ListSee
 
 			var out sdkerrors.HTTPValidationError
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out, ""); err != nil {
-				return nil, err
+				return nil, sdkerrors.NewResponseValidationError("response did not match the declared error schema", httpRes.StatusCode, string(rawBody), httpRes, err)
 			}
 
 			out.HTTPMeta = components.HTTPMetadata{
@@ -560,6 +560,8 @@ func (s *Seeds) ListSuggestions(ctx context.Context, request *operations.ListSee
 			return nil, err
 		}
 		return nil, sdkerrors.NewSDKDefaultError("API error occurred", httpRes.StatusCode, string(rawBody), httpRes)
+	case httpRes.StatusCode == 503:
+		fallthrough
 	case httpRes.StatusCode >= 500 && httpRes.StatusCode < 600:
 		rawBody, err := utils.ConsumeRawBody(httpRes)
 		if err != nil {
@@ -718,7 +720,7 @@ func (s *Seeds) Retrieve(ctx context.Context, request operations.GetSeedRequest,
 
 			var out sdkerrors.HTTPValidationError
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out, ""); err != nil {
-				return nil, err
+				return nil, sdkerrors.NewResponseValidationError("response did not match the declared error schema", httpRes.StatusCode, string(rawBody), httpRes, err)
 			}
 
 			out.HTTPMeta = components.HTTPMetadata{
@@ -764,7 +766,7 @@ func (s *Seeds) Retrieve(ctx context.Context, request operations.GetSeedRequest,
 }
 
 // Delete a seed
-// Refused while an environment or a template still uses it.
+// Refused while an environment or a scenario still uses it.
 func (s *Seeds) Delete(ctx context.Context, request operations.DeleteSeedRequest, opts ...operations.Option) (*operations.DeleteSeedResponse, error) {
 	o := operations.Options{}
 	supportedOptions := []string{
@@ -875,7 +877,7 @@ func (s *Seeds) Delete(ctx context.Context, request operations.DeleteSeedRequest
 
 			var out sdkerrors.HTTPValidationError
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out, ""); err != nil {
-				return nil, err
+				return nil, sdkerrors.NewResponseValidationError("response did not match the declared error schema", httpRes.StatusCode, string(rawBody), httpRes, err)
 			}
 
 			out.HTTPMeta = components.HTTPMetadata{

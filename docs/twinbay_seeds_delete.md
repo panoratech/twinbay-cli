@@ -4,10 +4,10 @@ Delete a seed
 
 ### Synopsis
 
-Refused while an environment or a template still uses it.
+Refused while an environment or a scenario still uses it.
 
 ```
-twinbay seeds delete [flags]
+twinbay seeds delete [seed-id] [flags]
 ```
 
 ### Examples
@@ -20,7 +20,7 @@ twinbay seeds delete [flags]
 
 ```
   -h, --help             help for delete
-  -s, --seed-id string   [required]
+  -s, --seed-id string   string value (or pass it as the [seed-id] argument)
 ```
 
 ### Options inherited from parent commands

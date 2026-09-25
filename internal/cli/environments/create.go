@@ -16,9 +16,9 @@ import (
 
 var createCmdMeta = []flagutil.FlagMeta{
 	{FlagName: "name", Shorthand: "n", FieldPath: "Name", Kind: flagutil.FlagKindString, Optional: true, MinLength: 1, Description: "Display name of the new environment. Generated when omitted."},
-	{FlagName: "twins", FieldPath: "Twins", Kind: flagutil.FlagKindJSON, Optional: true, Annotations: `json:"twins,omitempty"`, Description: "Provider twins to provision, as slugs or objects with an optional seed. Omitted when a template supplies the twins."},
-	{FlagName: "template", FieldPath: "Template", Kind: flagutil.FlagKindJSON, Optional: true, Annotations: `json:"template,omitempty"`, Description: "A saved environment definition to start from, instead of listing twins. Its twins are used as they were saved."},
-	{FlagName: "save-as-template", Shorthand: "s", FieldPath: "SaveAsTemplate", Kind: flagutil.FlagKindBool, Optional: true, HasDefault: true, Description: "Also save this environment's definition, so another environment can be started from it later."},
+	{FlagName: "twins", Shorthand: "t", FieldPath: "Twins", Kind: flagutil.FlagKindJSON, Optional: true, Annotations: `json:"twins,omitempty"`, Description: "Provider twins to provision, as slugs or objects with an optional seed. Omitted when a scenario supplies the twins."},
+	{FlagName: "scenario", FieldPath: "Scenario", Kind: flagutil.FlagKindJSON, Optional: true, Annotations: `json:"scenario,omitempty"`, Description: "A saved environment definition to start from, instead of listing twins. Its twins are used as they were saved."},
+	{FlagName: "save-as-scenario", FieldPath: "SaveAsScenario", Kind: flagutil.FlagKindBool, Optional: true, HasDefault: true, Description: "Also save this environment's definition, so another environment can be started from it later."},
 }
 
 // initCreateCmd initializes the create command.

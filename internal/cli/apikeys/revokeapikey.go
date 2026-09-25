@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/panoratech/twinbay-cli/internal/client"
 	"github.com/panoratech/twinbay-cli/internal/flagutil"
+	"github.com/panoratech/twinbay-cli/internal/interactive"
 	"github.com/panoratech/twinbay-cli/internal/output"
 	"github.com/panoratech/twinbay-cli/internal/sdk"
 	"github.com/panoratech/twinbay-cli/internal/sdk/models/operations"
@@ -20,11 +21,11 @@ var revokeAPIKeyCmdMeta = []flagutil.FlagMeta{
 // initRevokeApiKeyCmd initializes the revoke-api-key command.
 func initRevokeApiKeyCmd(parent *cobra.Command) error {
 	var cmd = &cobra.Command{
-		Use:     "revoke",
+		Use:     "revoke [api-key-id]",
 		Short:   "Revoke an API key",
 		Long:    "The key stops working immediately. Its row stays, so a key seen in a log can still be named, and its token can never be minted again.",
 		Example: "  twinbay api-keys revoke --api-key-id 70d05b12-db01-4e93-afb7-c26ecf254345",
-		Args:    cobra.NoArgs,
+		Args:    flagutil.PositionalFlagArgs,
 		RunE:    runRevokeApiKeyCmd,
 		Annotations: map[string]string{
 			"speakeasy_operation": "revoke_api_key",
@@ -34,6 +35,14 @@ func initRevokeApiKeyCmd(parent *cobra.Command) error {
 	if err := flagutil.ValidateMeta[operations.RevokeAPIKeyRequest](revokeAPIKeyCmdMeta); err != nil {
 		return fmt.Errorf("invalid metadata for revoke-api-key: %w", err)
 	}
+	if err := flagutil.DeclarePositionalFlag(cmd, "api-key-id", "string value (or pass it as the [api-key-id] argument)", true); err != nil {
+		return err
+	}
+	if err := interactive.Declare(cmd, interactive.CommandSpec{Args: []interactive.ArgSpec{
+		{Name: "api-key-id", Summary: "string value", Required: true, SatisfiedBy: []string{"api-key-id"}},
+	}}); err != nil {
+		return fmt.Errorf("declare interactive arguments for revoke-api-key: %w", err)
+	}
 	parent.AddCommand(cmd)
 	return nil
 }
@@ -42,6 +51,9 @@ func initRevokeApiKeyCmd(parent *cobra.Command) error {
 func runRevokeApiKeyCmd(cmd *cobra.Command, args []string) error {
 	if usage.UsageRequested(cmd) {
 		return usage.EmitSchema(cmd, cmd.OutOrStdout())
+	}
+	if err := flagutil.ResolvePositionalFlag(cmd, args); err != nil {
+		return err
 	}
 	req, err := flagutil.BuildRequest[operations.RevokeAPIKeyRequest](cmd, revokeAPIKeyCmdMeta, "", "")
 	if err != nil {

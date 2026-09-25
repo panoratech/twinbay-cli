@@ -7,7 +7,7 @@ Start a twin
 Queues a fresh container. Its state and credentials are new.
 
 ```
-twinbay twins start [flags]
+twinbay twins start [twin-id] [flags]
 ```
 
 ### Examples
@@ -20,7 +20,7 @@ twinbay twins start [flags]
 
 ```
   -h, --help             help for start
-  -t, --twin-id string   [required]
+  -t, --twin-id string   string value (or pass it as the [twin-id] argument)
 ```
 
 ### Options inherited from parent commands

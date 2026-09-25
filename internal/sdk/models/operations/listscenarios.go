@@ -7,33 +7,33 @@ import (
 	"github.com/panoratech/twinbay-cli/internal/sdk/sdkinternal/utils"
 )
 
-type ListEnvironmentTemplatesResponse struct {
+type ListScenariosResponse struct {
 	HTTPMeta components.HTTPMetadata `json:"-"`
 	// Successful Response
-	ResponseListEnvironmentTemplates []components.EnvironmentTemplateResponse
+	ResponseListScenarios []components.ScenarioResponse
 }
 
-func (l ListEnvironmentTemplatesResponse) MarshalJSON() ([]byte, error) {
+func (l ListScenariosResponse) MarshalJSON() ([]byte, error) {
 	return utils.MarshalJSON(l, "", false)
 }
 
-func (l *ListEnvironmentTemplatesResponse) UnmarshalJSON(data []byte) error {
+func (l *ListScenariosResponse) UnmarshalJSON(data []byte) error {
 	if err := utils.UnmarshalJSON(data, &l, "", false, nil); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (l *ListEnvironmentTemplatesResponse) GetHTTPMeta() components.HTTPMetadata {
+func (l *ListScenariosResponse) GetHTTPMeta() components.HTTPMetadata {
 	if l == nil {
 		return components.HTTPMetadata{}
 	}
 	return l.HTTPMeta
 }
 
-func (l *ListEnvironmentTemplatesResponse) GetResponseListEnvironmentTemplates() []components.EnvironmentTemplateResponse {
+func (l *ListScenariosResponse) GetResponseListScenarios() []components.ScenarioResponse {
 	if l == nil {
 		return nil
 	}
-	return l.ResponseListEnvironmentTemplates
+	return l.ResponseListScenarios
 }
