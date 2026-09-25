@@ -7,7 +7,7 @@ Advance a deterministic twin lifecycle
 Advance a deterministic twin lifecycle
 
 ```
-twinbay twins advance [flags]
+twinbay twins advance [twin-id] [flags]
 ```
 
 ### Examples
@@ -23,7 +23,7 @@ twinbay twins advance [flags]
       --body string      Request body as JSON (alternative to individual flags). Can also be provided via stdin; @path reads a file, @- reads stdin to EOF. Use --schema to print the exact JSON Schema.
   -h, --help             help for advance
       --schema           Print the exact JSON Schema of the request body and exit
-  -t, --twin-id string   [required]
+  -t, --twin-id string   string value (or pass it as the [twin-id] argument)
 ```
 
 ### Options inherited from parent commands

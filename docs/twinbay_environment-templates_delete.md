@@ -7,7 +7,7 @@ Delete an environment template
 Environments already started from it are untouched.
 
 ```
-twinbay environment-templates delete [flags]
+twinbay environment-templates delete [template-id] [flags]
 ```
 
 ### Examples
@@ -20,7 +20,7 @@ twinbay environment-templates delete [flags]
 
 ```
   -h, --help                 help for delete
-  -t, --template-id string   [required]
+  -t, --template-id string   string value (or pass it as the [template-id] argument)
 ```
 
 ### Options inherited from parent commands

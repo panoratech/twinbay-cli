@@ -7,7 +7,7 @@ Collect the twin's API key
 Returns the key the twin's current container minted.
 
 ```
-twinbay twins collect-credential [flags]
+twinbay twins collect-credential [twin-id] [flags]
 ```
 
 ### Examples
@@ -20,7 +20,7 @@ twinbay twins collect-credential [flags]
 
 ```
   -h, --help             help for collect-credential
-  -t, --twin-id string   [required]
+  -t, --twin-id string   string value (or pass it as the [twin-id] argument)
 ```
 
 ### Options inherited from parent commands

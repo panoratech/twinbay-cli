@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/panoratech/twinbay-cli/internal/client"
 	"github.com/panoratech/twinbay-cli/internal/flagutil"
+	"github.com/panoratech/twinbay-cli/internal/interactive"
 	"github.com/panoratech/twinbay-cli/internal/output"
 	"github.com/panoratech/twinbay-cli/internal/sdk"
 	"github.com/panoratech/twinbay-cli/internal/sdk/models/operations"
@@ -21,11 +22,11 @@ var createCmdMeta = []flagutil.FlagMeta{
 // initCreateCmd initializes the create command.
 func initCreateCmd(parent *cobra.Command) error {
 	var cmd = &cobra.Command{
-		Use:     "create",
+		Use:     "create [environment-id]",
 		Short:   "Export an environment's traffic",
 		Long:    "Records the slice to export and answers immediately; a worker writes the file. An empty body exports the whole environment for all of time.",
 		Example: "  twinbay environment-exports create --environment-id 71908616-bc97-42be-9f69-ce7b97287a58",
-		Args:    cobra.NoArgs,
+		Args:    flagutil.PositionalFlagArgs,
 		RunE:    runCreateCmd,
 		Annotations: map[string]string{
 			"speakeasy_operation": "create_export",
@@ -43,6 +44,14 @@ func initCreateCmd(parent *cobra.Command) error {
 	}
 	cmd.Flags().Bool("schema", false, "Print the exact JSON Schema of the request body and exit")
 	_ = flagutil.AnnotatePromptFlag(cmd, "schema", flagutil.PromptFlagSpec{Kind: "bool", DocSurface: true})
+	if err := flagutil.DeclarePositionalFlag(cmd, "environment-id", "string value (or pass it as the [environment-id] argument)", true); err != nil {
+		return err
+	}
+	if err := interactive.Declare(cmd, interactive.CommandSpec{Args: []interactive.ArgSpec{
+		{Name: "environment-id", Summary: "string value", Required: true, SatisfiedBy: []string{"environment-id"}},
+	}}); err != nil {
+		return fmt.Errorf("declare interactive arguments for create: %w", err)
+	}
 	parent.AddCommand(cmd)
 	return nil
 }
@@ -54,6 +63,9 @@ func runCreateCmd(cmd *cobra.Command, args []string) error {
 	}
 	if requested, _ := cmd.Flags().GetBool("schema"); requested {
 		return usage.EmitBodySchema(cmd.OutOrStdout(), "create_export")
+	}
+	if err := flagutil.ResolvePositionalFlag(cmd, args); err != nil {
+		return err
 	}
 	req, err := flagutil.BuildRequest[operations.CreateExportRequest](cmd, createCmdMeta, "Body", "body")
 	if err != nil {

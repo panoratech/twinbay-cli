@@ -841,7 +841,7 @@ paths:
         "422":
           description: "This twin cannot be seeded"
         "503":
-          description: "Seed generation is not configured"
+          description: "Seed generation is not configured or its manifest is temporarily unavailable"
       x-speakeasy-name-override: "create"
     get:
       tags:
@@ -916,6 +916,8 @@ paths:
           description: "The credential is missing, malformed, expired, or not trusted"
         "403":
           description: "The credential does not act inside an organization"
+        "503":
+          description: "A twin manifest is temporarily unavailable"
         "422":
           description: "Validation Error"
           content:
@@ -1445,6 +1447,14 @@ components:
             - type: "null"
           title: "Seed"
           description: "A generated starting state to load into this twin, by `seeds.id`. Omitted starts the twin with its own state and nothing else."
+        description:
+          anyOf:
+            - type: "string"
+              maxLength: 2000
+              minLength: 1
+            - type: "null"
+          title: "Description"
+          description: "Generate the first dataset in this twin before it becomes ready."
       additionalProperties: false
       type: "object"
       required:

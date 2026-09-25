@@ -7,7 +7,7 @@ Retrieve an environment
 Retrieve an environment
 
 ```
-twinbay environments retrieve [flags]
+twinbay environments retrieve [environment-id] [flags]
 ```
 
 ### Examples
@@ -19,7 +19,7 @@ twinbay environments retrieve [flags]
 ### Options
 
 ```
-  -e, --environment-id string   [required]
+  -e, --environment-id string   string value (or pass it as the [environment-id] argument)
   -h, --help                    help for retrieve
 ```
 

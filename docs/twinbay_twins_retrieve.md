@@ -7,7 +7,7 @@ Retrieve a twin
 With `wait_for`, the answer is held until the twin reaches that state, a run of it settles, or the wait runs out — so a caller waiting for a twin to serve sends one request rather than polling.
 
 ```
-twinbay twins retrieve [flags]
+twinbay twins retrieve [twin-id] [flags]
 ```
 
 ### Examples
@@ -20,7 +20,7 @@ twinbay twins retrieve [flags]
 
 ```
   -h, --help              help for retrieve
-  -t, --twin-id string    [required]
+  -t, --twin-id string    string value (or pass it as the [twin-id] argument)
   -w, --wait-for string   options: ready, stopped
 ```
 

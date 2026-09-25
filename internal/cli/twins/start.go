@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/panoratech/twinbay-cli/internal/client"
 	"github.com/panoratech/twinbay-cli/internal/flagutil"
+	"github.com/panoratech/twinbay-cli/internal/interactive"
 	"github.com/panoratech/twinbay-cli/internal/output"
 	"github.com/panoratech/twinbay-cli/internal/sdk"
 	"github.com/panoratech/twinbay-cli/internal/sdk/models/operations"
@@ -20,11 +21,11 @@ var startCmdMeta = []flagutil.FlagMeta{
 // initStartCmd initializes the start command.
 func initStartCmd(parent *cobra.Command) error {
 	var cmd = &cobra.Command{
-		Use:     "start",
+		Use:     "start [twin-id]",
 		Short:   "Start a twin",
 		Long:    "Queues a fresh container. Its state and credentials are new.",
 		Example: "  twinbay twins start --twin-id 62eb3588-3e2d-43be-a97f-3a422b30ef51",
-		Args:    cobra.NoArgs,
+		Args:    flagutil.PositionalFlagArgs,
 		RunE:    runStartCmd,
 		Annotations: map[string]string{
 			"speakeasy_operation": "start_environment_twin",
@@ -34,6 +35,14 @@ func initStartCmd(parent *cobra.Command) error {
 	if err := flagutil.ValidateMeta[operations.StartEnvironmentTwinRequest](startCmdMeta); err != nil {
 		return fmt.Errorf("invalid metadata for start: %w", err)
 	}
+	if err := flagutil.DeclarePositionalFlag(cmd, "twin-id", "string value (or pass it as the [twin-id] argument)", true); err != nil {
+		return err
+	}
+	if err := interactive.Declare(cmd, interactive.CommandSpec{Args: []interactive.ArgSpec{
+		{Name: "twin-id", Summary: "string value", Required: true, SatisfiedBy: []string{"twin-id"}},
+	}}); err != nil {
+		return fmt.Errorf("declare interactive arguments for start: %w", err)
+	}
 	parent.AddCommand(cmd)
 	return nil
 }
@@ -42,6 +51,9 @@ func initStartCmd(parent *cobra.Command) error {
 func runStartCmd(cmd *cobra.Command, args []string) error {
 	if usage.UsageRequested(cmd) {
 		return usage.EmitSchema(cmd, cmd.OutOrStdout())
+	}
+	if err := flagutil.ResolvePositionalFlag(cmd, args); err != nil {
+		return err
 	}
 	req, err := flagutil.BuildRequest[operations.StartEnvironmentTwinRequest](cmd, startCmdMeta, "", "")
 	if err != nil {

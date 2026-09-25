@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/panoratech/twinbay-cli/internal/client"
 	"github.com/panoratech/twinbay-cli/internal/flagutil"
+	"github.com/panoratech/twinbay-cli/internal/interactive"
 	"github.com/panoratech/twinbay-cli/internal/output"
 	"github.com/panoratech/twinbay-cli/internal/sdk"
 	"github.com/panoratech/twinbay-cli/internal/sdk/models/operations"
@@ -20,11 +21,11 @@ var deleteCmdMeta = []flagutil.FlagMeta{
 // initDeleteCmd initializes the delete command.
 func initDeleteCmd(parent *cobra.Command) error {
 	var cmd = &cobra.Command{
-		Use:     "delete",
+		Use:     "delete [template-id]",
 		Short:   "Delete an environment template",
 		Long:    "Environments already started from it are untouched.",
 		Example: "  twinbay environment-templates delete --template-id 88a23c18-dc84-4fba-8fa1-de867e687f5f",
-		Args:    cobra.NoArgs,
+		Args:    flagutil.PositionalFlagArgs,
 		RunE:    runDeleteCmd,
 		Annotations: map[string]string{
 			"speakeasy_operation": "delete_environment_template",
@@ -34,6 +35,14 @@ func initDeleteCmd(parent *cobra.Command) error {
 	if err := flagutil.ValidateMeta[operations.DeleteEnvironmentTemplateRequest](deleteCmdMeta); err != nil {
 		return fmt.Errorf("invalid metadata for delete: %w", err)
 	}
+	if err := flagutil.DeclarePositionalFlag(cmd, "template-id", "string value (or pass it as the [template-id] argument)", true); err != nil {
+		return err
+	}
+	if err := interactive.Declare(cmd, interactive.CommandSpec{Args: []interactive.ArgSpec{
+		{Name: "template-id", Summary: "string value", Required: true, SatisfiedBy: []string{"template-id"}},
+	}}); err != nil {
+		return fmt.Errorf("declare interactive arguments for delete: %w", err)
+	}
 	parent.AddCommand(cmd)
 	return nil
 }
@@ -42,6 +51,9 @@ func initDeleteCmd(parent *cobra.Command) error {
 func runDeleteCmd(cmd *cobra.Command, args []string) error {
 	if usage.UsageRequested(cmd) {
 		return usage.EmitSchema(cmd, cmd.OutOrStdout())
+	}
+	if err := flagutil.ResolvePositionalFlag(cmd, args); err != nil {
+		return err
 	}
 	req, err := flagutil.BuildRequest[operations.DeleteEnvironmentTemplateRequest](cmd, deleteCmdMeta, "", "")
 	if err != nil {

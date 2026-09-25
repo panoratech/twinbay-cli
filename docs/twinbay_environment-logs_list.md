@@ -7,7 +7,7 @@ List recent environment request logs
 List recent environment request logs
 
 ```
-twinbay environment-logs list [flags]
+twinbay environment-logs list [environment-id] [flags]
 ```
 
 ### Examples
@@ -19,7 +19,7 @@ twinbay environment-logs list [flags]
 ### Options
 
 ```
-      --environment-id string        [required]
+  -e, --environment-id string        string value (or pass it as the [environment-id] argument)
       --environment-twin-id string   string value
   -h, --help                         help for list
   -p, --page int                     Page number (default 1)

@@ -7,7 +7,7 @@ Revoke an API key
 The key stops working immediately. Its row stays, so a key seen in a log can still be named, and its token can never be minted again.
 
 ```
-twinbay api-keys revoke [flags]
+twinbay api-keys revoke [api-key-id] [flags]
 ```
 
 ### Examples
@@ -19,7 +19,7 @@ twinbay api-keys revoke [flags]
 ### Options
 
 ```
-  -a, --api-key-id string   [required]
+  -a, --api-key-id string   string value (or pass it as the [api-key-id] argument)
   -h, --help                help for revoke
 ```
 

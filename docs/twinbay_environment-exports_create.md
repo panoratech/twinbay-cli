@@ -7,7 +7,7 @@ Export an environment's traffic
 Records the slice to export and answers immediately; a worker writes the file. An empty body exports the whole environment for all of time.
 
 ```
-twinbay environment-exports create [flags]
+twinbay environment-exports create [environment-id] [flags]
 ```
 
 ### Examples
@@ -21,7 +21,7 @@ twinbay environment-exports create [flags]
 ```
       --body string             Request body as JSON (alternative to individual flags). Can also be provided via stdin; @path reads a file, @- reads stdin to EOF. Use --schema to print the exact JSON Schema.
   -b, --body-param string       JSON object
-  -e, --environment-id string   [required]
+  -e, --environment-id string   string value (or pass it as the [environment-id] argument)
   -h, --help                    help for create
       --schema                  Print the exact JSON Schema of the request body and exit
 ```

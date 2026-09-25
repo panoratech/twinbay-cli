@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/panoratech/twinbay-cli/internal/client"
 	"github.com/panoratech/twinbay-cli/internal/flagutil"
+	"github.com/panoratech/twinbay-cli/internal/interactive"
 	"github.com/panoratech/twinbay-cli/internal/output"
 	"github.com/panoratech/twinbay-cli/internal/sdk"
 	"github.com/panoratech/twinbay-cli/internal/sdk/models/operations"
@@ -20,11 +21,11 @@ var retrieveCmdMeta = []flagutil.FlagMeta{
 // initRetrieveCmd initializes the retrieve command.
 func initRetrieveCmd(parent *cobra.Command) error {
 	var cmd = &cobra.Command{
-		Use:     "retrieve",
+		Use:     "retrieve [twin-slug]",
 		Short:   "Retrieve a twin",
 		Long:    "Retrieve a twin",
 		Example: "  twinbay catalog retrieve --twin-slug <value>",
-		Args:    cobra.NoArgs,
+		Args:    flagutil.PositionalFlagArgs,
 		RunE:    runRetrieveCmd,
 		Annotations: map[string]string{
 			"speakeasy_operation": "get_twin",
@@ -34,6 +35,14 @@ func initRetrieveCmd(parent *cobra.Command) error {
 	if err := flagutil.ValidateMeta[operations.GetTwinRequest](retrieveCmdMeta); err != nil {
 		return fmt.Errorf("invalid metadata for retrieve: %w", err)
 	}
+	if err := flagutil.DeclarePositionalFlag(cmd, "twin-slug", "string value (or pass it as the [twin-slug] argument)", true); err != nil {
+		return err
+	}
+	if err := interactive.Declare(cmd, interactive.CommandSpec{Args: []interactive.ArgSpec{
+		{Name: "twin-slug", Summary: "string value", Required: true, SatisfiedBy: []string{"twin-slug"}},
+	}}); err != nil {
+		return fmt.Errorf("declare interactive arguments for retrieve: %w", err)
+	}
 	parent.AddCommand(cmd)
 	return nil
 }
@@ -42,6 +51,9 @@ func initRetrieveCmd(parent *cobra.Command) error {
 func runRetrieveCmd(cmd *cobra.Command, args []string) error {
 	if usage.UsageRequested(cmd) {
 		return usage.EmitSchema(cmd, cmd.OutOrStdout())
+	}
+	if err := flagutil.ResolvePositionalFlag(cmd, args); err != nil {
+		return err
 	}
 	req, err := flagutil.BuildRequest[operations.GetTwinRequest](cmd, retrieveCmdMeta, "", "")
 	if err != nil {
