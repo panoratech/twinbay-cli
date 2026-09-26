@@ -23,7 +23,7 @@ func initRetrieveCmd(parent *cobra.Command) error {
 	var cmd = &cobra.Command{
 		Use:     "retrieve [scenario-id]",
 		Short:   "Retrieve a scenario",
-		Long:    "Retrieve a scenario",
+		Long:    "A community scenario another organization published is readable here with `owned` false; editing, deleting and starting it stay with its organization.",
 		Example: "  twinbay scenarios retrieve --scenario-id 8b6d526c-7c36-41bd-a04b-68b5ceb40432",
 		Args:    flagutil.PositionalFlagArgs,
 		RunE:    runRetrieveCmd,
