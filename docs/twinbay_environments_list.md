@@ -19,7 +19,9 @@ twinbay environments list [flags]
 ### Options
 
 ```
-  -h, --help   help for list
+  -h, --help       help for list
+  -p, --page int   Page number (default 1)
+  -s, --size int   Page size (default 50)
 ```
 
 ### Options inherited from parent commands

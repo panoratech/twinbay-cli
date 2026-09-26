@@ -10,8 +10,8 @@ import (
 	"github.com/panoratech/twinbay-cli/internal/cli/environmentexports"
 	"github.com/panoratech/twinbay-cli/internal/cli/environmentlogs"
 	"github.com/panoratech/twinbay-cli/internal/cli/environments"
-	"github.com/panoratech/twinbay-cli/internal/cli/environmenttemplates"
 	"github.com/panoratech/twinbay-cli/internal/cli/organizations"
+	"github.com/panoratech/twinbay-cli/internal/cli/scenarios"
 	"github.com/panoratech/twinbay-cli/internal/cli/seeds"
 	"github.com/panoratech/twinbay-cli/internal/cli/twinrecords"
 	"github.com/panoratech/twinbay-cli/internal/cli/twins"
@@ -53,7 +53,7 @@ func NewRootCommand() (*cobra.Command, error) {
 			if usage.UsageRequested(cmd) {
 				return nil
 			}
-			if err := flagutil.ValidateEnumFlag(cmd, "output-format", output.Formats); err != nil {
+			if err := flagutil.ValidateOutputFormatFlag(cmd, output.Formats); err != nil {
 				return err
 			}
 			if err := flagutil.ValidateEnumFlag(cmd, "color", []string{"auto", "always", "never"}); err != nil {
@@ -88,8 +88,8 @@ func NewRootCommand() (*cobra.Command, error) {
 	if err := twinrecords.InitTwinRecordsRoot(rootCmd); err != nil {
 		return nil, fmt.Errorf("init twin-records: %w", err)
 	}
-	if err := environmenttemplates.InitEnvironmentTemplatesRoot(rootCmd); err != nil {
-		return nil, fmt.Errorf("init environment-templates: %w", err)
+	if err := scenarios.InitScenariosRoot(rootCmd); err != nil {
+		return nil, fmt.Errorf("init scenarios: %w", err)
 	}
 	if err := seeds.InitSeedsRoot(rootCmd); err != nil {
 		return nil, fmt.Errorf("init seeds: %w", err)

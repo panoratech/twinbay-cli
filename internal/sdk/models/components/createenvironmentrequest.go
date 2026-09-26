@@ -9,41 +9,41 @@ import (
 	"github.com/panoratech/twinbay-cli/internal/sdk/sdkinternal/utils"
 )
 
-type TwinType string
+type CreateEnvironmentRequestTwinType string
 
 const (
-	TwinTypeStr                          TwinType = "str"
-	TwinTypeCreateEnvironmentTwinRequest TwinType = "CreateEnvironmentTwinRequest"
+	CreateEnvironmentRequestTwinTypeStr                          CreateEnvironmentRequestTwinType = "str"
+	CreateEnvironmentRequestTwinTypeCreateEnvironmentTwinRequest CreateEnvironmentRequestTwinType = "CreateEnvironmentTwinRequest"
 )
 
-type Twin struct {
+type CreateEnvironmentRequestTwin struct {
 	Str                          *string                       `queryParam:"inline" union:"member"`
 	CreateEnvironmentTwinRequest *CreateEnvironmentTwinRequest `queryParam:"inline" union:"member"`
 
-	Type TwinType
+	Type CreateEnvironmentRequestTwinType
 }
 
-func CreateTwinStr(str string) Twin {
-	typ := TwinTypeStr
+func CreateCreateEnvironmentRequestTwinStr(str string) CreateEnvironmentRequestTwin {
+	typ := CreateEnvironmentRequestTwinTypeStr
 
-	return Twin{
+	return CreateEnvironmentRequestTwin{
 		Str:  &str,
 		Type: typ,
 	}
 }
 
-func CreateTwinCreateEnvironmentTwinRequest(createEnvironmentTwinRequest CreateEnvironmentTwinRequest) Twin {
-	typ := TwinTypeCreateEnvironmentTwinRequest
+func CreateCreateEnvironmentRequestTwinCreateEnvironmentTwinRequest(createEnvironmentTwinRequest CreateEnvironmentTwinRequest) CreateEnvironmentRequestTwin {
+	typ := CreateEnvironmentRequestTwinTypeCreateEnvironmentTwinRequest
 
-	return Twin{
+	return CreateEnvironmentRequestTwin{
 		CreateEnvironmentTwinRequest: &createEnvironmentTwinRequest,
 		Type:                         typ,
 	}
 }
 
-func (u *Twin) UnmarshalJSON(data []byte) (err error) {
+func (u *CreateEnvironmentRequestTwin) UnmarshalJSON(data []byte) (err error) {
 	previous := *u
-	*u = Twin{}
+	*u = CreateEnvironmentRequestTwin{}
 	defer func() {
 		if err != nil {
 			*u = previous
@@ -56,7 +56,7 @@ func (u *Twin) UnmarshalJSON(data []byte) (err error) {
 	var str string = ""
 	if err := utils.UnmarshalJSON(data, &str, "", true, nil); err == nil {
 		candidates = append(candidates, utils.UnionCandidate{
-			Type:  TwinTypeStr,
+			Type:  CreateEnvironmentRequestTwinTypeStr,
 			Value: &str,
 		})
 	}
@@ -64,36 +64,36 @@ func (u *Twin) UnmarshalJSON(data []byte) (err error) {
 	var createEnvironmentTwinRequest CreateEnvironmentTwinRequest = CreateEnvironmentTwinRequest{}
 	if err := utils.UnmarshalJSON(data, &createEnvironmentTwinRequest, "", true, nil); err == nil {
 		candidates = append(candidates, utils.UnionCandidate{
-			Type:  TwinTypeCreateEnvironmentTwinRequest,
+			Type:  CreateEnvironmentRequestTwinTypeCreateEnvironmentTwinRequest,
 			Value: &createEnvironmentTwinRequest,
 		})
 	}
 
 	if len(candidates) == 0 {
-		return fmt.Errorf("could not unmarshal `%s` into any supported union types for Twin", string(data))
+		return fmt.Errorf("could not unmarshal `%s` into any supported union types for CreateEnvironmentRequestTwin", string(data))
 	}
 
 	// Pick the best candidate using multi-stage filtering
 	best := utils.PickBestUnionCandidate(candidates, data)
 	if best == nil {
-		return fmt.Errorf("could not unmarshal `%s` into any supported union types for Twin", string(data))
+		return fmt.Errorf("could not unmarshal `%s` into any supported union types for CreateEnvironmentRequestTwin", string(data))
 	}
 
 	// Set the union type and value based on the best candidate
-	u.Type = best.Type.(TwinType)
+	u.Type = best.Type.(CreateEnvironmentRequestTwinType)
 	switch best.Type {
-	case TwinTypeStr:
+	case CreateEnvironmentRequestTwinTypeStr:
 		u.Str = best.Value.(*string)
 		return nil
-	case TwinTypeCreateEnvironmentTwinRequest:
+	case CreateEnvironmentRequestTwinTypeCreateEnvironmentTwinRequest:
 		u.CreateEnvironmentTwinRequest = best.Value.(*CreateEnvironmentTwinRequest)
 		return nil
 	}
 
-	return fmt.Errorf("could not unmarshal `%s` into any supported union types for Twin", string(data))
+	return fmt.Errorf("could not unmarshal `%s` into any supported union types for CreateEnvironmentRequestTwin", string(data))
 }
 
-func (u Twin) MarshalJSON() ([]byte, error) {
+func (u CreateEnvironmentRequestTwin) MarshalJSON() ([]byte, error) {
 	if u.Str != nil {
 		return utils.MarshalJSON(u.Str, "", true)
 	}
@@ -102,18 +102,18 @@ func (u Twin) MarshalJSON() ([]byte, error) {
 		return utils.MarshalJSON(u.CreateEnvironmentTwinRequest, "", true)
 	}
 
-	return nil, errors.New("could not marshal union type Twin: all fields are null")
+	return nil, errors.New("could not marshal union type CreateEnvironmentRequestTwin: all fields are null")
 }
 
 type CreateEnvironmentRequest struct {
 	// Display name of the new environment. Generated when omitted.
 	Name *string `json:"name,omitzero"`
-	// Provider twins to provision, as slugs or objects with an optional seed. Omitted when a template supplies the twins.
-	Twins optionalnullable.OptionalNullable[[]Twin] `json:"twins,omitzero"`
+	// Provider twins to provision, as slugs or objects with an optional seed. Omitted when a scenario supplies the twins.
+	Twins optionalnullable.OptionalNullable[[]CreateEnvironmentRequestTwin] `json:"twins,omitzero"`
 	// A saved environment definition to start from, instead of listing twins. Its twins are used as they were saved.
-	Template optionalnullable.OptionalNullable[string] `json:"template,omitzero"`
+	Scenario optionalnullable.OptionalNullable[string] `json:"scenario,omitzero"`
 	// Also save this environment's definition, so another environment can be started from it later.
-	SaveAsTemplate *bool `default:"false" json:"save_as_template"`
+	SaveAsScenario *bool `default:"false" json:"save_as_scenario"`
 }
 
 func (c CreateEnvironmentRequest) MarshalJSON() ([]byte, error) {
@@ -134,23 +134,23 @@ func (c *CreateEnvironmentRequest) GetName() *string {
 	return c.Name
 }
 
-func (c *CreateEnvironmentRequest) GetTwins() optionalnullable.OptionalNullable[[]Twin] {
+func (c *CreateEnvironmentRequest) GetTwins() optionalnullable.OptionalNullable[[]CreateEnvironmentRequestTwin] {
 	if c == nil {
 		return nil
 	}
 	return c.Twins
 }
 
-func (c *CreateEnvironmentRequest) GetTemplate() optionalnullable.OptionalNullable[string] {
+func (c *CreateEnvironmentRequest) GetScenario() optionalnullable.OptionalNullable[string] {
 	if c == nil {
 		return nil
 	}
-	return c.Template
+	return c.Scenario
 }
 
-func (c *CreateEnvironmentRequest) GetSaveAsTemplate() *bool {
+func (c *CreateEnvironmentRequest) GetSaveAsScenario() *bool {
 	if c == nil {
 		return nil
 	}
-	return c.SaveAsTemplate
+	return c.SaveAsScenario
 }

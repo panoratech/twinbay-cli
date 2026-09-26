@@ -7,7 +7,7 @@ Stop a twin
 Queues the container for destruction. Everything it holds is lost.
 
 ```
-twinbay twins stop [flags]
+twinbay twins stop [twin-id] [flags]
 ```
 
 ### Examples
@@ -20,7 +20,7 @@ twinbay twins stop [flags]
 
 ```
   -h, --help             help for stop
-  -t, --twin-id string   [required]
+  -t, --twin-id string   string value (or pass it as the [twin-id] argument)
 ```
 
 ### Options inherited from parent commands

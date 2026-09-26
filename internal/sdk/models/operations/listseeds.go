@@ -11,6 +11,21 @@ import (
 type ListSeedsRequest struct {
 	// Only seeds for this twin's slug.
 	Twin optionalnullable.OptionalNullable[string] `queryParam:"style=form,explode=true,name=twin"`
+	// Page number
+	Page *int64 `default:"1" queryParam:"style=form,explode=true,name=page"`
+	// Page size
+	Size *int64 `default:"50" queryParam:"style=form,explode=true,name=size"`
+}
+
+func (l ListSeedsRequest) MarshalJSON() ([]byte, error) {
+	return utils.MarshalJSON(l, "", false)
+}
+
+func (l *ListSeedsRequest) UnmarshalJSON(data []byte) error {
+	if err := utils.UnmarshalJSON(data, &l, "", false, nil); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (l *ListSeedsRequest) GetTwin() optionalnullable.OptionalNullable[string] {
@@ -20,10 +35,24 @@ func (l *ListSeedsRequest) GetTwin() optionalnullable.OptionalNullable[string] {
 	return l.Twin
 }
 
+func (l *ListSeedsRequest) GetPage() *int64 {
+	if l == nil {
+		return nil
+	}
+	return l.Page
+}
+
+func (l *ListSeedsRequest) GetSize() *int64 {
+	if l == nil {
+		return nil
+	}
+	return l.Size
+}
+
 type ListSeedsResponse struct {
 	HTTPMeta components.HTTPMetadata `json:"-"`
 	// Successful Response
-	ResponseListSeeds []components.SeedResponse
+	PageSeedResponse *components.PageSeedResponse
 }
 
 func (l ListSeedsResponse) MarshalJSON() ([]byte, error) {
@@ -44,9 +73,9 @@ func (l *ListSeedsResponse) GetHTTPMeta() components.HTTPMetadata {
 	return l.HTTPMeta
 }
 
-func (l *ListSeedsResponse) GetResponseListSeeds() []components.SeedResponse {
+func (l *ListSeedsResponse) GetPageSeedResponse() *components.PageSeedResponse {
 	if l == nil {
 		return nil
 	}
-	return l.ResponseListSeeds
+	return l.PageSeedResponse
 }

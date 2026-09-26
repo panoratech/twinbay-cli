@@ -33,7 +33,7 @@ paths:
       tags:
         - "organizations"
       summary: "List your organizations"
-      description: "Every organization the caller is a member of, with their role in each, oldest membership first. Independent of the organization the current token acts in. Paginated: walk the pages with `page` and `size`."
+      description: "Every organization the caller is a member of, with their role in each, newest membership first. Independent of the organization the current token acts in. Paginated: walk the pages with `page` and `size`."
       operationId: "list_organizations"
       security:
         - Organization API key: []
@@ -211,7 +211,7 @@ paths:
       tags:
         - "api-keys"
       summary: "List API keys"
-      description: "Every key of the active organization that has not been revoked, oldest first. A key that has expired is still listed, so that it can be read and cleaned up rather than vanishing unexplained; `expires_at` says which. Tokens are never included. Paginated: walk the pages with `page` and `size`."
+      description: "Every key of the active organization that has not been revoked, newest first. A key that has expired is still listed, so that it can be read and cleaned up rather than vanishing unexplained; `expires_at` says which. Tokens are never included. Paginated: walk the pages with `page` and `size`."
       operationId: "list_api_keys"
       security:
         - Organization API key: []
@@ -291,7 +291,7 @@ paths:
       tags:
         - "catalog"
       summary: "List available twins"
-      description: "Returns the registered code twins ordered by display name."
+      description: "Returns the registered code twins newest release first."
       operationId: "list_twins"
       security:
         - Organization API key: []
@@ -369,40 +369,20 @@ paths:
       x-speakeasy-group: "catalog"
       x-speakeasy-name-override: "retrieve"
   /environments:
-    get:
-      tags:
-        - "environments"
-      summary: "List environments"
-      operationId: "list_environments"
-      responses:
-        "200":
-          description: "Successful Response"
-          content:
-            application/json:
-              schema:
-                items:
-                  $ref: "#/components/schemas/EnvironmentResponse"
-                type: "array"
-                title: "Response List Environments"
-        "401":
-          description: "The credential is missing, malformed, expired, or not trusted"
-        "403":
-          description: "The credential does not act inside an organization"
-      security:
-        - Organization API key: []
-      x-speakeasy-name-override: "list"
     post:
       tags:
         - "environments"
       summary: "Create an environment"
       description: "Records the environment and queues each twin for provisioning. The twins are not serving yet: read each one with `wait_for=ready`, then collect its API key."
       operationId: "create_environment"
+      security:
+        - Organization API key: []
       requestBody:
+        required: true
         content:
           application/json:
             schema:
               $ref: "#/components/schemas/CreateEnvironmentRequest"
-        required: true
       responses:
         "202":
           description: "Successful Response"
@@ -420,9 +400,54 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
+      x-speakeasy-name-override: "create"
+    get:
+      tags:
+        - "environments"
+      summary: "List environments"
+      operationId: "list_environments"
       security:
         - Organization API key: []
-      x-speakeasy-name-override: "create"
+      parameters:
+        - name: "page"
+          in: "query"
+          required: false
+          schema:
+            type: "integer"
+            minimum: 1
+            description: "Page number"
+            default: 1
+            title: "Page"
+          description: "Page number"
+        - name: "size"
+          in: "query"
+          required: false
+          schema:
+            type: "integer"
+            maximum: 100
+            minimum: 1
+            description: "Page size"
+            default: 50
+            title: "Size"
+          description: "Page size"
+      responses:
+        "200":
+          description: "Successful Response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Page_EnvironmentResponse_"
+        "401":
+          description: "The credential is missing, malformed, expired, or not trusted"
+        "403":
+          description: "The credential does not act inside an organization"
+        "422":
+          description: "Validation Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+      x-speakeasy-name-override: "list"
   /environments/{environment_id}:
     get:
       tags:
@@ -753,48 +778,184 @@ paths:
                 $ref: "#/components/schemas/HTTPValidationError"
       x-speakeasy-group: "twins"
       x-speakeasy-name-override: "advance"
-  /environment-templates:
+  /scenarios:
+    post:
+      tags:
+        - "scenarios"
+      summary: "Create a scenario"
+      description: "Save providers and optional reusable seeds without starting an environment."
+      operationId: "create_scenario"
+      security:
+        - Organization API key: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateScenarioRequest"
+      responses:
+        "201":
+          description: "Successful Response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScenarioResponse"
+        "401":
+          description: "The credential is missing, malformed, expired, or not trusted"
+        "403":
+          description: "The credential does not act inside an organization"
+        "422":
+          description: "Validation Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+      x-speakeasy-name-override: "create"
     get:
       tags:
-        - "environments"
-      summary: "List environment templates"
-      description: "Saved environment definitions. Start an environment from one by sending its id as `template` to `POST /environments`."
-      operationId: "list_environment_templates"
+        - "scenarios"
+      summary: "List scenarios"
+      description: "Start an environment from a scenario by sending its id as `scenario` to `POST /environments`."
+      operationId: "list_scenarios"
+      security:
+        - Organization API key: []
+      parameters:
+        - name: "include_public"
+          in: "query"
+          required: false
+          schema:
+            type: "boolean"
+            default: true
+            title: "Include Public"
+        - name: "page"
+          in: "query"
+          required: false
+          schema:
+            type: "integer"
+            minimum: 1
+            description: "Page number"
+            default: 1
+            title: "Page"
+          description: "Page number"
+        - name: "size"
+          in: "query"
+          required: false
+          schema:
+            type: "integer"
+            maximum: 100
+            minimum: 1
+            description: "Page size"
+            default: 50
+            title: "Size"
+          description: "Page size"
       responses:
         "200":
           description: "Successful Response"
           content:
             application/json:
               schema:
-                items:
-                  $ref: "#/components/schemas/EnvironmentTemplateResponse"
-                type: "array"
-                title: "Response List Environment Templates"
+                $ref: "#/components/schemas/Page_ScenarioResponse_"
         "401":
           description: "The credential is missing, malformed, expired, or not trusted"
         "403":
           description: "The credential does not act inside an organization"
-      security:
-        - Organization API key: []
-      x-speakeasy-group: "environment_templates"
+        "422":
+          description: "Validation Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
       x-speakeasy-name-override: "list"
-  /environment-templates/{template_id}:
-    delete:
+  /scenarios/{scenario_id}:
+    get:
       tags:
-        - "environments"
-      summary: "Delete an environment template"
-      description: "Environments already started from it are untouched."
-      operationId: "delete_environment_template"
+        - "scenarios"
+      summary: "Retrieve a scenario"
+      operationId: "get_scenario"
       security:
         - Organization API key: []
       parameters:
-        - name: "template_id"
+        - name: "scenario_id"
           in: "path"
           required: true
           schema:
             type: "string"
             format: "uuid"
-            title: "Template Id"
+            title: "Scenario Id"
+      responses:
+        "200":
+          description: "Successful Response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScenarioResponse"
+        "401":
+          description: "The credential is missing, malformed, expired, or not trusted"
+        "403":
+          description: "The credential does not act inside an organization"
+        "422":
+          description: "Validation Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+      x-speakeasy-name-override: "retrieve"
+    patch:
+      tags:
+        - "scenarios"
+      summary: "Update a scenario"
+      description: "Change the name or replace provider selections. Existing environments are untouched."
+      operationId: "update_scenario"
+      security:
+        - Organization API key: []
+      parameters:
+        - name: "scenario_id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+            title: "Scenario Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateScenarioRequest"
+      responses:
+        "200":
+          description: "Successful Response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScenarioResponse"
+        "401":
+          description: "The credential is missing, malformed, expired, or not trusted"
+        "403":
+          description: "The credential does not act inside an organization"
+        "422":
+          description: "Validation Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+      x-speakeasy-name-override: "update"
+    delete:
+      tags:
+        - "scenarios"
+      summary: "Delete a scenario"
+      description: "Referenced seeds and environments already started from it are untouched."
+      operationId: "delete_scenario"
+      security:
+        - Organization API key: []
+      parameters:
+        - name: "scenario_id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+            title: "Scenario Id"
       responses:
         "204":
           description: "Successful Response"
@@ -808,7 +969,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-      x-speakeasy-group: "environment_templates"
       x-speakeasy-name-override: "delete"
   /seeds:
     post:
@@ -841,7 +1001,7 @@ paths:
         "422":
           description: "This twin cannot be seeded"
         "503":
-          description: "Seed generation is not configured"
+          description: "Seed generation is not configured or its manifest is temporarily unavailable"
       x-speakeasy-name-override: "create"
     get:
       tags:
@@ -861,16 +1021,34 @@ paths:
             description: "Only seeds for this twin's slug."
             title: "Twin"
           description: "Only seeds for this twin's slug."
+        - name: "page"
+          in: "query"
+          required: false
+          schema:
+            type: "integer"
+            minimum: 1
+            description: "Page number"
+            default: 1
+            title: "Page"
+          description: "Page number"
+        - name: "size"
+          in: "query"
+          required: false
+          schema:
+            type: "integer"
+            maximum: 100
+            minimum: 1
+            description: "Page size"
+            default: 50
+            title: "Size"
+          description: "Page size"
       responses:
         "200":
           description: "Successful Response"
           content:
             application/json:
               schema:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/SeedResponse"
-                title: "Response List Seeds"
+                $ref: "#/components/schemas/Page_SeedResponse_"
         "401":
           description: "The credential is missing, malformed, expired, or not trusted"
         "403":
@@ -902,20 +1080,40 @@ paths:
             description: "Only suggestions for this twin's slug."
             title: "Twin"
           description: "Only suggestions for this twin's slug."
+        - name: "page"
+          in: "query"
+          required: false
+          schema:
+            type: "integer"
+            minimum: 1
+            description: "Page number"
+            default: 1
+            title: "Page"
+          description: "Page number"
+        - name: "size"
+          in: "query"
+          required: false
+          schema:
+            type: "integer"
+            maximum: 100
+            minimum: 1
+            description: "Page size"
+            default: 50
+            title: "Size"
+          description: "Page size"
       responses:
         "200":
           description: "Successful Response"
           content:
             application/json:
               schema:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/SeedSuggestionResponse"
-                title: "Response List Seed Suggestions"
+                $ref: "#/components/schemas/Page_SeedSuggestionResponse_"
         "401":
           description: "The credential is missing, malformed, expired, or not trusted"
         "403":
           description: "The credential does not act inside an organization"
+        "503":
+          description: "A twin manifest is temporarily unavailable"
         "422":
           description: "Validation Error"
           content:
@@ -963,7 +1161,7 @@ paths:
       tags:
         - "seeds"
       summary: "Delete a seed"
-      description: "Refused while an environment or a template still uses it."
+      description: "Refused while an environment or a scenario still uses it."
       operationId: "delete_seed"
       security:
         - Organization API key: []
@@ -1414,17 +1612,17 @@ components:
               minItems: 1
             - type: "null"
           title: "Twins"
-          description: "Provider twins to provision, as slugs or objects with an optional seed. Omitted when a template supplies the twins."
-        template:
+          description: "Provider twins to provision, as slugs or objects with an optional seed. Omitted when a scenario supplies the twins."
+        scenario:
           anyOf:
             - type: "string"
               format: "uuid"
             - type: "null"
-          title: "Template"
+          title: "Scenario"
           description: "A saved environment definition to start from, instead of listing twins. Its twins are used as they were saved."
-        save_as_template:
+        save_as_scenario:
           type: "boolean"
-          title: "Save As Template"
+          title: "Save As Scenario"
           description: "Also save this environment's definition, so another environment can be started from it later."
           default: false
       additionalProperties: false
@@ -1445,6 +1643,14 @@ components:
             - type: "null"
           title: "Seed"
           description: "A generated starting state to load into this twin, by `seeds.id`. Omitted starts the twin with its own state and nothing else."
+        description:
+          anyOf:
+            - type: "string"
+              maxLength: 2000
+              minLength: 1
+            - type: "null"
+          title: "Description"
+          description: "Generate the first dataset in this twin before it becomes ready."
       additionalProperties: false
       type: "object"
       required:
@@ -1492,6 +1698,30 @@ components:
       required:
         - "name"
       title: "CreateOrganizationRequest"
+    CreateScenarioRequest:
+      properties:
+        name:
+          type: "string"
+          maxLength: 100
+          minLength: 1
+          title: "Name"
+        twins:
+          items:
+            anyOf:
+              - type: "string"
+                maxLength: 100
+                minLength: 1
+              - $ref: "#/components/schemas/ScenarioTwinRequest"
+          type: "array"
+          maxItems: 25
+          minItems: 1
+          title: "Twins"
+      additionalProperties: false
+      type: "object"
+      required:
+        - "name"
+        - "twins"
+      title: "CreateScenarioRequest"
     CreateSeedRequest:
       properties:
         name:
@@ -1622,47 +1852,6 @@ components:
         - "twins"
         - "created_at"
       title: "EnvironmentResponse"
-    EnvironmentTemplateResponse:
-      properties:
-        id:
-          type: "string"
-          format: "uuid"
-          title: "Id"
-        name:
-          type: "string"
-          title: "Name"
-        twins:
-          items:
-            $ref: "#/components/schemas/EnvironmentTemplateTwinResponse"
-          type: "array"
-          title: "Twins"
-        created_at:
-          type: "string"
-          format: "date-time"
-          title: "Created At"
-      type: "object"
-      required:
-        - "id"
-        - "name"
-        - "twins"
-        - "created_at"
-      title: "EnvironmentTemplateResponse"
-    EnvironmentTemplateTwinResponse:
-      properties:
-        twin:
-          type: "string"
-          title: "Twin"
-        seed:
-          anyOf:
-            - type: "string"
-              format: "uuid"
-            - type: "null"
-          title: "Seed"
-      type: "object"
-      required:
-        - "twin"
-      title: "EnvironmentTemplateTwinResponse"
-      description: "A slot a template asks for, named as a create request names it."
     EnvironmentTwinResponse:
       properties:
         id:
@@ -1918,6 +2107,37 @@ components:
         - "size"
         - "pages"
       title: "Page[ApiKeyResponse]"
+    Page_EnvironmentResponse_:
+      properties:
+        items:
+          items:
+            $ref: "#/components/schemas/EnvironmentResponse"
+          type: "array"
+          title: "Items"
+        total:
+          type: "integer"
+          minimum: 0.0
+          title: "Total"
+        page:
+          type: "integer"
+          minimum: 1.0
+          title: "Page"
+        size:
+          type: "integer"
+          minimum: 1.0
+          title: "Size"
+        pages:
+          type: "integer"
+          minimum: 0.0
+          title: "Pages"
+      type: "object"
+      required:
+        - "items"
+        - "total"
+        - "page"
+        - "size"
+        - "pages"
+      title: "Page[EnvironmentResponse]"
     Page_ExportResponse_:
       properties:
         items:
@@ -2011,6 +2231,99 @@ components:
         - "size"
         - "pages"
       title: "Page[RequestLogSummaryResponse]"
+    Page_ScenarioResponse_:
+      properties:
+        items:
+          items:
+            $ref: "#/components/schemas/ScenarioResponse"
+          type: "array"
+          title: "Items"
+        total:
+          type: "integer"
+          minimum: 0.0
+          title: "Total"
+        page:
+          type: "integer"
+          minimum: 1.0
+          title: "Page"
+        size:
+          type: "integer"
+          minimum: 1.0
+          title: "Size"
+        pages:
+          type: "integer"
+          minimum: 0.0
+          title: "Pages"
+      type: "object"
+      required:
+        - "items"
+        - "total"
+        - "page"
+        - "size"
+        - "pages"
+      title: "Page[ScenarioResponse]"
+    Page_SeedResponse_:
+      properties:
+        items:
+          items:
+            $ref: "#/components/schemas/SeedResponse"
+          type: "array"
+          title: "Items"
+        total:
+          type: "integer"
+          minimum: 0.0
+          title: "Total"
+        page:
+          type: "integer"
+          minimum: 1.0
+          title: "Page"
+        size:
+          type: "integer"
+          minimum: 1.0
+          title: "Size"
+        pages:
+          type: "integer"
+          minimum: 0.0
+          title: "Pages"
+      type: "object"
+      required:
+        - "items"
+        - "total"
+        - "page"
+        - "size"
+        - "pages"
+      title: "Page[SeedResponse]"
+    Page_SeedSuggestionResponse_:
+      properties:
+        items:
+          items:
+            $ref: "#/components/schemas/SeedSuggestionResponse"
+          type: "array"
+          title: "Items"
+        total:
+          type: "integer"
+          minimum: 0.0
+          title: "Total"
+        page:
+          type: "integer"
+          minimum: 1.0
+          title: "Page"
+        size:
+          type: "integer"
+          minimum: 1.0
+          title: "Size"
+        pages:
+          type: "integer"
+          minimum: 0.0
+          title: "Pages"
+      type: "object"
+      required:
+        - "items"
+        - "total"
+        - "page"
+        - "size"
+        - "pages"
+      title: "Page[SeedSuggestionResponse]"
     Page_TwinResponse_:
       properties:
         items:
@@ -2168,6 +2481,68 @@ components:
         - "duration_ms"
         - "occurred_at"
       title: "RequestLogSummaryResponse"
+    ScenarioResponse:
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+          title: "Id"
+        name:
+          type: "string"
+          title: "Name"
+        twins:
+          items:
+            $ref: "#/components/schemas/ScenarioTwinResponse"
+          type: "array"
+          title: "Twins"
+        owned:
+          type: "boolean"
+          title: "Owned"
+        created_at:
+          type: "string"
+          format: "date-time"
+          title: "Created At"
+      type: "object"
+      required:
+        - "id"
+        - "name"
+        - "twins"
+        - "owned"
+        - "created_at"
+      title: "ScenarioResponse"
+    ScenarioTwinRequest:
+      properties:
+        twin:
+          type: "string"
+          maxLength: 100
+          minLength: 1
+          title: "Twin"
+        seed:
+          anyOf:
+            - type: "string"
+              format: "uuid"
+            - type: "null"
+          title: "Seed"
+      additionalProperties: false
+      type: "object"
+      required:
+        - "twin"
+      title: "ScenarioTwinRequest"
+    ScenarioTwinResponse:
+      properties:
+        twin:
+          type: "string"
+          title: "Twin"
+        seed:
+          anyOf:
+            - type: "string"
+              format: "uuid"
+            - type: "null"
+          title: "Seed"
+      type: "object"
+      required:
+        - "twin"
+      title: "ScenarioTwinResponse"
     SeedResponse:
       properties:
         id:
@@ -2294,6 +2669,31 @@ components:
       required:
         - "name"
       title: "UpdateOrganizationRequest"
+    UpdateScenarioRequest:
+      properties:
+        name:
+          anyOf:
+            - type: "string"
+              maxLength: 100
+              minLength: 1
+            - type: "null"
+          title: "Name"
+        twins:
+          anyOf:
+            - items:
+                anyOf:
+                  - type: "string"
+                    maxLength: 100
+                    minLength: 1
+                  - $ref: "#/components/schemas/ScenarioTwinRequest"
+              type: "array"
+              maxItems: 25
+              minItems: 1
+            - type: "null"
+          title: "Twins"
+      additionalProperties: false
+      type: "object"
+      title: "UpdateScenarioRequest"
     UserResponse:
       properties:
         id:
@@ -2364,5 +2764,7 @@ tags:
     description: "Manage provisioned twins by their IDs."
   - name: "catalog"
     description: "Browse the digital twins available for new environments."
+  - name: "scenarios"
+    description: "Reusable starting setups of provider twins and optional seeds."
   - name: "seeds"
     description: "Starting states for a twin. Describe the data you want in your own words, and a worker expands it into rows once; pass the seed's id when you create an environment to start a twin holding it."

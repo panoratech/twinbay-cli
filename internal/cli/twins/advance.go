@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/panoratech/twinbay-cli/internal/client"
 	"github.com/panoratech/twinbay-cli/internal/flagutil"
+	"github.com/panoratech/twinbay-cli/internal/interactive"
 	"github.com/panoratech/twinbay-cli/internal/output"
 	"github.com/panoratech/twinbay-cli/internal/sdk"
 	"github.com/panoratech/twinbay-cli/internal/sdk/models/operations"
@@ -21,11 +22,11 @@ var advanceCmdMeta = []flagutil.FlagMeta{
 // initAdvanceCmd initializes the advance command.
 func initAdvanceCmd(parent *cobra.Command) error {
 	var cmd = &cobra.Command{
-		Use:     "advance",
+		Use:     "advance [twin-id]",
 		Short:   "Advance a deterministic twin lifecycle",
 		Long:    "Advance a deterministic twin lifecycle",
 		Example: "  twinbay twins advance --twin-id 6676c26b-60f9-49d6-a691-a1177f475044",
-		Args:    cobra.NoArgs,
+		Args:    flagutil.PositionalFlagArgs,
 		RunE:    runAdvanceCmd,
 		Annotations: map[string]string{
 			"speakeasy_operation": "advance_environment",
@@ -43,6 +44,14 @@ func initAdvanceCmd(parent *cobra.Command) error {
 	}
 	cmd.Flags().Bool("schema", false, "Print the exact JSON Schema of the request body and exit")
 	_ = flagutil.AnnotatePromptFlag(cmd, "schema", flagutil.PromptFlagSpec{Kind: "bool", DocSurface: true})
+	if err := flagutil.DeclarePositionalFlag(cmd, "twin-id", "string value (or pass it as the [twin-id] argument)", true); err != nil {
+		return err
+	}
+	if err := interactive.Declare(cmd, interactive.CommandSpec{Args: []interactive.ArgSpec{
+		{Name: "twin-id", Summary: "string value", Required: true, SatisfiedBy: []string{"twin-id"}},
+	}}); err != nil {
+		return fmt.Errorf("declare interactive arguments for advance: %w", err)
+	}
 	parent.AddCommand(cmd)
 	return nil
 }
@@ -54,6 +63,9 @@ func runAdvanceCmd(cmd *cobra.Command, args []string) error {
 	}
 	if requested, _ := cmd.Flags().GetBool("schema"); requested {
 		return usage.EmitBodySchema(cmd.OutOrStdout(), "advance_environment")
+	}
+	if err := flagutil.ResolvePositionalFlag(cmd, args); err != nil {
+		return err
 	}
 	req, err := flagutil.BuildRequest[operations.AdvanceEnvironmentRequest](cmd, advanceCmdMeta, "Body", "body")
 	if err != nil {

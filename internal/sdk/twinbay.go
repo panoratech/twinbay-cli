@@ -2,7 +2,7 @@
 
 package sdk
 
-// Generated from OpenAPI doc version 0.1.0 and generator version 2.938.0
+// Generated from OpenAPI doc version 0.1.0 and generator version 2.941.0
 
 import (
 	"context"
@@ -62,9 +62,10 @@ type Twinbay struct {
 	// Create and edit isolated provider environments. Each environment contains behavioural twins from the `twins` package.
 	Environments *Environments
 	// Manage provisioned twins by their IDs.
-	Twins                *Twins
-	TwinRecords          *TwinRecords
-	EnvironmentTemplates *EnvironmentTemplates
+	Twins       *Twins
+	TwinRecords *TwinRecords
+	// Reusable starting setups of provider twins and optional seeds.
+	Scenarios *Scenarios
 	// Starting states for a twin. Describe the data you want in your own words, and a worker expands it into rows once; pass the seed's id when you create an environment to start a twin holding it.
 	Seeds              *Seeds
 	EnvironmentLogs    *EnvironmentLogs
@@ -144,11 +145,11 @@ func WithTimeout(timeout time.Duration) SDKOption {
 // New creates a new instance of the SDK with the provided options
 func New(opts ...SDKOption) *Twinbay {
 	sdk := &Twinbay{
-		SDKVersion: "0.2.3",
+		SDKVersion: "0.3.0",
 		sdkConfiguration: config.SDKConfiguration{
-			UserAgent:         "speakeasy-sdk/go 0.2.3 2.938.0 0.1.0 github.com/panoratech/twinbay-cli/internal/sdk",
-			SDKVersion:        "0.2.3",
-			GenVersion:        "2.938.0",
+			UserAgent:         "speakeasy-sdk/go 0.3.0 2.941.0 0.1.0 github.com/panoratech/twinbay-cli/internal/sdk",
+			SDKVersion:        "0.3.0",
+			GenVersion:        "2.941.0",
 			OpenAPIDocVersion: "0.1.0",
 			ServerList:        ServerList,
 		},
@@ -172,7 +173,7 @@ func New(opts ...SDKOption) *Twinbay {
 	sdk.Environments = newEnvironments(sdk, sdk.sdkConfiguration, sdk.hooks)
 	sdk.Twins = newTwins(sdk, sdk.sdkConfiguration, sdk.hooks)
 	sdk.TwinRecords = newTwinRecords(sdk, sdk.sdkConfiguration, sdk.hooks)
-	sdk.EnvironmentTemplates = newEnvironmentTemplates(sdk, sdk.sdkConfiguration, sdk.hooks)
+	sdk.Scenarios = newScenarios(sdk, sdk.sdkConfiguration, sdk.hooks)
 	sdk.Seeds = newSeeds(sdk, sdk.sdkConfiguration, sdk.hooks)
 	sdk.EnvironmentLogs = newEnvironmentLogs(sdk, sdk.sdkConfiguration, sdk.hooks)
 	sdk.EnvironmentExports = newEnvironmentExports(sdk, sdk.sdkConfiguration, sdk.hooks)

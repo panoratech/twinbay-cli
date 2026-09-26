@@ -15,6 +15,8 @@ import (
 
 var listCmdMeta = []flagutil.FlagMeta{
 	{FlagName: "twin", Shorthand: "t", FieldPath: "Twin", Kind: flagutil.FlagKindJSON, Optional: true, Annotations: `queryParam:"style=form,explode=true,name=twin"`, Description: "Only seeds for this twin's slug."},
+	{FlagName: "page", Shorthand: "p", FieldPath: "Page", Kind: flagutil.FlagKindInt64, Optional: true, HasDefault: true, DefaultInt: 1, HasMinimum: true, Minimum: 1, Description: "Page number"},
+	{FlagName: "size", Shorthand: "s", FieldPath: "Size", Kind: flagutil.FlagKindInt64, Optional: true, HasDefault: true, DefaultInt: 50, HasMinimum: true, Minimum: 1, HasMaximum: true, Maximum: 100, Description: "Page size"},
 }
 
 // initListCmd initializes the list command.

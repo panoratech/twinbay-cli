@@ -3,13 +3,20 @@
 package environments
 
 import (
+	"fmt"
 	"github.com/panoratech/twinbay-cli/internal/client"
+	"github.com/panoratech/twinbay-cli/internal/flagutil"
 	"github.com/panoratech/twinbay-cli/internal/output"
 	"github.com/panoratech/twinbay-cli/internal/sdk"
 	"github.com/panoratech/twinbay-cli/internal/sdk/models/operations"
 	"github.com/panoratech/twinbay-cli/internal/usage"
 	"github.com/spf13/cobra"
 )
+
+var listCmdMeta = []flagutil.FlagMeta{
+	{FlagName: "page", Shorthand: "p", FieldPath: "Page", Kind: flagutil.FlagKindInt64, Optional: true, HasDefault: true, DefaultInt: 1, HasMinimum: true, Minimum: 1, Description: "Page number"},
+	{FlagName: "size", Shorthand: "s", FieldPath: "Size", Kind: flagutil.FlagKindInt64, Optional: true, HasDefault: true, DefaultInt: 50, HasMinimum: true, Minimum: 1, HasMaximum: true, Maximum: 100, Description: "Page size"},
+}
 
 // initListCmd initializes the list command.
 func initListCmd(parent *cobra.Command) error {
@@ -24,6 +31,10 @@ func initListCmd(parent *cobra.Command) error {
 			"speakeasy_operation": "list_environments",
 		},
 	}
+	flagutil.RegisterFlags(cmd, listCmdMeta)
+	if err := flagutil.ValidateMeta[operations.ListEnvironmentsRequest](listCmdMeta); err != nil {
+		return fmt.Errorf("invalid metadata for list: %w", err)
+	}
 	parent.AddCommand(cmd)
 	return nil
 }
@@ -32,6 +43,10 @@ func initListCmd(parent *cobra.Command) error {
 func runListCmd(cmd *cobra.Command, args []string) error {
 	if usage.UsageRequested(cmd) {
 		return usage.EmitSchema(cmd, cmd.OutOrStdout())
+	}
+	req, err := flagutil.BuildRequest[operations.ListEnvironmentsRequest](cmd, listCmdMeta, "", "")
+	if err != nil {
+		return flagutil.WithCLIValidation(err)
 	}
 	s, err := client.NewClient(cmd)
 	if err != nil {
@@ -52,7 +67,7 @@ func runListCmd(cmd *cobra.Command, args []string) error {
 	if output.WantsRawJSON(cmd) {
 		sdkOpts = append(sdkOpts, operations.WithSkipDeserialization())
 	}
-	res, err := s.Environments.List(cmd.Context(), sdkOpts...)
+	res, err := s.Environments.List(cmd.Context(), req, sdkOpts...)
 	if err != nil {
 		return output.Error(cmd, err)
 	}

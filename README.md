@@ -124,11 +124,11 @@ This CLI is built to be driven by AI coding agents as well as people: everything
 
 | Run | You get |
 |-----|---------|
-| `twinbay --help`, `twinbay environment-templates list --help` | Commands by category, runnable examples, flags |
-| `twinbay --usage`, `twinbay environment-templates list --usage` | The command surface as machine-readable [KDL](https://kdl.dev): commands, aliases, flags, defaults, env vars, config keys |
+| `twinbay --help`, `twinbay api-keys list --help` | Commands by category, runnable examples, flags |
+| `twinbay --usage`, `twinbay api-keys list --usage` | The command surface as machine-readable [KDL](https://kdl.dev): commands, aliases, flags, defaults, env vars, config keys |
 | `twinbay environments create --schema` | The exact JSON Schema of the command's request body (all `$ref`s bundled) — build a valid `--body` from it |
-| `twinbay environment-templates list --dry-run` | The exact HTTP request (method, URL, headers, body), with no credentials or network call |
-| `twinbay environment-templates list --output-format json` (or `--jq`) | Machine-readable output |
+| `twinbay api-keys list --dry-run` | The exact HTTP request (method, URL, headers, body), with no credentials or network call |
+| `twinbay api-keys list --output-format json` (or `--jq`) | Machine-readable output |
 
 ### Discover the command surface
 
@@ -137,7 +137,7 @@ This CLI is built to be driven by AI coding agents as well as people: everything
 twinbay --usage
 
 # One command's subtree only
-twinbay environment-templates list --usage
+twinbay api-keys list --usage
 ```
 
 ### Read the exact request schema
@@ -155,10 +155,10 @@ Start quota-spending commands with `--dry-run`. It validates inputs, resolves th
 
 ```bash
 # Human preview: the [DRY-RUN] block is on stderr and stdout is empty
-twinbay environment-templates list --dry-run
+twinbay api-keys list --dry-run
 
 # Machine preview: compact JSON on stdout and silent stderr
-twinbay environment-templates list --dry-run --output-format json
+twinbay api-keys list --dry-run --output-format json
 ```
 
 The machine form writes one object per would-be request, one per line (NDJSON for multi-request commands), with exactly this shape:
@@ -175,13 +175,13 @@ Local mutation commands make no request under `--dry-run`: instead of a preview 
 
 ```bash
 # JSON on stdout
-twinbay environment-templates list --output-format json
+twinbay api-keys list --output-format json
 
 # Filter or reshape with a jq expression (always emits JSON, overrides --output-format)
-twinbay environment-templates list --jq '.'
+twinbay api-keys list --jq '.'
 
 # Print jq string results as plain text instead of JSON strings (like jq -r)
-twinbay environment-templates list --jq '.' --raw-output
+twinbay api-keys list --jq '.' --raw-output
 ```
 
 `--output-format toon` emits [TOON](https://github.com/toon-format/spec), a compact line-oriented format that uses fewer tokens than JSON; it is the default in agent mode.
@@ -191,7 +191,7 @@ Required-input prompts and guided `configure` / `auth login` forms are enabled b
 
 ```bash
 # Prompt for missing command inputs
-twinbay environment-templates list --interactive
+twinbay api-keys list --interactive
 
 # Open the guided configuration form
 twinbay configure --interactive
@@ -229,7 +229,7 @@ Authentication credentials can be configured in four ways (in order of priority)
 Pass credentials directly as flags to any command:
 
 ```bash
-twinbay --organization-api-key "$CLI_TWINBAY_ORGANIZATION_API_KEY" environment-templates list
+twinbay --organization-api-key "$CLI_TWINBAY_ORGANIZATION_API_KEY" api-keys list
 ```
 
 ### 2. Environment variables
@@ -287,8 +287,8 @@ Configuration is stored in `~/.config/twinbay/config.yaml`.
   * [`list`](docs/twinbay_catalog_list.md) - List available twins
   * [`retrieve`](docs/twinbay_catalog_retrieve.md) - Retrieve a twin
 * [`environments`](docs/twinbay_environments.md) - Create and edit isolated provider environments
-  * [`list`](docs/twinbay_environments_list.md) - List environments
   * [`create`](docs/twinbay_environments_create.md) - Create an environment
+  * [`list`](docs/twinbay_environments_list.md) - List environments
   * [`retrieve`](docs/twinbay_environments_retrieve.md) - Retrieve an environment
 * [`twins`](docs/twinbay_twins.md) - Manage provisioned twins by their IDs
   * [`retrieve`](docs/twinbay_twins_retrieve.md) - Retrieve a twin
@@ -299,9 +299,12 @@ Configuration is stored in `~/.config/twinbay/config.yaml`.
 * [`twin-records`](docs/twinbay_twin-records.md) - Operations for twin-records
   * [`list`](docs/twinbay_twin-records_list.md) - List twin state
   * [`update`](docs/twinbay_twin-records_update.md) - Replace a twin record
-* [`environment-templates`](docs/twinbay_environment-templates.md) - Operations for environment-templates
-  * [`list`](docs/twinbay_environment-templates_list.md) - List environment templates
-  * [`delete`](docs/twinbay_environment-templates_delete.md) - Delete an environment template
+* [`scenarios`](docs/twinbay_scenarios.md) - Reusable starting setups of provider twins and optional seeds
+  * [`create`](docs/twinbay_scenarios_create.md) - Create a scenario
+  * [`list`](docs/twinbay_scenarios_list.md) - List scenarios
+  * [`retrieve`](docs/twinbay_scenarios_retrieve.md) - Retrieve a scenario
+  * [`update`](docs/twinbay_scenarios_update.md) - Update a scenario
+  * [`delete`](docs/twinbay_scenarios_delete.md) - Delete a scenario
 * [`seeds`](docs/twinbay_seeds.md) - Starting states for a twin
   * [`create`](docs/twinbay_seeds_create.md) - Generate a seed
   * [`list`](docs/twinbay_seeds_list.md) - List seeds
@@ -330,7 +333,7 @@ Commands that accept a request body take it three ways, with a clear priority ch
 Each top-level body field is a flag:
 
 ```bash
-twinbay environments create --save-as-template=false
+twinbay environments create --save-as-scenario=false
 ```
 
 ### `--body` flag
@@ -338,14 +341,14 @@ twinbay environments create --save-as-template=false
 Provide the entire request body as a JSON string:
 
 ```bash
-twinbay environments create --body '{"save_as_template":false}'
+twinbay environments create --body '{"save_as_scenario":false}'
 ```
 
 Individual flags override `--body` values:
 
 ```bash
-# Sends {"save_as_template":true}
-twinbay environments create --body '{"save_as_template":false}' --save-as-template=true
+# Sends {"save_as_scenario":true}
+twinbay environments create --body '{"save_as_scenario":false}' --save-as-scenario=true
 ```
 
 ### Stdin piping (lowest priority)
@@ -353,14 +356,14 @@ twinbay environments create --body '{"save_as_template":false}' --save-as-templa
 Pipe JSON into any command that accepts a request body:
 
 ```bash
-echo '{"save_as_template":false}' | twinbay environments create
+echo '{"save_as_scenario":false}' | twinbay environments create
 ```
 
 Individual flags override stdin values:
 
 ```bash
-# Sends {"save_as_template":true}
-echo '{"save_as_template":false}' | twinbay environments create --save-as-template=true
+# Sends {"save_as_scenario":true}
+echo '{"save_as_scenario":false}' | twinbay environments create --save-as-scenario=true
 ```
 
 This is useful for chaining commands, reading from files, or scripting:
@@ -379,7 +382,7 @@ When multiple input methods are used, the priority is:
 
 | Priority | Source | Description |
 |----------|--------|-------------|
-| 1 (highest) | Individual flags | `--save-as-template ...` always wins |
+| 1 (highest) | Individual flags | `--save-as-scenario ...` always wins |
 | 2 | `--body` flag | Whole-body JSON via flag |
 | 3 (lowest) | Stdin | Piped JSON input |
 <!-- End Request Body Input [stdinpiping] -->
@@ -392,7 +395,7 @@ When multiple input methods are used, the priority is:
 Use `--server-url` to override the server URL entirely, bypassing any named or indexed server selection:
 
 ```bash
-twinbay --server-url https://custom-api.example.com environment-templates list
+twinbay --server-url https://custom-api.example.com api-keys list
 ```
 
 **Precedence**: `--server-url` > `--server` > default
@@ -415,16 +418,16 @@ Every command supports a `--output-format` flag that controls how the response i
 
 ```bash
 # Default pretty output
-twinbay environment-templates list
+twinbay api-keys list
 
 # Machine-readable JSON
-twinbay environment-templates list --output-format json
+twinbay api-keys list --output-format json
 
 # TOON for LLM-friendly compact output
-twinbay environment-templates list --output-format toon
+twinbay api-keys list --output-format toon
 
 # Pipe JSON to jq without using --output-format
-twinbay environment-templates list --output-format json | jq '.'
+twinbay api-keys list --output-format json | jq '.'
 ```
 
 ### jq filtering
@@ -433,10 +436,10 @@ Use `--jq` to filter or transform the response inline using a [jq](https://jqlan
 
 ```bash
 # Extract a single field
-twinbay environment-templates list --jq '.'
+twinbay api-keys list --jq '.'
 
 # Reshape with any jq program; --raw-output prints string results as plain text (like jq -r)
-twinbay environment-templates list --jq '.' --raw-output
+twinbay api-keys list --jq '.' --raw-output
 ```
 
 ### Color control
@@ -479,7 +482,7 @@ On success, the response data is printed to **stdout** as JSON. On failure, erro
 
 ```bash
 # Capture output and handle errors
-twinbay environment-templates list --output-format json > output.json 2> error.log
+twinbay api-keys list --output-format json > output.json 2> error.log
 if [ $? -ne 0 ]; then
   echo "Error occurred, see error.log"
 fi
@@ -497,7 +500,7 @@ The CLI includes two diagnostic flags available on all commands:
 Preview what would be sent without making any network calls:
 
 ```bash
-twinbay environment-templates list --dry-run
+twinbay api-keys list --dry-run
 ```
 
 In human output modes, stdout is empty and the `[DRY-RUN]` block goes to stderr. It includes:
@@ -520,7 +523,7 @@ Local mutation commands emit one `{"dry_run":true,"local":true,"command":"…","
 Log request and response diagnostics while running normally:
 
 ```bash
-twinbay environment-templates list --debug
+twinbay api-keys list --debug
 ```
 
 Debug output goes to stderr and includes:

@@ -7,7 +7,7 @@ Retrieve a twin
 Retrieve a twin
 
 ```
-twinbay catalog retrieve [flags]
+twinbay catalog retrieve [twin-slug] [flags]
 ```
 
 ### Examples
@@ -20,7 +20,7 @@ twinbay catalog retrieve [flags]
 
 ```
   -h, --help               help for retrieve
-  -t, --twin-slug string   [required]
+  -t, --twin-slug string   string value (or pass it as the [twin-slug] argument)
 ```
 
 ### Options inherited from parent commands
