@@ -179,7 +179,7 @@ func (s *APIKeys) CreateAPIKey(ctx context.Context, request components.CreateAPI
 
 			var out sdkerrors.HTTPValidationError
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out, ""); err != nil {
-				return nil, err
+				return nil, sdkerrors.NewResponseValidationError("response did not match the declared error schema", httpRes.StatusCode, string(rawBody), httpRes, err)
 			}
 
 			out.HTTPMeta = components.HTTPMetadata{
@@ -223,7 +223,7 @@ func (s *APIKeys) CreateAPIKey(ctx context.Context, request components.CreateAPI
 }
 
 // ListAPIKeys - List API keys
-// Every key of the active organization that has not been revoked, oldest first. A key that has expired is still listed, so that it can be read and cleaned up rather than vanishing unexplained; `expires_at` says which. Tokens are never included. Paginated: walk the pages with `page` and `size`.
+// Every key of the active organization that has not been revoked, newest first. A key that has expired is still listed, so that it can be read and cleaned up rather than vanishing unexplained; `expires_at` says which. Tokens are never included. Paginated: walk the pages with `page` and `size`.
 func (s *APIKeys) ListAPIKeys(ctx context.Context, request *operations.ListAPIKeysRequest, opts ...operations.Option) (*operations.ListAPIKeysResponse, error) {
 	o := operations.Options{}
 	supportedOptions := []string{
@@ -367,7 +367,7 @@ func (s *APIKeys) ListAPIKeys(ctx context.Context, request *operations.ListAPIKe
 
 			var out sdkerrors.HTTPValidationError
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out, ""); err != nil {
-				return nil, err
+				return nil, sdkerrors.NewResponseValidationError("response did not match the declared error schema", httpRes.StatusCode, string(rawBody), httpRes, err)
 			}
 
 			out.HTTPMeta = components.HTTPMetadata{
@@ -522,7 +522,7 @@ func (s *APIKeys) RevokeAPIKey(ctx context.Context, request operations.RevokeAPI
 
 			var out sdkerrors.HTTPValidationError
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out, ""); err != nil {
-				return nil, err
+				return nil, sdkerrors.NewResponseValidationError("response did not match the declared error schema", httpRes.StatusCode, string(rawBody), httpRes, err)
 			}
 
 			out.HTTPMeta = components.HTTPMetadata{

@@ -4,7 +4,7 @@ List API keys
 
 ### Synopsis
 
-Every key of the active organization that has not been revoked, oldest first. A key that has expired is still listed, so that it can be read and cleaned up rather than vanishing unexplained; `expires_at` says which. Tokens are never included. Paginated: walk the pages with `page` and `size`.
+Every key of the active organization that has not been revoked, newest first. A key that has expired is still listed, so that it can be read and cleaned up rather than vanishing unexplained; `expires_at` says which. Tokens are never included. Paginated: walk the pages with `page` and `size`.
 
 ```
 twinbay api-keys list [flags]

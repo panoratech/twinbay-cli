@@ -20,6 +20,8 @@ twinbay seeds list-suggestions [flags]
 
 ```
   -h, --help          help for list-suggestions
+  -p, --page int      Page number (default 1)
+  -s, --size int      Page size (default 50)
   -t, --twin string   Only suggestions for this twin's slug.
 ```
 

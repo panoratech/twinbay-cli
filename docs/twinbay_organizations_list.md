@@ -4,7 +4,7 @@ List your organizations
 
 ### Synopsis
 
-Every organization the caller is a member of, with their role in each, oldest membership first. Independent of the organization the current token acts in. Paginated: walk the pages with `page` and `size`.
+Every organization the caller is a member of, with their role in each, newest membership first. Independent of the organization the current token acts in. Paginated: walk the pages with `page` and `size`.
 
 ```
 twinbay organizations list [flags]

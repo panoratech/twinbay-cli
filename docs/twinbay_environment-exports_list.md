@@ -7,7 +7,7 @@ List an environment's exports
 List an environment's exports
 
 ```
-twinbay environment-exports list [flags]
+twinbay environment-exports list [environment-id] [flags]
 ```
 
 ### Examples
@@ -19,7 +19,7 @@ twinbay environment-exports list [flags]
 ### Options
 
 ```
-  -e, --environment-id string   [required]
+  -e, --environment-id string   string value (or pass it as the [environment-id] argument)
   -h, --help                    help for list
   -p, --page int                Page number (default 1)
   -s, --size int                Page size (default 50)

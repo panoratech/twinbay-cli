@@ -23,7 +23,7 @@ func initListCmd(parent *cobra.Command) error {
 	var cmd = &cobra.Command{
 		Use:     "list",
 		Short:   "List available twins",
-		Long:    "Returns the registered code twins ordered by display name.",
+		Long:    "Returns the registered code twins newest release first.",
 		Example: "  twinbay catalog list",
 		Args:    cobra.NoArgs,
 		RunE:    runListCmd,

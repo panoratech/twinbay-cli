@@ -12,6 +12,8 @@ type CreateEnvironmentTwinRequest struct {
 	Twin string `json:"twin"`
 	// A generated starting state to load into this twin, by `seeds.id`. Omitted starts the twin with its own state and nothing else.
 	Seed optionalnullable.OptionalNullable[string] `json:"seed,omitzero"`
+	// Generate the first dataset in this twin before it becomes ready.
+	Description optionalnullable.OptionalNullable[string] `json:"description,omitzero"`
 }
 
 func (c CreateEnvironmentTwinRequest) MarshalJSON() ([]byte, error) {
@@ -37,4 +39,11 @@ func (c *CreateEnvironmentTwinRequest) GetSeed() optionalnullable.OptionalNullab
 		return nil
 	}
 	return c.Seed
+}
+
+func (c *CreateEnvironmentTwinRequest) GetDescription() optionalnullable.OptionalNullable[string] {
+	if c == nil {
+		return nil
+	}
+	return c.Description
 }

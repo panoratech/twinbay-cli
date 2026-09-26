@@ -40,10 +40,10 @@ twinbay [flags]
 * [twinbay configure](twinbay_configure.md)	 - Configure authentication credentials and preferences
 * [twinbay environment-exports](twinbay_environment-exports.md)	 - Operations for environment-exports
 * [twinbay environment-logs](twinbay_environment-logs.md)	 - Operations for environment-logs
-* [twinbay environment-templates](twinbay_environment-templates.md)	 - Operations for environment-templates
 * [twinbay environments](twinbay_environments.md)	 - Create and edit isolated provider environments
 * [twinbay explore](twinbay_explore.md)	 - Interactively browse and run commands
 * [twinbay organizations](twinbay_organizations.md)	 - Organizations the caller belongs to
+* [twinbay scenarios](twinbay_scenarios.md)	 - Reusable starting setups of provider twins and optional seeds
 * [twinbay seeds](twinbay_seeds.md)	 - Starting states for a twin
 * [twinbay twin-records](twinbay_twin-records.md)	 - Operations for twin-records
 * [twinbay twins](twinbay_twins.md)	 - Manage provisioned twins by their IDs

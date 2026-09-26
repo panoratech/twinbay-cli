@@ -32,7 +32,7 @@ func newOrganizations(rootSDK *Twinbay, sdkConfig config.SDKConfiguration, hooks
 }
 
 // ListOrganizations - List your organizations
-// Every organization the caller is a member of, with their role in each, oldest membership first. Independent of the organization the current token acts in. Paginated: walk the pages with `page` and `size`.
+// Every organization the caller is a member of, with their role in each, newest membership first. Independent of the organization the current token acts in. Paginated: walk the pages with `page` and `size`.
 func (s *Organizations) ListOrganizations(ctx context.Context, request *operations.ListOrganizationsRequest, opts ...operations.Option) (*operations.ListOrganizationsResponse, error) {
 	o := operations.Options{}
 	supportedOptions := []string{
@@ -176,7 +176,7 @@ func (s *Organizations) ListOrganizations(ctx context.Context, request *operatio
 
 			var out sdkerrors.HTTPValidationError
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out, ""); err != nil {
-				return nil, err
+				return nil, sdkerrors.NewResponseValidationError("response did not match the declared error schema", httpRes.StatusCode, string(rawBody), httpRes, err)
 			}
 
 			out.HTTPMeta = components.HTTPMetadata{
@@ -365,7 +365,7 @@ func (s *Organizations) CreateOrganization(ctx context.Context, request componen
 
 			var out sdkerrors.HTTPValidationError
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out, ""); err != nil {
-				return nil, err
+				return nil, sdkerrors.NewResponseValidationError("response did not match the declared error schema", httpRes.StatusCode, string(rawBody), httpRes, err)
 			}
 
 			out.HTTPMeta = components.HTTPMetadata{
@@ -713,7 +713,7 @@ func (s *Organizations) Update(ctx context.Context, request components.UpdateOrg
 
 			var out sdkerrors.HTTPValidationError
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out, ""); err != nil {
-				return nil, err
+				return nil, sdkerrors.NewResponseValidationError("response did not match the declared error schema", httpRes.StatusCode, string(rawBody), httpRes, err)
 			}
 
 			out.HTTPMeta = components.HTTPMetadata{

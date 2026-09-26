@@ -7,10 +7,42 @@ import (
 	"github.com/panoratech/twinbay-cli/internal/sdk/sdkinternal/utils"
 )
 
+type ListEnvironmentsRequest struct {
+	// Page number
+	Page *int64 `default:"1" queryParam:"style=form,explode=true,name=page"`
+	// Page size
+	Size *int64 `default:"50" queryParam:"style=form,explode=true,name=size"`
+}
+
+func (l ListEnvironmentsRequest) MarshalJSON() ([]byte, error) {
+	return utils.MarshalJSON(l, "", false)
+}
+
+func (l *ListEnvironmentsRequest) UnmarshalJSON(data []byte) error {
+	if err := utils.UnmarshalJSON(data, &l, "", false, nil); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (l *ListEnvironmentsRequest) GetPage() *int64 {
+	if l == nil {
+		return nil
+	}
+	return l.Page
+}
+
+func (l *ListEnvironmentsRequest) GetSize() *int64 {
+	if l == nil {
+		return nil
+	}
+	return l.Size
+}
+
 type ListEnvironmentsResponse struct {
 	HTTPMeta components.HTTPMetadata `json:"-"`
 	// Successful Response
-	ResponseListEnvironments []components.EnvironmentResponse
+	PageEnvironmentResponse *components.PageEnvironmentResponse
 }
 
 func (l ListEnvironmentsResponse) MarshalJSON() ([]byte, error) {
@@ -31,9 +63,9 @@ func (l *ListEnvironmentsResponse) GetHTTPMeta() components.HTTPMetadata {
 	return l.HTTPMeta
 }
 
-func (l *ListEnvironmentsResponse) GetResponseListEnvironments() []components.EnvironmentResponse {
+func (l *ListEnvironmentsResponse) GetPageEnvironmentResponse() *components.PageEnvironmentResponse {
 	if l == nil {
 		return nil
 	}
-	return l.ResponseListEnvironments
+	return l.PageEnvironmentResponse
 }

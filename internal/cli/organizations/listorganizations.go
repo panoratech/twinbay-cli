@@ -23,7 +23,7 @@ func initListOrganizationsCmd(parent *cobra.Command) error {
 	var cmd = &cobra.Command{
 		Use:     "list",
 		Short:   "List your organizations",
-		Long:    "Every organization the caller is a member of, with their role in each, oldest membership first. Independent of the organization the current token acts in. Paginated: walk the pages with `page` and `size`.",
+		Long:    "Every organization the caller is a member of, with their role in each, newest membership first. Independent of the organization the current token acts in. Paginated: walk the pages with `page` and `size`.",
 		Example: "  twinbay organizations list",
 		Args:    cobra.NoArgs,
 		RunE:    runListOrganizationsCmd,
