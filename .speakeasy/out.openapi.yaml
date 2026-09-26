@@ -871,6 +871,7 @@ paths:
       tags:
         - "scenarios"
       summary: "Retrieve a scenario"
+      description: "A community scenario another organization published is readable here with `owned` false; editing, deleting and starting it stay with its organization."
       operationId: "get_scenario"
       security:
         - Organization API key: []
@@ -893,6 +894,8 @@ paths:
           description: "The credential is missing, malformed, expired, or not trusted"
         "403":
           description: "The credential does not act inside an organization"
+        "404":
+          description: "Scenario not found"
         "422":
           description: "Validation Error"
           content:

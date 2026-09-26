@@ -411,6 +411,7 @@ func (s *Scenarios) List(ctx context.Context, request *operations.ListScenariosR
 }
 
 // Retrieve a scenario
+// A community scenario another organization published is readable here with `owned` false; editing, deleting and starting it stay with its organization.
 func (s *Scenarios) Retrieve(ctx context.Context, request operations.GetScenarioRequest, opts ...operations.Option) (*operations.GetScenarioResponse, error) {
 	o := operations.Options{}
 	supportedOptions := []string{
@@ -568,6 +569,8 @@ func (s *Scenarios) Retrieve(ctx context.Context, request operations.GetScenario
 	case httpRes.StatusCode == 401:
 		fallthrough
 	case httpRes.StatusCode == 403:
+		fallthrough
+	case httpRes.StatusCode == 404:
 		fallthrough
 	case httpRes.StatusCode >= 400 && httpRes.StatusCode < 500:
 		rawBody, err := utils.ConsumeRawBody(httpRes)
