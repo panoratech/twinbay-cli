@@ -41,10 +41,16 @@ twinbay [flags]
 * [twinbay environment-exports](twinbay_environment-exports.md)	 - Operations for environment-exports
 * [twinbay environment-logs](twinbay_environment-logs.md)	 - Operations for environment-logs
 * [twinbay environments](twinbay_environments.md)	 - Create and edit isolated provider environments
+* [twinbay evaluation-inputs](twinbay_evaluation-inputs.md)	 - Operations for evaluation-inputs
+* [twinbay evaluations](twinbay_evaluations.md)	 - Operations for evaluations
+* [twinbay evaluator-versions](twinbay_evaluator-versions.md)	 - Operations for evaluator-versions
 * [twinbay explore](twinbay_explore.md)	 - Interactively browse and run commands
 * [twinbay organizations](twinbay_organizations.md)	 - Organizations the caller belongs to
 * [twinbay scenarios](twinbay_scenarios.md)	 - Reusable starting setups of provider twins and optional seeds
 * [twinbay seeds](twinbay_seeds.md)	 - Starting states for a twin
+* [twinbay test-runs](twinbay_test-runs.md)	 - Operations for test-runs
+* [twinbay test-versions](twinbay_test-versions.md)	 - Operations for test-versions
+* [twinbay tests](twinbay_tests.md)	 - Outcomes described in natural language, compiled once into request matchers, and evaluated deterministically against the traffic an attempt was served
 * [twinbay twin-records](twinbay_twin-records.md)	 - Operations for twin-records
 * [twinbay twins](twinbay_twins.md)	 - Manage provisioned twins by their IDs
 * [twinbay users](twinbay_users.md)	 - The current user

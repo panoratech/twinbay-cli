@@ -311,6 +311,29 @@ Configuration is stored in `~/.config/twinbay/config.yaml`.
   * [`list-suggestions`](docs/twinbay_seeds_list-suggestions.md) - List suggested starting states
   * [`retrieve`](docs/twinbay_seeds_retrieve.md) - Retrieve a seed
   * [`delete`](docs/twinbay_seeds_delete.md) - Delete a seed
+* [`tests`](docs/twinbay_tests.md) - Outcomes described in natural language, compiled once into request matchers, and evaluated deterministically against the traffic an attempt was served
+  * [`create`](docs/twinbay_tests_create.md) - Create a test
+  * [`list`](docs/twinbay_tests_list.md) - List tests
+  * [`retrieve`](docs/twinbay_tests_retrieve.md) - Retrieve a test
+* [`test-versions`](docs/twinbay_test-versions.md) - Operations for test-versions
+  * [`create`](docs/twinbay_test-versions_create.md) - Create a test version
+  * [`list`](docs/twinbay_test-versions_list.md) - List a test's versions
+  * [`retrieve`](docs/twinbay_test-versions_retrieve.md) - Retrieve a test version
+* [`evaluator-versions`](docs/twinbay_evaluator-versions.md) - Operations for evaluator-versions
+  * [`create`](docs/twinbay_evaluator-versions_create.md) - Compile a test version
+  * [`list`](docs/twinbay_evaluator-versions_list.md) - List a test version's evaluators
+  * [`retrieve`](docs/twinbay_evaluator-versions_retrieve.md) - Retrieve an evaluator version
+* [`test-runs`](docs/twinbay_test-runs.md) - Operations for test-runs
+  * [`create`](docs/twinbay_test-runs_create.md) - Start a test run
+  * [`list`](docs/twinbay_test-runs_list.md) - List test runs
+  * [`retrieve`](docs/twinbay_test-runs_retrieve.md) - Retrieve a test run
+* [`evaluations`](docs/twinbay_evaluations.md) - Operations for evaluations
+  * [`create`](docs/twinbay_evaluations_create.md) - Evaluate a test run
+  * [`list`](docs/twinbay_evaluations_list.md) - List a test run's evaluations
+  * [`retrieve`](docs/twinbay_evaluations_retrieve.md) - Retrieve an evaluation
+  * [`regrade`](docs/twinbay_evaluations_regrade.md) - Regrade an evaluation
+* [`evaluation-inputs`](docs/twinbay_evaluation-inputs.md) - Operations for evaluation-inputs
+  * [`download`](docs/twinbay_evaluation-inputs_download.md) - Sign a link to a preserved capture
 * [`environment-logs`](docs/twinbay_environment-logs.md) - Operations for environment-logs
   * [`list`](docs/twinbay_environment-logs_list.md) - List recent environment request logs
   * [`retrieve`](docs/twinbay_environment-logs_retrieve.md) - Retrieve an environment request log
