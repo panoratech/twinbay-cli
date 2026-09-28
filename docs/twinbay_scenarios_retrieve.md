@@ -4,7 +4,7 @@ Retrieve a scenario
 
 ### Synopsis
 
-Retrieve a scenario
+A community scenario another organization published is readable here with `owned` false; editing, deleting and starting it stay with its organization.
 
 ```
 twinbay scenarios retrieve [scenario-id] [flags]

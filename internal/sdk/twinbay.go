@@ -67,7 +67,14 @@ type Twinbay struct {
 	// Reusable starting setups of provider twins and optional seeds.
 	Scenarios *Scenarios
 	// Starting states for a twin. Describe the data you want in your own words, and a worker expands it into rows once; pass the seed's id when you create an environment to start a twin holding it.
-	Seeds              *Seeds
+	Seeds *Seeds
+	// Outcomes described in natural language, compiled once into request matchers, and evaluated deterministically against the traffic an attempt was served.
+	Tests              *Tests
+	TestVersions       *TestVersions
+	EvaluatorVersions  *EvaluatorVersions
+	TestRuns           *TestRuns
+	Evaluations        *Evaluations
+	EvaluationInputs   *EvaluationInputs
 	EnvironmentLogs    *EnvironmentLogs
 	EnvironmentExports *EnvironmentExports
 
@@ -145,10 +152,10 @@ func WithTimeout(timeout time.Duration) SDKOption {
 // New creates a new instance of the SDK with the provided options
 func New(opts ...SDKOption) *Twinbay {
 	sdk := &Twinbay{
-		SDKVersion: "0.3.0",
+		SDKVersion: "0.3.1",
 		sdkConfiguration: config.SDKConfiguration{
-			UserAgent:         "speakeasy-sdk/go 0.3.0 2.941.0 0.1.0 github.com/panoratech/twinbay-cli/internal/sdk",
-			SDKVersion:        "0.3.0",
+			UserAgent:         "speakeasy-sdk/go 0.3.1 2.941.0 0.1.0 github.com/panoratech/twinbay-cli/internal/sdk",
+			SDKVersion:        "0.3.1",
 			GenVersion:        "2.941.0",
 			OpenAPIDocVersion: "0.1.0",
 			ServerList:        ServerList,
@@ -175,6 +182,12 @@ func New(opts ...SDKOption) *Twinbay {
 	sdk.TwinRecords = newTwinRecords(sdk, sdk.sdkConfiguration, sdk.hooks)
 	sdk.Scenarios = newScenarios(sdk, sdk.sdkConfiguration, sdk.hooks)
 	sdk.Seeds = newSeeds(sdk, sdk.sdkConfiguration, sdk.hooks)
+	sdk.Tests = newTests(sdk, sdk.sdkConfiguration, sdk.hooks)
+	sdk.TestVersions = newTestVersions(sdk, sdk.sdkConfiguration, sdk.hooks)
+	sdk.EvaluatorVersions = newEvaluatorVersions(sdk, sdk.sdkConfiguration, sdk.hooks)
+	sdk.TestRuns = newTestRuns(sdk, sdk.sdkConfiguration, sdk.hooks)
+	sdk.Evaluations = newEvaluations(sdk, sdk.sdkConfiguration, sdk.hooks)
+	sdk.EvaluationInputs = newEvaluationInputs(sdk, sdk.sdkConfiguration, sdk.hooks)
 	sdk.EnvironmentLogs = newEnvironmentLogs(sdk, sdk.sdkConfiguration, sdk.hooks)
 	sdk.EnvironmentExports = newEnvironmentExports(sdk, sdk.sdkConfiguration, sdk.hooks)
 
