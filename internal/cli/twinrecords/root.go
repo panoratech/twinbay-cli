@@ -20,7 +20,7 @@ func InitTwinRecordsRoot(parent *cobra.Command) error {
 			}
 			return cmd.Help()
 		},
-		Aliases: []string{"tr"},
+		Aliases: []string{"tre"},
 	}
 
 	if err := initListCmd(TwinRecordsCmd); err != nil {
