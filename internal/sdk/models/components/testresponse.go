@@ -4,14 +4,19 @@ package components
 
 import (
 	"github.com/panoratech/twinbay-cli/internal/sdk/sdkinternal/utils"
-	"time"
+	"github.com/panoratech/twinbay-cli/internal/sdk/types"
 )
 
 type TestResponse struct {
-	ID              string    `json:"id"`
-	Name            string    `json:"name"`
-	LatestVersionID string    `json:"latest_version_id"`
-	CreatedAt       time.Time `json:"created_at"`
+	ID string `json:"id"`
+	//lint:ignore U1000 accessed via reflection for JSON marshaling
+	object          *string           `const:"test" json:"object"`
+	Name            string            `json:"name"`
+	Version         int64             `json:"version"`
+	TaskDescription string            `json:"task_description"`
+	Outcomes        []OutcomeResponse `json:"outcomes"`
+	Created         int64             `json:"created"`
+	Updated         int64             `json:"updated"`
 }
 
 func (t TestResponse) MarshalJSON() ([]byte, error) {
@@ -32,6 +37,10 @@ func (t *TestResponse) GetID() string {
 	return t.ID
 }
 
+func (t *TestResponse) GetObject() *string {
+	return types.Pointer("test")
+}
+
 func (t *TestResponse) GetName() string {
 	if t == nil {
 		return ""
@@ -39,16 +48,37 @@ func (t *TestResponse) GetName() string {
 	return t.Name
 }
 
-func (t *TestResponse) GetLatestVersionID() string {
+func (t *TestResponse) GetVersion() int64 {
+	if t == nil {
+		return 0
+	}
+	return t.Version
+}
+
+func (t *TestResponse) GetTaskDescription() string {
 	if t == nil {
 		return ""
 	}
-	return t.LatestVersionID
+	return t.TaskDescription
 }
 
-func (t *TestResponse) GetCreatedAt() time.Time {
+func (t *TestResponse) GetOutcomes() []OutcomeResponse {
 	if t == nil {
-		return time.Time{}
+		return []OutcomeResponse{}
 	}
-	return t.CreatedAt
+	return t.Outcomes
+}
+
+func (t *TestResponse) GetCreated() int64 {
+	if t == nil {
+		return 0
+	}
+	return t.Created
+}
+
+func (t *TestResponse) GetUpdated() int64 {
+	if t == nil {
+		return 0
+	}
+	return t.Updated
 }

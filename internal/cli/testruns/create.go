@@ -16,8 +16,7 @@ import (
 
 var createCmdMeta = []flagutil.FlagMeta{
 	{FlagName: "environment-id", FieldPath: "EnvironmentID", Kind: flagutil.FlagKindString, Required: true, Description: "[required]"},
-	{FlagName: "test-version-id", Shorthand: "t", FieldPath: "TestVersionID", Kind: flagutil.FlagKindString, Required: true, Description: "[required]"},
-	{FlagName: "evaluator-version-id", FieldPath: "EvaluatorVersionID", Kind: flagutil.FlagKindString, Required: true, Description: "[required]"},
+	{FlagName: "evaluator-id", FieldPath: "EvaluatorID", Kind: flagutil.FlagKindString, Required: true, Description: "[required]"},
 }
 
 // initCreateCmd initializes the create command.
@@ -26,7 +25,7 @@ func initCreateCmd(parent *cobra.Command) error {
 		Use:     "create",
 		Short:   "Start a test run",
 		Long:    "Opens an attempt: traffic the environment serves from now on is attributed to it. Does not launch an agent or reset twins. An environment runs one attempt at a time.",
-		Example: "  twinbay test-runs create --environment-id 24e86869-c8aa-4fa2-9d08-6690490dcd5a --test-version-id fd3a7185-927c-4c41-b2e0-5139a6d0458e --evaluator-version-id 51940cd7-c932-46d5-8b0b-b57693e9208b",
+		Example: "  twinbay test-runs create --environment-id 24e86869-c8aa-4fa2-9d08-6690490dcd5a --evaluator-id 24e86869-c8aa-4fa2-9d08-6690490dcd5a",
 		Args:    cobra.NoArgs,
 		RunE:    runCreateCmd,
 		Annotations: map[string]string{

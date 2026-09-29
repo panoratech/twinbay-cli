@@ -50,7 +50,7 @@ func (l *ListTestVersionsRequest) GetSize() *int64 {
 type ListTestVersionsResponse struct {
 	HTTPMeta components.HTTPMetadata `json:"-"`
 	// Successful Response
-	PageTestVersionResponse *components.PageTestVersionResponse
+	PageTestResponse *components.PageTestResponse
 }
 
 func (l ListTestVersionsResponse) MarshalJSON() ([]byte, error) {
@@ -71,9 +71,9 @@ func (l *ListTestVersionsResponse) GetHTTPMeta() components.HTTPMetadata {
 	return l.HTTPMeta
 }
 
-func (l *ListTestVersionsResponse) GetPageTestVersionResponse() *components.PageTestVersionResponse {
+func (l *ListTestVersionsResponse) GetPageTestResponse() *components.PageTestResponse {
 	if l == nil {
 		return nil
 	}
-	return l.PageTestVersionResponse
+	return l.PageTestResponse
 }

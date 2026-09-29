@@ -4,27 +4,28 @@ Evaluate a test run
 
 ### Synopsis
 
-Queues a capture of the attempt's traffic and a deterministic match against its pinned evaluator. A checkpoint keeps the attempt open; the first final evaluation closes it, and later ones capture late logs within the same window.
+Queues a capture and grading with the run's evaluator. Naming another evaluator regrades the latest ready capture for the same phase.
 
 ```
-twinbay evaluations create [test-run-id] [flags]
+twinbay evaluations create [flags]
 ```
 
 ### Examples
 
 ```
-  twinbay evaluations create --test-run-id a5f303a8-7157-436c-bbf7-46f3351b0036 --phase checkpoint
+  twinbay evaluations create --test-run-id 7a5f303a-8715-4736-9cbf-746f3351b003 --phase checkpoint
 ```
 
 ### Options
 
 ```
       --body string              Request body as JSON (alternative to individual flags). Can also be provided via stdin; @path reads a file, @- reads stdin to EOF. Use --schema to print the exact JSON Schema.
+  -e, --evaluator-id string      string value
   -h, --help                     help for create
   -i, --idempotency-key string   Replaying the same key and payload returns the same evaluation; reusing it with a different payload answers 409.
   -p, --phase string             options: checkpoint, final [required]
       --schema                   Print the exact JSON Schema of the request body and exit
-  -t, --test-run-id string       string value (or pass it as the [test-run-id] argument)
+  -t, --test-run-id string       [required]
 ```
 
 ### Options inherited from parent commands

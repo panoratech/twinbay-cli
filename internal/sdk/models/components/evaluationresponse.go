@@ -103,17 +103,17 @@ func (e *EvaluationResponseVerdict) IsExact() bool {
 }
 
 type EvaluationResponse struct {
-	ID                 string                                    `json:"id"`
-	InputID            string                                    `json:"input_id"`
-	EvaluatorVersionID string                                    `json:"evaluator_version_id"`
-	RegradedFromID     optionalnullable.OptionalNullable[string] `json:"regraded_from_id,omitzero"`
-	Status             EvaluationResponseStatus                  `json:"status"`
-	Phase              EvaluationResponsePhase                   `json:"phase"`
-	CoverageStatus     CoverageStatus                            `json:"coverage_status"`
-	Verdict            EvaluationResponseVerdict                 `json:"verdict"`
-	Results            []ResultResponse                          `json:"results"`
-	ErrorMessage       optionalnullable.OptionalNullable[string] `json:"error_message,omitzero"`
-	CreatedAt          time.Time                                 `json:"created_at"`
+	ID             string                                    `json:"id"`
+	InputID        string                                    `json:"input_id"`
+	EvaluatorID    string                                    `json:"evaluator_id"`
+	RegradedFromID optionalnullable.OptionalNullable[string] `json:"regraded_from_id,omitzero"`
+	Status         EvaluationResponseStatus                  `json:"status"`
+	Phase          EvaluationResponsePhase                   `json:"phase"`
+	CoverageStatus CoverageStatus                            `json:"coverage_status"`
+	Verdict        EvaluationResponseVerdict                 `json:"verdict"`
+	Results        []ResultResponse                          `json:"results"`
+	ErrorMessage   optionalnullable.OptionalNullable[string] `json:"error_message,omitzero"`
+	CreatedAt      time.Time                                 `json:"created_at"`
 }
 
 func (e EvaluationResponse) MarshalJSON() ([]byte, error) {
@@ -141,11 +141,11 @@ func (e *EvaluationResponse) GetInputID() string {
 	return e.InputID
 }
 
-func (e *EvaluationResponse) GetEvaluatorVersionID() string {
+func (e *EvaluationResponse) GetEvaluatorID() string {
 	if e == nil {
 		return ""
 	}
-	return e.EvaluatorVersionID
+	return e.EvaluatorID
 }
 
 func (e *EvaluationResponse) GetRegradedFromID() optionalnullable.OptionalNullable[string] {

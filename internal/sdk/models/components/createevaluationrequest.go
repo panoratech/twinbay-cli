@@ -5,6 +5,7 @@ package components
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/panoratech/twinbay-cli/internal/sdk/optionalnullable"
 )
 
 type CreateEvaluationRequestPhase string
@@ -34,7 +35,16 @@ func (e *CreateEvaluationRequestPhase) UnmarshalJSON(data []byte) error {
 }
 
 type CreateEvaluationRequest struct {
-	Phase CreateEvaluationRequestPhase `json:"phase"`
+	TestRunID   string                                    `json:"test_run_id"`
+	Phase       CreateEvaluationRequestPhase              `json:"phase"`
+	EvaluatorID optionalnullable.OptionalNullable[string] `json:"evaluator_id,omitzero"`
+}
+
+func (c *CreateEvaluationRequest) GetTestRunID() string {
+	if c == nil {
+		return ""
+	}
+	return c.TestRunID
 }
 
 func (c *CreateEvaluationRequest) GetPhase() CreateEvaluationRequestPhase {
@@ -42,4 +52,11 @@ func (c *CreateEvaluationRequest) GetPhase() CreateEvaluationRequestPhase {
 		return CreateEvaluationRequestPhase("")
 	}
 	return c.Phase
+}
+
+func (c *CreateEvaluationRequest) GetEvaluatorID() optionalnullable.OptionalNullable[string] {
+	if c == nil {
+		return nil
+	}
+	return c.EvaluatorID
 }

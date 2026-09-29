@@ -2,21 +2,21 @@
 
 package components
 
-type CreateTestVersionRequest struct {
+type UpdateTestRequest struct {
 	TaskDescription string           `json:"task_description"`
 	Outcomes        []OutcomeRequest `json:"outcomes"`
 }
 
-func (c *CreateTestVersionRequest) GetTaskDescription() string {
-	if c == nil {
+func (u *UpdateTestRequest) GetTaskDescription() string {
+	if u == nil {
 		return ""
 	}
-	return c.TaskDescription
+	return u.TaskDescription
 }
 
-func (c *CreateTestVersionRequest) GetOutcomes() []OutcomeRequest {
-	if c == nil {
+func (u *UpdateTestRequest) GetOutcomes() []OutcomeRequest {
+	if u == nil {
 		return []OutcomeRequest{}
 	}
-	return c.Outcomes
+	return u.Outcomes
 }

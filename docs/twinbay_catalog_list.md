@@ -4,7 +4,7 @@ List available twins
 
 ### Synopsis
 
-Returns the registered code twins newest release first.
+Returns registered twins, newest release first unless sorted by name.
 
 ```
 twinbay catalog list [flags]

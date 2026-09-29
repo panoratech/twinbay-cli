@@ -1,19 +1,28 @@
-## twinbay tests
+## twinbay tests list-versions
 
-Outcomes described in natural language, compiled once into request matchers, and evaluated deterministically against the traffic an attempt was served
+List a test's versions
 
 ### Synopsis
 
-Outcomes described in natural language, compiled once into request matchers, and evaluated deterministically against the traffic an attempt was served.
+List a test's versions
 
 ```
-twinbay tests [flags]
+twinbay tests list-versions [test-id] [flags]
+```
+
+### Examples
+
+```
+  twinbay tests list-versions --test-id 8ca5e633-292b-437b-bb16-096839c97d14
 ```
 
 ### Options
 
 ```
-  -h, --help   help for tests
+  -h, --help             help for list-versions
+  -p, --page int         Page number (default 1)
+  -s, --size int         Page size (default 50)
+  -t, --test-id string   string value (or pass it as the [test-id] argument)
 ```
 
 ### Options inherited from parent commands
@@ -39,12 +48,13 @@ twinbay tests [flags]
 
 ### SEE ALSO
 
-* [twinbay](twinbay.md)	 - Twinbay: Backend API
-* [twinbay tests create](twinbay_tests_create.md)	 - Create a test
-* [twinbay tests list](twinbay_tests_list.md)	 - List tests
-* [twinbay tests list-versions](twinbay_tests_list-versions.md)	 - List a test's versions
-* [twinbay tests retrieve](twinbay_tests_retrieve.md)	 - Retrieve a test
-* [twinbay tests retrieve-version](twinbay_tests_retrieve-version.md)	 - Retrieve a test version
-* [twinbay tests update](twinbay_tests_update.md)	 - Update a test
+* [twinbay tests](twinbay_tests.md)	 - Outcomes described in natural language, compiled once into request matchers, and evaluated deterministically against the traffic an attempt was served
+
+### Machine interface
+
+* `twinbay tests list-versions --usage` — this command's flags, defaults and env vars as machine-readable KDL
+* `twinbay tests list-versions --dry-run` — preview the request without OS-keychain access or a network call (human preview on stderr)
+* `--dry-run --output-format json` (or a caller-explicit `--jq`) writes one preview object per request as NDJSON on stdout; jq is not applied to previews
+* `--output-format json` or `--jq <expr>` for machine-readable live output; in agent mode errors are a JSON envelope on stderr
 
 Exit codes: 0 ok · 1 runtime · 2 usage · 3 authentication/authorization

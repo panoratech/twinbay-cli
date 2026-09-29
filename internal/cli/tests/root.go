@@ -34,6 +34,18 @@ func InitTestsRoot(parent *cobra.Command) error {
 		return err
 	}
 
+	if err := initUpdateCmd(TestsCmd); err != nil {
+		return err
+	}
+
+	if err := initListVersionsCmd(TestsCmd); err != nil {
+		return err
+	}
+
+	if err := initRetrieveVersionCmd(TestsCmd); err != nil {
+		return err
+	}
+
 	parent.AddCommand(TestsCmd)
 	return nil
 }

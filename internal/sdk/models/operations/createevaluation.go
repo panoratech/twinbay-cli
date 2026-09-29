@@ -9,17 +9,9 @@ import (
 )
 
 type CreateEvaluationRequest struct {
-	TestRunID string `pathParam:"style=simple,explode=false,name=test_run_id"`
 	// Replaying the same key and payload returns the same evaluation; reusing it with a different payload answers 409.
 	IdempotencyKey optionalnullable.OptionalNullable[string] `header:"style=simple,explode=false,name=Idempotency-Key"`
 	Body           components.CreateEvaluationRequest        `request:"mediaType=application/json"`
-}
-
-func (c *CreateEvaluationRequest) GetTestRunID() string {
-	if c == nil {
-		return ""
-	}
-	return c.TestRunID
 }
 
 func (c *CreateEvaluationRequest) GetIdempotencyKey() optionalnullable.OptionalNullable[string] {

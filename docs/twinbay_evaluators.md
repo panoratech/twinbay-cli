@@ -1,19 +1,19 @@
-## twinbay tests
+## twinbay evaluators
 
-Outcomes described in natural language, compiled once into request matchers, and evaluated deterministically against the traffic an attempt was served
+Operations for evaluators
 
 ### Synopsis
 
-Outcomes described in natural language, compiled once into request matchers, and evaluated deterministically against the traffic an attempt was served.
+Operations for evaluators
 
 ```
-twinbay tests [flags]
+twinbay evaluators [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for tests
+  -h, --help   help for evaluators
 ```
 
 ### Options inherited from parent commands
@@ -40,11 +40,8 @@ twinbay tests [flags]
 ### SEE ALSO
 
 * [twinbay](twinbay.md)	 - Twinbay: Backend API
-* [twinbay tests create](twinbay_tests_create.md)	 - Create a test
-* [twinbay tests list](twinbay_tests_list.md)	 - List tests
-* [twinbay tests list-versions](twinbay_tests_list-versions.md)	 - List a test's versions
-* [twinbay tests retrieve](twinbay_tests_retrieve.md)	 - Retrieve a test
-* [twinbay tests retrieve-version](twinbay_tests_retrieve-version.md)	 - Retrieve a test version
-* [twinbay tests update](twinbay_tests_update.md)	 - Update a test
+* [twinbay evaluators create](twinbay_evaluators_create.md)	 - Create an evaluator
+* [twinbay evaluators list](twinbay_evaluators_list.md)	 - List evaluators
+* [twinbay evaluators retrieve](twinbay_evaluators_retrieve.md)	 - Retrieve an evaluator
 
 Exit codes: 0 ok · 1 runtime · 2 usage · 3 authentication/authorization

@@ -70,8 +70,7 @@ type Twinbay struct {
 	Seeds *Seeds
 	// Outcomes described in natural language, compiled once into request matchers, and evaluated deterministically against the traffic an attempt was served.
 	Tests              *Tests
-	TestVersions       *TestVersions
-	EvaluatorVersions  *EvaluatorVersions
+	Evaluators         *Evaluators
 	TestRuns           *TestRuns
 	Evaluations        *Evaluations
 	EvaluationInputs   *EvaluationInputs
@@ -152,10 +151,10 @@ func WithTimeout(timeout time.Duration) SDKOption {
 // New creates a new instance of the SDK with the provided options
 func New(opts ...SDKOption) *Twinbay {
 	sdk := &Twinbay{
-		SDKVersion: "0.3.1",
+		SDKVersion: "0.3.2",
 		sdkConfiguration: config.SDKConfiguration{
-			UserAgent:         "speakeasy-sdk/go 0.3.1 2.941.0 0.1.0 github.com/panoratech/twinbay-cli/internal/sdk",
-			SDKVersion:        "0.3.1",
+			UserAgent:         "speakeasy-sdk/go 0.3.2 2.941.0 0.1.0 github.com/panoratech/twinbay-cli/internal/sdk",
+			SDKVersion:        "0.3.2",
 			GenVersion:        "2.941.0",
 			OpenAPIDocVersion: "0.1.0",
 			ServerList:        ServerList,
@@ -183,8 +182,7 @@ func New(opts ...SDKOption) *Twinbay {
 	sdk.Scenarios = newScenarios(sdk, sdk.sdkConfiguration, sdk.hooks)
 	sdk.Seeds = newSeeds(sdk, sdk.sdkConfiguration, sdk.hooks)
 	sdk.Tests = newTests(sdk, sdk.sdkConfiguration, sdk.hooks)
-	sdk.TestVersions = newTestVersions(sdk, sdk.sdkConfiguration, sdk.hooks)
-	sdk.EvaluatorVersions = newEvaluatorVersions(sdk, sdk.sdkConfiguration, sdk.hooks)
+	sdk.Evaluators = newEvaluators(sdk, sdk.sdkConfiguration, sdk.hooks)
 	sdk.TestRuns = newTestRuns(sdk, sdk.sdkConfiguration, sdk.hooks)
 	sdk.Evaluations = newEvaluations(sdk, sdk.sdkConfiguration, sdk.hooks)
 	sdk.EvaluationInputs = newEvaluationInputs(sdk, sdk.sdkConfiguration, sdk.hooks)

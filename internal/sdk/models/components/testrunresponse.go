@@ -33,8 +33,9 @@ func (e *ExecutionStatus) IsExact() bool {
 type TestRunResponse struct {
 	ID                 string                                       `json:"id"`
 	EnvironmentID      string                                       `json:"environment_id"`
-	TestVersionID      string                                       `json:"test_version_id"`
-	EvaluatorVersionID string                                       `json:"evaluator_version_id"`
+	TestID             string                                       `json:"test_id"`
+	TestVersion        int64                                        `json:"test_version"`
+	EvaluatorID        string                                       `json:"evaluator_id"`
 	ExecutionStatus    ExecutionStatus                              `json:"execution_status"`
 	StartedAt          time.Time                                    `json:"started_at"`
 	FinishedAt         optionalnullable.OptionalNullable[time.Time] `json:"finished_at,omitzero"`
@@ -67,18 +68,25 @@ func (t *TestRunResponse) GetEnvironmentID() string {
 	return t.EnvironmentID
 }
 
-func (t *TestRunResponse) GetTestVersionID() string {
+func (t *TestRunResponse) GetTestID() string {
 	if t == nil {
 		return ""
 	}
-	return t.TestVersionID
+	return t.TestID
 }
 
-func (t *TestRunResponse) GetEvaluatorVersionID() string {
+func (t *TestRunResponse) GetTestVersion() int64 {
+	if t == nil {
+		return 0
+	}
+	return t.TestVersion
+}
+
+func (t *TestRunResponse) GetEvaluatorID() string {
 	if t == nil {
 		return ""
 	}
-	return t.EvaluatorVersionID
+	return t.EvaluatorID
 }
 
 func (t *TestRunResponse) GetExecutionStatus() ExecutionStatus {

@@ -15,7 +15,8 @@ import (
 
 var listCmdMeta = []flagutil.FlagMeta{
 	{FlagName: "environment-id", Shorthand: "e", FieldPath: "EnvironmentID", Kind: flagutil.FlagKindJSON, Optional: true, Annotations: `queryParam:"style=form,explode=true,name=environment_id"`, Description: "string value"},
-	{FlagName: "test-version-id", Shorthand: "t", FieldPath: "TestVersionID", Kind: flagutil.FlagKindJSON, Optional: true, Annotations: `queryParam:"style=form,explode=true,name=test_version_id"`, Description: "string value"},
+	{FlagName: "test", FieldPath: "Test", Kind: flagutil.FlagKindJSON, Optional: true, Annotations: `queryParam:"style=form,explode=true,name=test"`, Description: "string value"},
+	{FlagName: "test-version", FieldPath: "TestVersion", Kind: flagutil.FlagKindJSON, Optional: true, Annotations: `queryParam:"style=form,explode=true,name=test_version"`, Description: "integer value"},
 	{FlagName: "page", Shorthand: "p", FieldPath: "Page", Kind: flagutil.FlagKindInt64, Optional: true, HasDefault: true, DefaultInt: 1, HasMinimum: true, Minimum: 1, Description: "Page number"},
 	{FlagName: "size", Shorthand: "s", FieldPath: "Size", Kind: flagutil.FlagKindInt64, Optional: true, HasDefault: true, DefaultInt: 50, HasMinimum: true, Minimum: 1, HasMaximum: true, Maximum: 100, Description: "Page size"},
 }

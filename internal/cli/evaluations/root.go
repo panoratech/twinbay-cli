@@ -34,10 +34,6 @@ func InitEvaluationsRoot(parent *cobra.Command) error {
 		return err
 	}
 
-	if err := initRegradeCmd(EvaluationsCmd); err != nil {
-		return err
-	}
-
 	parent.AddCommand(EvaluationsCmd)
 	return nil
 }

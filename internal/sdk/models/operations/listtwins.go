@@ -4,12 +4,16 @@ package operations
 
 import (
 	"github.com/panoratech/twinbay-cli/internal/sdk/models/components"
+	"github.com/panoratech/twinbay-cli/internal/sdk/optionalnullable"
 	"github.com/panoratech/twinbay-cli/internal/sdk/sdkinternal/utils"
 )
 
 type ListTwinsRequest struct {
-	Page *int64 `default:"1" queryParam:"style=form,explode=true,name=page"`
-	Size *int64 `default:"50" queryParam:"style=form,explode=true,name=size"`
+	// Sort by display name, A-Z (case-insensitive).
+	//lint:ignore U1000 accessed via reflection for JSON marshaling
+	sort optionalnullable.OptionalNullable[string] `const:"name" queryParam:"style=form,explode=true,name=sort"`
+	Page *int64                                    `default:"1" queryParam:"style=form,explode=true,name=page"`
+	Size *int64                                    `default:"50" queryParam:"style=form,explode=true,name=size"`
 }
 
 func (l ListTwinsRequest) MarshalJSON() ([]byte, error) {
@@ -21,6 +25,11 @@ func (l *ListTwinsRequest) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	return nil
+}
+
+func (l *ListTwinsRequest) GetSort() optionalnullable.OptionalNullable[string] {
+	var tmp string = "name"
+	return optionalnullable.From[string](&tmp)
 }
 
 func (l *ListTwinsRequest) GetPage() *int64 {

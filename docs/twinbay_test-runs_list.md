@@ -19,11 +19,12 @@ twinbay test-runs list [flags]
 ### Options
 
 ```
-  -e, --environment-id string    string value
-  -h, --help                     help for list
-  -p, --page int                 Page number (default 1)
-  -s, --size int                 Page size (default 50)
-  -t, --test-version-id string   string value
+  -e, --environment-id string   string value
+  -h, --help                    help for list
+  -p, --page int                Page number (default 1)
+  -s, --size int                Page size (default 50)
+      --test string             string value
+      --test-version string     integer value
 ```
 
 ### Options inherited from parent commands
