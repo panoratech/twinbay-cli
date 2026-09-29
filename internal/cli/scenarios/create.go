@@ -25,7 +25,7 @@ func initCreateCmd(parent *cobra.Command) error {
 		Use:     "create",
 		Short:   "Create a scenario",
 		Long:    "Save providers and optional reusable seeds without starting an environment.",
-		Example: "  twinbay scenarios create --name <value> --twins '[]'",
+		Example: "",
 		Args:    cobra.NoArgs,
 		RunE:    runCreateCmd,
 		Annotations: map[string]string{

@@ -7,7 +7,9 @@ import (
 )
 
 type CreateEvaluatorRequest struct {
-	TestID      string                                   `json:"test_id"`
+	// Test to compile into matchers.
+	TestID string `json:"test_id"`
+	// Version to pin. When omitted, evaluator creation pins the latest test version.
 	TestVersion optionalnullable.OptionalNullable[int64] `json:"test_version,omitzero"`
 	// Catalog slugs of the twins whose APIs the outcomes are about.
 	Twins []string `json:"twins"`

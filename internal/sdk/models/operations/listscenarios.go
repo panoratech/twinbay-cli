@@ -51,6 +51,8 @@ type ListScenariosResponse struct {
 	HTTPMeta components.HTTPMetadata `json:"-"`
 	// Successful Response
 	PageScenarioResponse *components.PageScenarioResponse
+
+	Next func() (*ListScenariosResponse, error)
 }
 
 func (l ListScenariosResponse) MarshalJSON() ([]byte, error) {

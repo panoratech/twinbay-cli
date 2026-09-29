@@ -8,6 +8,7 @@ import (
 	"github.com/panoratech/twinbay-cli/internal/sdk/optionalnullable"
 )
 
+// CreateEvaluationRequestPhase - Checkpoint grades without closing the run; final closes and grades it.
 type CreateEvaluationRequestPhase string
 
 const (
@@ -35,8 +36,11 @@ func (e *CreateEvaluationRequestPhase) UnmarshalJSON(data []byte) error {
 }
 
 type CreateEvaluationRequest struct {
-	TestRunID   string                                    `json:"test_run_id"`
-	Phase       CreateEvaluationRequestPhase              `json:"phase"`
+	// Test run whose attributed traffic should be graded.
+	TestRunID string `json:"test_run_id"`
+	// Checkpoint grades without closing the run; final closes and grades it.
+	Phase CreateEvaluationRequestPhase `json:"phase"`
+	// Different ready evaluator used to regrade the latest ready capture for this run and phase.
 	EvaluatorID optionalnullable.OptionalNullable[string] `json:"evaluator_id,omitzero"`
 }
 

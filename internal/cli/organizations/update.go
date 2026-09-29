@@ -24,7 +24,7 @@ func initUpdateCmd(parent *cobra.Command) error {
 		Use:     "update",
 		Short:   "Rename the active organization",
 		Long:    "Requires the **admin** role or above in the active organization.",
-		Example: "  twinbay organizations update --name <value>",
+		Example: "",
 		Args:    cobra.NoArgs,
 		RunE:    runUpdateCmd,
 		Annotations: map[string]string{

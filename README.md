@@ -29,6 +29,7 @@ Twinbay: Backend API
   * [Request Body Input](#request-body-input)
   * [Server Selection](#server-selection)
   * [Output Formats](#output-formats)
+  * [Pagination](#pagination)
   * [Error Handling](#error-handling)
   * [Diagnostics](#diagnostics)
 * [Development](#development)
@@ -109,6 +110,19 @@ twinbay completion powershell | Out-String | Invoke-Expression
 <!-- Start CLI Example Usage [usage] -->
 ## CLI Example Usage
 
+### Quick start
+
+```bash
+# Compile the latest test version
+twinbay evaluators create-and-wait --test-id 7ef34f0b-0ae6-4e26-ae92-f49d239d4d7d --twins stripe
+
+# Finish and grade a test run
+twinbay evaluations create-and-wait --test-run-id b04bd7fb-3f6c-4de8-9c5a-918909419dcc --phase final
+
+# Generate a support backlog
+twinbay seeds create-and-wait --name aging-backlog --twin zendesk "50 open tickets, half aging past 90 days"
+```
+
 ### Example
 
 ```bash
@@ -126,7 +140,7 @@ This CLI is built to be driven by AI coding agents as well as people: everything
 |-----|---------|
 | `twinbay --help`, `twinbay api-keys list --help` | Commands by category, runnable examples, flags |
 | `twinbay --usage`, `twinbay api-keys list --usage` | The command surface as machine-readable [KDL](https://kdl.dev): commands, aliases, flags, defaults, env vars, config keys |
-| `twinbay test-runs create --schema` | The exact JSON Schema of the command's request body (all `$ref`s bundled) — build a valid `--body` from it |
+| `twinbay evaluators create-and-wait --schema` | The exact JSON Schema of the command's request body (all `$ref`s bundled) — build a valid `--body` from it |
 | `twinbay api-keys list --dry-run` | The exact HTTP request (method, URL, headers, body), with no credentials or network call |
 | `twinbay api-keys list --output-format json` (or `--jq`) | Machine-readable output |
 
@@ -146,7 +160,7 @@ twinbay api-keys list --usage
 
 ```bash
 # JSON Schema (draft 2020-12) of the request body, with every $ref bundled under $defs
-twinbay test-runs create --schema
+twinbay evaluators create-and-wait --schema
 ```
 
 ### Probe before you spend
@@ -156,6 +170,7 @@ Start quota-spending commands with `--dry-run`. It validates inputs, resolves th
 ```bash
 # Human preview: the [DRY-RUN] block is on stderr and stdout is empty
 twinbay api-keys list --dry-run
+twinbay evaluators create-and-wait --test-id 7ef34f0b-0ae6-4e26-ae92-f49d239d4d7d --twins stripe --dry-run
 
 # Machine preview: compact JSON on stdout and silent stderr
 twinbay api-keys list --dry-run --output-format json
@@ -191,7 +206,7 @@ Required-input prompts and guided `configure` / `auth login` forms are enabled b
 
 ```bash
 # Prompt for missing command inputs
-twinbay api-keys list --interactive
+twinbay evaluators create-and-wait --interactive
 
 # Open the guided configuration form
 twinbay configure --interactive
@@ -217,6 +232,23 @@ Outside agent mode, explicit JSON and `--jq` preserve the compatibility envelope
 ```
 
 `error_type` is one of `authentication_error`, `authorization_error`, `not_found`, `validation_error`, `rate_limit_error`, `server_error`, `api_error`, `connection_error`, `protocol_error`, `runtime_error`, `unsupported_error`, `async_failed`, `async_timeout`, `async_unknown_state`. Classification derives from the HTTP status and transport evidence; `error_reason` is absent for API errors. Status-less local failures may use `CLI_VALIDATION`, `CLI_CONNECTION`, `CLI_PROTOCOL`, `CLI_RUNTIME`, `CLI_UNAVAILABLE`, `CLI_AUTHENTICATION`, or the async polling reasons `CLI_ASYNC_FAILED`, `CLI_ASYNC_TIMEOUT`, and `CLI_ASYNC_UNKNOWN_STATE`. `hints` preserves server guidance first, adds the most specific local taxonomy guidance, then typed CLI and command-specific guidance, removing exact duplicates. `exit_code` is always the code for the final `error_type` shown in the envelope: 1 runtime, 2 usage, or 3 authentication/authorization.
+
+```bash
+# "evaluators create-and-wait" declares hints for CLI_ASYNC_FAILED, CLI_ASYNC_TIMEOUT; a failing request returns them in the envelope
+twinbay evaluators create-and-wait --test-id 7ef34f0b-0ae6-4e26-ae92-f49d239d4d7d --twins stripe
+```
+
+### Lists, streams, and files
+
+List commands accept `--all` to fetch every page and stream results as they arrive (one JSON value per line with `--output-format json`; `--max-pages N` bounds the walk).
+
+Structured output and agent mode never write pagination hints to stderr; if a later page fails or the server repeats a cursor, the command exits non-zero after the pages already written.
+
+```bash
+twinbay api-keys list --all --output-format json
+```
+
+Long-running commands poll to a terminal response; human progress goes to stderr and machine-mode success keeps stderr silent. Add `--async` to `twinbay evaluators create-and-wait --test-id 7ef34f0b-0ae6-4e26-ae92-f49d239d4d7d --twins stripe` to return its handle immediately, or tune foreground polling with `--poll-interval <duration>` and `--poll-timeout <duration>`. Resume an escaped or timed-out operation with `twinbay evaluators retrieve --evaluator-id <id>`.
 <!-- End For AI agents [agents] -->
 
 <!-- Start Authentication [security] -->
@@ -269,8 +301,9 @@ Configuration is stored in `~/.config/twinbay/config.yaml`.
 <!-- Start Commands [operations] -->
 ## Commands
 
-<details open>
-<summary>Available commands</summary>
+Commands are grouped the way `twinbay --help` shows them. Every command accepts `--help`; body-bearing commands also accept `--schema` (exact request JSON Schema) and `--dry-run` (preview the request without sending it) — see [For AI agents](#for-ai-agents).
+
+### Additional commands
 
 * [`users`](docs/twinbay_users.md) - The current user
   * [`retrieve`](docs/twinbay_users_retrieve.md) - Read the authenticated user
@@ -306,6 +339,13 @@ Configuration is stored in `~/.config/twinbay/config.yaml`.
   * [`update`](docs/twinbay_scenarios_update.md) - Update a scenario
   * [`delete`](docs/twinbay_scenarios_delete.md) - Delete a scenario
 * [`seeds`](docs/twinbay_seeds.md) - Starting states for a twin
+  * [`create-and-wait`](docs/twinbay_seeds_create-and-wait.md) - Generate a seed and wait
+
+    ```bash
+    # Generate a support backlog
+    twinbay seeds create-and-wait --name aging-backlog --twin zendesk "50 open tickets, half aging past 90 days"
+    ```
+
   * [`create`](docs/twinbay_seeds_create.md) - Generate a seed
   * [`list`](docs/twinbay_seeds_list.md) - List seeds
   * [`list-suggestions`](docs/twinbay_seeds_list-suggestions.md) - List suggested starting states
@@ -319,6 +359,15 @@ Configuration is stored in `~/.config/twinbay/config.yaml`.
   * [`list-versions`](docs/twinbay_tests_list-versions.md) - List a test's versions
   * [`retrieve-version`](docs/twinbay_tests_retrieve-version.md) - Retrieve a test version
 * [`evaluators`](docs/twinbay_evaluators.md) - Operations for evaluators
+  * [`create-and-wait`](docs/twinbay_evaluators_create-and-wait.md) - Create an evaluator and wait
+
+    ```bash
+    # Compile the latest test version
+    twinbay evaluators create-and-wait --test-id 7ef34f0b-0ae6-4e26-ae92-f49d239d4d7d --twins stripe
+    # Compile a specific test version
+    twinbay evaluators create-and-wait --test-id 7ef34f0b-0ae6-4e26-ae92-f49d239d4d7d --test-version 3 --twins stripe
+    ```
+
   * [`create`](docs/twinbay_evaluators_create.md) - Create an evaluator
   * [`list`](docs/twinbay_evaluators_list.md) - List evaluators
   * [`retrieve`](docs/twinbay_evaluators_retrieve.md) - Retrieve an evaluator
@@ -327,6 +376,15 @@ Configuration is stored in `~/.config/twinbay/config.yaml`.
   * [`list`](docs/twinbay_test-runs_list.md) - List test runs
   * [`retrieve`](docs/twinbay_test-runs_retrieve.md) - Retrieve a test run
 * [`evaluations`](docs/twinbay_evaluations.md) - Operations for evaluations
+  * [`create-and-wait`](docs/twinbay_evaluations_create-and-wait.md) - Evaluate a test run and wait
+
+    ```bash
+    # Finish and grade a test run
+    twinbay evaluations create-and-wait --test-run-id b04bd7fb-3f6c-4de8-9c5a-918909419dcc --phase final
+    # Regrade the latest ready final capture
+    twinbay evaluations create-and-wait --test-run-id b04bd7fb-3f6c-4de8-9c5a-918909419dcc --phase final --evaluator-id 1177bd8d-986f-44a2-aec2-1518dc46d6b0
+    ```
+
   * [`create`](docs/twinbay_evaluations_create.md) - Evaluate a test run
   * [`list`](docs/twinbay_evaluations_list.md) - List a test run's evaluations
   * [`retrieve`](docs/twinbay_evaluations_retrieve.md) - Retrieve an evaluation
@@ -340,8 +398,6 @@ Configuration is stored in `~/.config/twinbay/config.yaml`.
   * [`list`](docs/twinbay_environment-exports_list.md) - List an environment's exports
   * [`retrieve`](docs/twinbay_environment-exports_retrieve.md) - Retrieve an export
   * [`download`](docs/twinbay_environment-exports_download.md) - Sign a link to an exported file
-
-</details>
 <!-- End Commands [operations] -->
 
 <!-- Start Request Body Input [stdinpiping] -->
@@ -486,6 +542,61 @@ When using `--all` (pagination) or streaming operations, output is written incre
 | `toon` | One TOON-encoded object per block, separated by blank lines |
 | `pretty` (default) | Pretty-printed items separated by blank lines |
 <!-- End Output Formats [output-formats] -->
+
+<!-- Start Pagination [pagination] -->
+## Pagination
+
+Some operations in this CLI support automatic pagination. These operations accept `--all` to automatically fetch all pages and stream results incrementally.
+
+### Basic usage
+
+```bash
+# Fetch a single page (default behavior)
+twinbay api-keys list
+
+# Automatically fetch all pages
+twinbay api-keys list --all
+```
+
+### Limiting pages
+
+Use `--max-pages` with `--all` to cap the number of pages fetched. A negative value is invalid; `0` means unlimited. Passing `--max-pages` without `--all` is an error.
+
+```bash
+# Fetch at most 5 pages
+twinbay api-keys list --all --max-pages 5
+```
+
+### Output formats
+
+When using `--all`, output is streamed as each page is fetched. Operations whose pagination declaration names an `outputs.results` array emit one item at a time. Other operations emit one complete page object at a time, preserving the single-page response shape and any continuation cursor.
+
+| Format | Behavior |
+|--------|----------|
+| `--output-format json` | One JSON object per line ([NDJSON](https://github.com/ndjson/ndjson-spec)) |
+| `--output-format yaml` | YAML documents separated by `---` |
+| `--output-format toon` | One TOON-encoded block per item, separated by blank lines |
+| Default (pretty) | Pretty-printed items separated by blank lines |
+
+```bash
+# Stream all results as NDJSON
+twinbay api-keys list --all --output-format json
+
+# Pipe to jq for further processing
+twinbay api-keys list --all --output-format json | jq '.'
+
+# Use the built-in --jq flag
+twinbay api-keys list --all --jq '.'
+```
+
+### How it works
+
+Under the hood, `--all` calls the operation once, then follows the underlying `Next()` pagination closure to fetch subsequent pages. Results are written to stdout as they arrive rather than buffered in memory, so this works well even with large result sets.
+
+Without `--all`, paginated operations behave like any other command — pass cursor, page, offset, or limit flags manually and get a single page of results. In pretty or table output, a cursor response that proves another page exists prints a hint on stderr. JSON, YAML, TOON, `--jq`, and agent mode keep stderr silent on success. Offset/limit responses do not guess from a full result page. Cursor operations that declare both a results array and a mutable limit also suppress the hint because the client cannot safely reproduce the SDK's runtime limit check.
+
+Pagination can fail after earlier pages have already been written. A later-page API failure or a repeated/cyclic continuation cursor stops with a non-zero exit status; callers should treat stdout as partial whenever the command exits non-zero. `--all` tracks cursor values and stops before issuing another request when the server repeats one; the same applies to next URLs when the target generator supports them.
+<!-- End Pagination [pagination] -->
 
 <!-- Start Error Handling [errors] -->
 ## Error Handling

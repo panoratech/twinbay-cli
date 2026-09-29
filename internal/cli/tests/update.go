@@ -26,7 +26,7 @@ func initUpdateCmd(parent *cobra.Command) error {
 		Use:     "update [test-id]",
 		Short:   "Update a test",
 		Long:    "Appends an immutable definition. Existing runs remain pinned to their version.",
-		Example: "  twinbay tests update --test-id b513fe0a-0702-4fe7-a57d-00381c144e2a --task-description <value> --outcomes '[]'",
+		Example: "",
 		Args:    flagutil.PositionalFlagArgs,
 		RunE:    runUpdateCmd,
 		Annotations: map[string]string{

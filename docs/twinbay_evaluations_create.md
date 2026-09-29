@@ -20,12 +20,12 @@ twinbay evaluations create [flags]
 
 ```
       --body string              Request body as JSON (alternative to individual flags). Can also be provided via stdin; @path reads a file, @- reads stdin to EOF. Use --schema to print the exact JSON Schema.
-  -e, --evaluator-id string      string value
+  -e, --evaluator-id string      Different ready evaluator used to regrade the latest ready capture for this run and phase.
   -h, --help                     help for create
   -i, --idempotency-key string   Replaying the same key and payload returns the same evaluation; reusing it with a different payload answers 409.
-  -p, --phase string             options: checkpoint, final [required]
+  -p, --phase string             Checkpoint grades without closing the run; final closes and grades it. (options: checkpoint, final) [required]
       --schema                   Print the exact JSON Schema of the request body and exit
-  -t, --test-run-id string       [required]
+  -t, --test-run-id string       Test run whose attributed traffic should be graded. [required]
 ```
 
 ### Options inherited from parent commands

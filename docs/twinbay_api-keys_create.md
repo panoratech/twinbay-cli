@@ -10,12 +10,6 @@ Mints a key for the active organization. It acts with the caller's role, read fr
 twinbay api-keys create [flags]
 ```
 
-### Examples
-
-```
-  twinbay api-keys create --name <value>
-```
-
 ### Options
 
 ```

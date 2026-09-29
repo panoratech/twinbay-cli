@@ -10,12 +10,6 @@ Requires the **admin** role or above in the active organization.
 twinbay organizations update [flags]
 ```
 
-### Examples
-
-```
-  twinbay organizations update --name <value>
-```
-
 ### Options
 
 ```

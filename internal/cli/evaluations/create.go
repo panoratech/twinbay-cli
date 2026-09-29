@@ -15,9 +15,9 @@ import (
 
 var createCmdMeta = []flagutil.FlagMeta{
 	{FlagName: "idempotency-key", Shorthand: "i", FieldPath: "IdempotencyKey", Kind: flagutil.FlagKindJSON, Optional: true, Annotations: `header:"style=simple,explode=false,name=Idempotency-Key"`, Description: "Replaying the same key and payload returns the same evaluation; reusing it with a different payload answers 409."},
-	{FlagName: "test-run-id", Shorthand: "t", FieldPath: "Body.TestRunID", Kind: flagutil.FlagKindString, Required: true, Description: "[required]"},
-	{FlagName: "phase", Shorthand: "p", FieldPath: "Body.Phase", Kind: flagutil.FlagKindEnum, Required: true, EnumValues: []string{"checkpoint", "final"}, Description: "options: checkpoint, final [required]"},
-	{FlagName: "evaluator-id", Shorthand: "e", FieldPath: "Body.EvaluatorID", Kind: flagutil.FlagKindJSON, Optional: true, Annotations: `json:"evaluator_id,omitempty"`, Description: "string value"},
+	{FlagName: "test-run-id", Shorthand: "t", FieldPath: "Body.TestRunID", Kind: flagutil.FlagKindString, Required: true, Description: "Test run whose attributed traffic should be graded. [required]"},
+	{FlagName: "phase", Shorthand: "p", FieldPath: "Body.Phase", Kind: flagutil.FlagKindEnum, Required: true, EnumValues: []string{"checkpoint", "final"}, Description: "Checkpoint grades without closing the run; final closes and grades it. (options: checkpoint, final) [required]"},
+	{FlagName: "evaluator-id", Shorthand: "e", FieldPath: "Body.EvaluatorID", Kind: flagutil.FlagKindJSON, Optional: true, Annotations: `json:"evaluator_id,omitempty"`, Description: "Different ready evaluator used to regrade the latest ready capture for this run and phase."},
 }
 
 // initCreateCmd initializes the create command.
@@ -57,36 +57,43 @@ func runCreateCmd(cmd *cobra.Command, args []string) error {
 	if requested, _ := cmd.Flags().GetBool("schema"); requested {
 		return usage.EmitBodySchema(cmd.OutOrStdout(), "create_evaluation")
 	}
-	req, err := flagutil.BuildRequest[operations.CreateEvaluationRequest](cmd, createCmdMeta, "Body", "body")
-	if err != nil {
-		return flagutil.WithCLIValidation(err)
-	}
-	s, err := client.NewClient(cmd)
+	res, err := executeCreateCmd(cmd, args, false)
 	if err != nil {
 		return err
 	}
-	sdkOpts, err := output.PrepareCallOpts(cmd)
-	if err != nil {
-		return err
+	if res == nil {
+		return nil
 	}
-	// Dry-run: force skip deserialization so the synthetic empty response
-	// does not cause parse failures in typed response handling.
-	if client.IsDryRun(cmd) {
-		sdkOpts = append(sdkOpts, operations.WithSkipDeserialization())
-	}
-	if err := output.ValidateGlobalServerIndex(cmd, len(sdk.ServerList)); err != nil {
-		return err
-	}
-	if output.WantsRawJSON(cmd) {
-		sdkOpts = append(sdkOpts, operations.WithSkipDeserialization())
-	}
-	res, err := s.Evaluations.Create(cmd.Context(), *req, sdkOpts...)
-	if err != nil {
-		return output.Error(cmd, err)
-	}
-
 	if err := output.Result(cmd, res); err != nil {
 		return err
 	}
 	return nil
+}
+func executeCreateCmd(cmd *cobra.Command, args []string, asyncIntent bool) (*operations.CreateEvaluationResponse, error) {
+	req, err := flagutil.BuildRequest[operations.CreateEvaluationRequest](cmd, createCmdMeta, "Body", "body")
+	if err != nil {
+		return nil, flagutil.WithCLIValidation(err)
+	}
+	s, err := client.NewClient(cmd)
+	if err != nil {
+		return nil, err
+	}
+	sdkOpts, err := output.PrepareCallOpts(cmd)
+	if err != nil {
+		return nil, err
+	}
+	if client.IsDryRun(cmd) || asyncIntent {
+		sdkOpts = append(sdkOpts, operations.WithSkipDeserialization())
+	}
+	if err := output.ValidateGlobalServerIndex(cmd, len(sdk.ServerList)); err != nil {
+		return nil, err
+	}
+	if asyncIntent || output.WantsRawJSON(cmd) {
+		sdkOpts = append(sdkOpts, operations.WithSkipDeserialization())
+	}
+	res, err := s.Evaluations.Create(cmd.Context(), *req, sdkOpts...)
+	if err != nil {
+		return nil, output.Error(cmd, err)
+	}
+	return res, nil
 }

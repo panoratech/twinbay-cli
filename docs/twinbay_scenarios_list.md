@@ -19,8 +19,10 @@ twinbay scenarios list [flags]
 ### Options
 
 ```
+  -a, --all              Automatically paginate and fetch all results (streams NDJSON for JSON output)
   -h, --help             help for list
   -i, --include-public   boolean flag (default true)
+      --max-pages int    Maximum number of pages to fetch when using --all (0 = no limit)
   -p, --page int         Page number (default 1)
   -s, --size int         Page size (default 50)
 ```

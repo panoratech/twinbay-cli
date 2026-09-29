@@ -8,6 +8,31 @@ import (
 	"time"
 )
 
+// SeedResponseStatus - Generation state.
+type SeedResponseStatus string
+
+const (
+	SeedResponseStatusPending SeedResponseStatus = "pending"
+	SeedResponseStatusRunning SeedResponseStatus = "running"
+	SeedResponseStatusReady   SeedResponseStatus = "ready"
+	SeedResponseStatusFailed  SeedResponseStatus = "failed"
+)
+
+func (e SeedResponseStatus) ToPointer() *SeedResponseStatus {
+	return &e
+}
+
+// IsExact returns true if the value matches a known enum value, false otherwise.
+func (e *SeedResponseStatus) IsExact() bool {
+	if e != nil {
+		switch *e {
+		case "pending", "running", "ready", "failed":
+			return true
+		}
+	}
+	return false
+}
+
 type SeedResponse struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
@@ -15,8 +40,8 @@ type SeedResponse struct {
 	Twin string `json:"twin"`
 	// The starting state this seed was asked for.
 	Prompt string `json:"prompt"`
-	// pending, running, ready or failed
-	Status string `json:"status"`
+	// Generation state.
+	Status SeedResponseStatus `json:"status"`
 	// Why generation failed, if it did.
 	Failure optionalnullable.OptionalNullable[string] `json:"failure,omitzero"`
 	// The release this seed was generated against.
@@ -67,9 +92,9 @@ func (s *SeedResponse) GetPrompt() string {
 	return s.Prompt
 }
 
-func (s *SeedResponse) GetStatus() string {
+func (s *SeedResponse) GetStatus() SeedResponseStatus {
 	if s == nil {
-		return ""
+		return SeedResponseStatus("")
 	}
 	return s.Status
 }

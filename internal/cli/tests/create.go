@@ -26,7 +26,7 @@ func initCreateCmd(parent *cobra.Command) error {
 		Use:     "create",
 		Short:   "Create a test",
 		Long:    "Records the test and its immutable version 1. Nothing is compiled or run.",
-		Example: "  twinbay tests create --task-description <value> --outcomes '[{\"slug\":\"<value>\",\"description\":\"electrify powerfully antelope yowza\",\"expectation\":\"required\",\"timing\":\"at_end\"}]' --name <value>",
+		Example: "",
 		Args:    cobra.NoArgs,
 		RunE:    runCreateCmd,
 		Annotations: map[string]string{

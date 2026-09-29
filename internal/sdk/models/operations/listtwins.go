@@ -50,6 +50,8 @@ type ListTwinsResponse struct {
 	HTTPMeta components.HTTPMetadata `json:"-"`
 	// Successful Response
 	PageTwinResponse *components.PageTwinResponse
+
+	Next func() (*ListTwinsResponse, error)
 }
 
 func (l ListTwinsResponse) MarshalJSON() ([]byte, error) {

@@ -38,6 +38,8 @@ func initListCmd(parent *cobra.Command) error {
 	if err := flagutil.ValidateMeta[operations.ListTestRunsRequest](listCmdMeta); err != nil {
 		return fmt.Errorf("invalid metadata for list: %w", err)
 	}
+	cmd.Flags().BoolP("all", "a", false, "Automatically paginate and fetch all results (streams NDJSON for JSON output)")
+	cmd.Flags().Int("max-pages", 0, "Maximum number of pages to fetch when using --all (0 = no limit)")
 	parent.AddCommand(cmd)
 	return nil
 }
@@ -46,6 +48,14 @@ func initListCmd(parent *cobra.Command) error {
 func runListCmd(cmd *cobra.Command, args []string) error {
 	if usage.UsageRequested(cmd) {
 		return usage.EmitSchema(cmd, cmd.OutOrStdout())
+	}
+	allPages, _ := flagutil.GetBoolFlag(cmd, "all")
+	maxPages, _ := flagutil.GetIntFlag(cmd, "max-pages")
+	if maxPages < 0 {
+		return flagutil.WithCLIValidation(fmt.Errorf("--max-pages must be zero or greater"))
+	}
+	if flagutil.FlagChanged(cmd, "max-pages") && !allPages {
+		return flagutil.WithCLIValidation(fmt.Errorf("--max-pages requires --all"))
 	}
 	req, err := flagutil.BuildRequest[operations.ListTestRunsRequest](cmd, listCmdMeta, "", "")
 	if err != nil {
@@ -66,6 +76,20 @@ func runListCmd(cmd *cobra.Command, args []string) error {
 	}
 	if err := output.ValidateGlobalServerIndex(cmd, len(sdk.ServerList)); err != nil {
 		return err
+	}
+	if allPages && !client.IsDryRun(cmd) {
+		res, err := s.TestRuns.List(cmd.Context(), req, sdkOpts...)
+		if err != nil {
+			return output.Error(cmd, err)
+		}
+		return output.PaginatedResult(cmd, res, "PageTestRunResponse", "Items", maxPages, output.PaginationProbe{
+			Type:       "offsetLimit",
+			CursorKind: "",
+			NextCursor: "",
+			NextURL:    "",
+			Results:    "$.items",
+			HasLimit:   true,
+		})
 	}
 	if output.WantsRawJSON(cmd) {
 		sdkOpts = append(sdkOpts, operations.WithSkipDeserialization())

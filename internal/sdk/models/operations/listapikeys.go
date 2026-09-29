@@ -43,6 +43,8 @@ type ListAPIKeysResponse struct {
 	HTTPMeta components.HTTPMetadata `json:"-"`
 	// One page of the organization's keys
 	PageAPIKeyResponse *components.PageAPIKeyResponse
+
+	Next func() (*ListAPIKeysResponse, error)
 }
 
 func (l ListAPIKeysResponse) MarshalJSON() ([]byte, error) {

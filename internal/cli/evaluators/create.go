@@ -15,8 +15,8 @@ import (
 )
 
 var createCmdMeta = []flagutil.FlagMeta{
-	{FlagName: "test-id", FieldPath: "TestID", Kind: flagutil.FlagKindString, Required: true, Description: "[required]"},
-	{FlagName: "test-version", FieldPath: "TestVersion", Kind: flagutil.FlagKindJSON, Optional: true, Annotations: `json:"test_version,omitempty"`, Description: "integer value"},
+	{FlagName: "test-id", FieldPath: "TestID", Kind: flagutil.FlagKindString, Required: true, Description: "Test to compile into matchers. [required]"},
+	{FlagName: "test-version", FieldPath: "TestVersion", Kind: flagutil.FlagKindJSON, Optional: true, Annotations: `json:"test_version,omitempty"`, Description: "Version to pin. When omitted, evaluator creation pins the latest test version."},
 	{FlagName: "twins", FieldPath: "Twins", Kind: flagutil.FlagKindStringArray, Required: true, Description: "Catalog slugs of the twins whose APIs the outcomes are about. [required]"},
 }
 
@@ -26,7 +26,7 @@ func initCreateCmd(parent *cobra.Command) error {
 		Use:     "create",
 		Short:   "Create an evaluator",
 		Long:    "Queues compilation of a test definition into immutable request matchers. The latest test version is pinned when no version is supplied.",
-		Example: "  twinbay evaluators create --test-id e3a58ccc-aa80-4c5a-a71a-262fc8302ffc --twins <value>",
+		Example: "",
 		Args:    cobra.NoArgs,
 		RunE:    runCreateCmd,
 		Annotations: map[string]string{
@@ -57,36 +57,43 @@ func runCreateCmd(cmd *cobra.Command, args []string) error {
 	if requested, _ := cmd.Flags().GetBool("schema"); requested {
 		return usage.EmitBodySchema(cmd.OutOrStdout(), "create_evaluator")
 	}
-	request, err := flagutil.BuildRequest[components.CreateEvaluatorRequest](cmd, createCmdMeta, "", "body")
-	if err != nil {
-		return flagutil.WithCLIValidation(err)
-	}
-	s, err := client.NewClient(cmd)
+	res, err := executeCreateCmd(cmd, args, false)
 	if err != nil {
 		return err
 	}
-	sdkOpts, err := output.PrepareCallOpts(cmd)
-	if err != nil {
-		return err
+	if res == nil {
+		return nil
 	}
-	// Dry-run: force skip deserialization so the synthetic empty response
-	// does not cause parse failures in typed response handling.
-	if client.IsDryRun(cmd) {
-		sdkOpts = append(sdkOpts, operations.WithSkipDeserialization())
-	}
-	if err := output.ValidateGlobalServerIndex(cmd, len(sdk.ServerList)); err != nil {
-		return err
-	}
-	if output.WantsRawJSON(cmd) {
-		sdkOpts = append(sdkOpts, operations.WithSkipDeserialization())
-	}
-	res, err := s.Evaluators.Create(cmd.Context(), *request, sdkOpts...)
-	if err != nil {
-		return output.Error(cmd, err)
-	}
-
 	if err := output.Result(cmd, res); err != nil {
 		return err
 	}
 	return nil
+}
+func executeCreateCmd(cmd *cobra.Command, args []string, asyncIntent bool) (*operations.CreateEvaluatorResponse, error) {
+	request, err := flagutil.BuildRequest[components.CreateEvaluatorRequest](cmd, createCmdMeta, "", "body")
+	if err != nil {
+		return nil, flagutil.WithCLIValidation(err)
+	}
+	s, err := client.NewClient(cmd)
+	if err != nil {
+		return nil, err
+	}
+	sdkOpts, err := output.PrepareCallOpts(cmd)
+	if err != nil {
+		return nil, err
+	}
+	if client.IsDryRun(cmd) || asyncIntent {
+		sdkOpts = append(sdkOpts, operations.WithSkipDeserialization())
+	}
+	if err := output.ValidateGlobalServerIndex(cmd, len(sdk.ServerList)); err != nil {
+		return nil, err
+	}
+	if asyncIntent || output.WantsRawJSON(cmd) {
+		sdkOpts = append(sdkOpts, operations.WithSkipDeserialization())
+	}
+	res, err := s.Evaluators.Create(cmd.Context(), *request, sdkOpts...)
+	if err != nil {
+		return nil, output.Error(cmd, err)
+	}
+	return res, nil
 }

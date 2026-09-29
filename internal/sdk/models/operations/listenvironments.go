@@ -43,6 +43,8 @@ type ListEnvironmentsResponse struct {
 	HTTPMeta components.HTTPMetadata `json:"-"`
 	// Successful Response
 	PageEnvironmentResponse *components.PageEnvironmentResponse
+
+	Next func() (*ListEnvironmentsResponse, error)
 }
 
 func (l ListEnvironmentsResponse) MarshalJSON() ([]byte, error) {
