@@ -8,20 +8,28 @@ import (
 )
 
 type GetTestVersionRequest struct {
-	TestVersionID string `pathParam:"style=simple,explode=false,name=test_version_id"`
+	TestID  string `pathParam:"style=simple,explode=false,name=test_id"`
+	Version int64  `pathParam:"style=simple,explode=false,name=version"`
 }
 
-func (g *GetTestVersionRequest) GetTestVersionID() string {
+func (g *GetTestVersionRequest) GetTestID() string {
 	if g == nil {
 		return ""
 	}
-	return g.TestVersionID
+	return g.TestID
+}
+
+func (g *GetTestVersionRequest) GetVersion() int64 {
+	if g == nil {
+		return 0
+	}
+	return g.Version
 }
 
 type GetTestVersionResponse struct {
 	HTTPMeta components.HTTPMetadata `json:"-"`
 	// Successful Response
-	TestVersionResponse *components.TestVersionResponse
+	TestResponse *components.TestResponse
 }
 
 func (g GetTestVersionResponse) MarshalJSON() ([]byte, error) {
@@ -42,9 +50,9 @@ func (g *GetTestVersionResponse) GetHTTPMeta() components.HTTPMetadata {
 	return g.HTTPMeta
 }
 
-func (g *GetTestVersionResponse) GetTestVersionResponse() *components.TestVersionResponse {
+func (g *GetTestVersionResponse) GetTestResponse() *components.TestResponse {
 	if g == nil {
 		return nil
 	}
-	return g.TestVersionResponse
+	return g.TestResponse
 }

@@ -12,13 +12,12 @@ import (
 	"github.com/panoratech/twinbay-cli/internal/cli/environments"
 	"github.com/panoratech/twinbay-cli/internal/cli/evaluationinputs"
 	"github.com/panoratech/twinbay-cli/internal/cli/evaluations"
-	"github.com/panoratech/twinbay-cli/internal/cli/evaluatorversions"
+	"github.com/panoratech/twinbay-cli/internal/cli/evaluators"
 	"github.com/panoratech/twinbay-cli/internal/cli/organizations"
 	"github.com/panoratech/twinbay-cli/internal/cli/scenarios"
 	"github.com/panoratech/twinbay-cli/internal/cli/seeds"
 	"github.com/panoratech/twinbay-cli/internal/cli/testruns"
 	"github.com/panoratech/twinbay-cli/internal/cli/tests"
-	"github.com/panoratech/twinbay-cli/internal/cli/testversions"
 	"github.com/panoratech/twinbay-cli/internal/cli/twinrecords"
 	"github.com/panoratech/twinbay-cli/internal/cli/twins"
 	"github.com/panoratech/twinbay-cli/internal/cli/users"
@@ -103,11 +102,8 @@ func NewRootCommand() (*cobra.Command, error) {
 	if err := tests.InitTestsRoot(rootCmd); err != nil {
 		return nil, fmt.Errorf("init tests: %w", err)
 	}
-	if err := testversions.InitTestVersionsRoot(rootCmd); err != nil {
-		return nil, fmt.Errorf("init test-versions: %w", err)
-	}
-	if err := evaluatorversions.InitEvaluatorVersionsRoot(rootCmd); err != nil {
-		return nil, fmt.Errorf("init evaluator-versions: %w", err)
+	if err := evaluators.InitEvaluatorsRoot(rootCmd); err != nil {
+		return nil, fmt.Errorf("init evaluators: %w", err)
 	}
 	if err := testruns.InitTestRunsRoot(rootCmd); err != nil {
 		return nil, fmt.Errorf("init test-runs: %w", err)

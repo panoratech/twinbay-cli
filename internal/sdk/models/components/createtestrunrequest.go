@@ -3,9 +3,8 @@
 package components
 
 type CreateTestRunRequest struct {
-	EnvironmentID      string `json:"environment_id"`
-	TestVersionID      string `json:"test_version_id"`
-	EvaluatorVersionID string `json:"evaluator_version_id"`
+	EnvironmentID string `json:"environment_id"`
+	EvaluatorID   string `json:"evaluator_id"`
 }
 
 func (c *CreateTestRunRequest) GetEnvironmentID() string {
@@ -15,16 +14,9 @@ func (c *CreateTestRunRequest) GetEnvironmentID() string {
 	return c.EnvironmentID
 }
 
-func (c *CreateTestRunRequest) GetTestVersionID() string {
+func (c *CreateTestRunRequest) GetEvaluatorID() string {
 	if c == nil {
 		return ""
 	}
-	return c.TestVersionID
-}
-
-func (c *CreateTestRunRequest) GetEvaluatorVersionID() string {
-	if c == nil {
-		return ""
-	}
-	return c.EvaluatorVersionID
+	return c.EvaluatorID
 }

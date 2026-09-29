@@ -13,18 +13,17 @@ twinbay test-runs create [flags]
 ### Examples
 
 ```
-  twinbay test-runs create --environment-id 24e86869-c8aa-4fa2-9d08-6690490dcd5a --test-version-id fd3a7185-927c-4c41-b2e0-5139a6d0458e --evaluator-version-id 51940cd7-c932-46d5-8b0b-b57693e9208b
+  twinbay test-runs create --environment-id 24e86869-c8aa-4fa2-9d08-6690490dcd5a --evaluator-id 24e86869-c8aa-4fa2-9d08-6690490dcd5a
 ```
 
 ### Options
 
 ```
-      --body string                   Request body as JSON (alternative to individual flags). Can also be provided via stdin; @path reads a file, @- reads stdin to EOF. Use --schema to print the exact JSON Schema.
-      --environment-id string         [required]
-      --evaluator-version-id string   [required]
-  -h, --help                          help for create
-      --schema                        Print the exact JSON Schema of the request body and exit
-  -t, --test-version-id string        [required]
+      --body string             Request body as JSON (alternative to individual flags). Can also be provided via stdin; @path reads a file, @- reads stdin to EOF. Use --schema to print the exact JSON Schema.
+      --environment-id string   [required]
+      --evaluator-id string     [required]
+  -h, --help                    help for create
+      --schema                  Print the exact JSON Schema of the request body and exit
 ```
 
 ### Options inherited from parent commands

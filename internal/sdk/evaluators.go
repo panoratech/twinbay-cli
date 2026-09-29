@@ -13,25 +13,26 @@ import (
 	"github.com/panoratech/twinbay-cli/internal/sdk/sdkinternal/hooks"
 	"github.com/panoratech/twinbay-cli/internal/sdk/sdkinternal/utils"
 	"net/http"
+	"net/url"
 )
 
-type TestVersions struct {
+type Evaluators struct {
 	rootSDK          *Twinbay
 	sdkConfiguration config.SDKConfiguration
 	hooks            *hooks.Hooks
 }
 
-func newTestVersions(rootSDK *Twinbay, sdkConfig config.SDKConfiguration, hooks *hooks.Hooks) *TestVersions {
-	return &TestVersions{
+func newEvaluators(rootSDK *Twinbay, sdkConfig config.SDKConfiguration, hooks *hooks.Hooks) *Evaluators {
+	return &Evaluators{
 		rootSDK:          rootSDK,
 		sdkConfiguration: sdkConfig,
 		hooks:            hooks,
 	}
 }
 
-// Create a test version
-// A new definition. Attempts already pinned to an earlier version keep it.
-func (s *TestVersions) Create(ctx context.Context, request operations.CreateTestVersionRequest, opts ...operations.Option) (*operations.CreateTestVersionResponse, error) {
+// Create an evaluator
+// Queues compilation of a test definition into immutable request matchers. The latest test version is pinned when no version is supplied.
+func (s *Evaluators) Create(ctx context.Context, request components.CreateEvaluatorRequest, opts ...operations.Option) (*operations.CreateEvaluatorResponse, error) {
 	o := operations.Options{}
 	supportedOptions := []string{
 		operations.SupportedOptionTimeout,
@@ -50,7 +51,7 @@ func (s *TestVersions) Create(ctx context.Context, request operations.CreateTest
 	} else {
 		baseURL = *o.ServerURL
 	}
-	opURL, err := utils.GenerateURL(ctx, baseURL, "/tests/{test_id}/versions", request, nil)
+	opURL, err := url.JoinPath(baseURL, "/evaluators")
 	if err != nil {
 		return nil, fmt.Errorf("error generating URL: %w", err)
 	}
@@ -60,10 +61,10 @@ func (s *TestVersions) Create(ctx context.Context, request operations.CreateTest
 		SDKConfiguration: s.sdkConfiguration,
 		BaseURL:          baseURL,
 		Context:          ctx,
-		OperationID:      "create_test_version",
+		OperationID:      "create_evaluator",
 		SecuritySource:   s.sdkConfiguration.Security,
 	}
-	bodyReader, reqContentType, err := utils.SerializeRequestBody(ctx, request, false, false, "Body", "json", `request:"mediaType=application/json"`)
+	bodyReader, reqContentType, err := utils.SerializeRequestBody(ctx, request, false, false, "Request", "json", `request:"mediaType=application/json"`)
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +134,7 @@ func (s *TestVersions) Create(ctx context.Context, request operations.CreateTest
 		}
 	}
 
-	res := &operations.CreateTestVersionResponse{
+	res := &operations.CreateEvaluatorResponse{
 		HTTPMeta: components.HTTPMetadata{
 			Request:  req,
 			Response: httpRes,
@@ -141,7 +142,7 @@ func (s *TestVersions) Create(ctx context.Context, request operations.CreateTest
 	}
 
 	switch {
-	case httpRes.StatusCode == 201:
+	case httpRes.StatusCode == 202:
 		switch {
 		case utils.MatchContentType(httpRes.Header.Get("Content-Type"), `application/json`):
 			if o.SkipDeserialization != nil && *o.SkipDeserialization {
@@ -153,12 +154,12 @@ func (s *TestVersions) Create(ctx context.Context, request operations.CreateTest
 					return nil, err
 				}
 
-				var out components.TestVersionResponse
+				var out components.EvaluatorResponse
 				if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out, ""); err != nil {
 					return nil, err
 				}
 
-				res.TestVersionResponse = &out
+				res.EvaluatorResponse = &out
 			}
 		default:
 			rawBody, err := utils.ConsumeRawBody(httpRes)
@@ -204,6 +205,8 @@ func (s *TestVersions) Create(ctx context.Context, request operations.CreateTest
 			return nil, err
 		}
 		return nil, sdkerrors.NewSDKDefaultError("API error occurred", httpRes.StatusCode, string(rawBody), httpRes)
+	case httpRes.StatusCode == 503:
+		fallthrough
 	case httpRes.StatusCode >= 500 && httpRes.StatusCode < 600:
 		rawBody, err := utils.ConsumeRawBody(httpRes)
 		if err != nil {
@@ -222,8 +225,9 @@ func (s *TestVersions) Create(ctx context.Context, request operations.CreateTest
 
 }
 
-// List a test's versions
-func (s *TestVersions) List(ctx context.Context, request operations.ListTestVersionsRequest, opts ...operations.Option) (*operations.ListTestVersionsResponse, error) {
+// List evaluators
+// Lists every compilation for a test, optionally filtered by version.
+func (s *Evaluators) List(ctx context.Context, request operations.ListEvaluatorsRequest, opts ...operations.Option) (*operations.ListEvaluatorsResponse, error) {
 	o := operations.Options{}
 	supportedOptions := []string{
 		operations.SupportedOptionTimeout,
@@ -242,7 +246,7 @@ func (s *TestVersions) List(ctx context.Context, request operations.ListTestVers
 	} else {
 		baseURL = *o.ServerURL
 	}
-	opURL, err := utils.GenerateURL(ctx, baseURL, "/tests/{test_id}/versions", request, nil)
+	opURL, err := url.JoinPath(baseURL, "/evaluators")
 	if err != nil {
 		return nil, fmt.Errorf("error generating URL: %w", err)
 	}
@@ -252,7 +256,7 @@ func (s *TestVersions) List(ctx context.Context, request operations.ListTestVers
 		SDKConfiguration: s.sdkConfiguration,
 		BaseURL:          baseURL,
 		Context:          ctx,
-		OperationID:      "list_test_versions",
+		OperationID:      "list_evaluators",
 		SecuritySource:   s.sdkConfiguration.Security,
 	}
 
@@ -322,7 +326,7 @@ func (s *TestVersions) List(ctx context.Context, request operations.ListTestVers
 		}
 	}
 
-	res := &operations.ListTestVersionsResponse{
+	res := &operations.ListEvaluatorsResponse{
 		HTTPMeta: components.HTTPMetadata{
 			Request:  req,
 			Response: httpRes,
@@ -342,12 +346,12 @@ func (s *TestVersions) List(ctx context.Context, request operations.ListTestVers
 					return nil, err
 				}
 
-				var out components.PageTestVersionResponse
+				var out components.PageEvaluatorResponse
 				if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out, ""); err != nil {
 					return nil, err
 				}
 
-				res.PageTestVersionResponse = &out
+				res.PageEvaluatorResponse = &out
 			}
 		default:
 			rawBody, err := utils.ConsumeRawBody(httpRes)
@@ -411,8 +415,9 @@ func (s *TestVersions) List(ctx context.Context, request operations.ListTestVers
 
 }
 
-// Retrieve a test version
-func (s *TestVersions) Retrieve(ctx context.Context, request operations.GetTestVersionRequest, opts ...operations.Option) (*operations.GetTestVersionResponse, error) {
+// Retrieve an evaluator
+// Poll until `status` is `ready`, when rules and provenance are frozen, or `error`, when `last_error` explains the failure.
+func (s *Evaluators) Retrieve(ctx context.Context, request operations.GetEvaluatorRequest, opts ...operations.Option) (*operations.GetEvaluatorResponse, error) {
 	o := operations.Options{}
 	supportedOptions := []string{
 		operations.SupportedOptionTimeout,
@@ -431,7 +436,7 @@ func (s *TestVersions) Retrieve(ctx context.Context, request operations.GetTestV
 	} else {
 		baseURL = *o.ServerURL
 	}
-	opURL, err := utils.GenerateURL(ctx, baseURL, "/test-versions/{test_version_id}", request, nil)
+	opURL, err := utils.GenerateURL(ctx, baseURL, "/evaluators/{evaluator_id}", request, nil)
 	if err != nil {
 		return nil, fmt.Errorf("error generating URL: %w", err)
 	}
@@ -441,7 +446,7 @@ func (s *TestVersions) Retrieve(ctx context.Context, request operations.GetTestV
 		SDKConfiguration: s.sdkConfiguration,
 		BaseURL:          baseURL,
 		Context:          ctx,
-		OperationID:      "get_test_version",
+		OperationID:      "get_evaluator",
 		SecuritySource:   s.sdkConfiguration.Security,
 	}
 
@@ -507,7 +512,7 @@ func (s *TestVersions) Retrieve(ctx context.Context, request operations.GetTestV
 		}
 	}
 
-	res := &operations.GetTestVersionResponse{
+	res := &operations.GetEvaluatorResponse{
 		HTTPMeta: components.HTTPMetadata{
 			Request:  req,
 			Response: httpRes,
@@ -527,12 +532,12 @@ func (s *TestVersions) Retrieve(ctx context.Context, request operations.GetTestV
 					return nil, err
 				}
 
-				var out components.TestVersionResponse
+				var out components.EvaluatorResponse
 				if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out, ""); err != nil {
 					return nil, err
 				}
 
-				res.TestVersionResponse = &out
+				res.EvaluatorResponse = &out
 			}
 		default:
 			rawBody, err := utils.ConsumeRawBody(httpRes)

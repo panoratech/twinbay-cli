@@ -291,11 +291,22 @@ paths:
       tags:
         - "catalog"
       summary: "List available twins"
-      description: "Returns the registered code twins newest release first."
+      description: "Returns registered twins, newest release first unless sorted by name."
       operationId: "list_twins"
       security:
         - Organization API key: []
       parameters:
+        - name: "sort"
+          in: "query"
+          required: false
+          schema:
+            anyOf:
+              - const: "name"
+                type: "string"
+              - type: "null"
+            description: "Sort by display name, A-Z (case-insensitive)."
+            title: "Sort"
+          description: "Sort by display name, A-Z (case-insensitive)."
         - name: "page"
           in: "query"
           required: false
@@ -1310,13 +1321,12 @@ paths:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
       x-speakeasy-name-override: "retrieve"
-  /tests/{test_id}/versions:
     post:
       tags:
         - "tests"
-      summary: "Create a test version"
-      description: "A new definition. Attempts already pinned to an earlier version keep it."
-      operationId: "create_test_version"
+      summary: "Update a test"
+      description: "Appends an immutable definition. Existing runs remain pinned to their version."
+      operationId: "update_test"
       security:
         - Organization API key: []
       parameters:
@@ -1332,14 +1342,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateTestVersionRequest"
+              $ref: "#/components/schemas/UpdateTestRequest"
       responses:
-        "201":
+        "200":
           description: "Successful Response"
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/TestVersionResponse"
+                $ref: "#/components/schemas/TestResponse"
         "401":
           description: "The credential is missing, malformed, expired, or not trusted"
         "403":
@@ -1352,8 +1362,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-      x-speakeasy-group: "test_versions"
-      x-speakeasy-name-override: "create"
+      x-speakeasy-name-override: "update"
+  /tests/{test_id}/versions:
     get:
       tags:
         - "tests"
@@ -1396,7 +1406,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Page_TestVersionResponse_"
+                $ref: "#/components/schemas/Page_TestResponse_"
         "401":
           description: "The credential is missing, malformed, expired, or not trusted"
         "403":
@@ -1409,9 +1419,9 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-      x-speakeasy-group: "test_versions"
-      x-speakeasy-name-override: "list"
-  /test-versions/{test_version_id}:
+      x-speakeasy-group: "tests"
+      x-speakeasy-name-override: "list_versions"
+  /tests/{test_id}/versions/{version}:
     get:
       tags:
         - "tests"
@@ -1420,20 +1430,26 @@ paths:
       security:
         - Organization API key: []
       parameters:
-        - name: "test_version_id"
+        - name: "test_id"
           in: "path"
           required: true
           schema:
             type: "string"
             format: "uuid"
-            title: "Test Version Id"
+            title: "Test Id"
+        - name: "version"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            title: "Version"
       responses:
         "200":
           description: "Successful Response"
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/TestVersionResponse"
+                $ref: "#/components/schemas/TestResponse"
         "401":
           description: "The credential is missing, malformed, expired, or not trusted"
         "403":
@@ -1446,44 +1462,36 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-      x-speakeasy-group: "test_versions"
-      x-speakeasy-name-override: "retrieve"
-  /test-versions/{test_version_id}/compile:
+      x-speakeasy-group: "tests"
+      x-speakeasy-name-override: "retrieve_version"
+  /evaluators:
     post:
       tags:
         - "tests"
-      summary: "Compile a test version"
-      description: "Queues compilation of the outcomes into request matchers against the selected twins. Every call creates a new evaluator version; ambiguous or unsupported outcomes settle it as `error` rather than guessing."
-      operationId: "compile_test_version"
+      summary: "Create an evaluator"
+      description: "Queues compilation of a test definition into immutable request matchers. The latest test version is pinned when no version is supplied."
+      operationId: "create_evaluator"
       security:
         - Organization API key: []
-      parameters:
-        - name: "test_version_id"
-          in: "path"
-          required: true
-          schema:
-            type: "string"
-            format: "uuid"
-            title: "Test Version Id"
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CompileRequest"
+              $ref: "#/components/schemas/CreateEvaluatorRequest"
       responses:
         "202":
           description: "Successful Response"
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/EvaluatorVersionResponse"
+                $ref: "#/components/schemas/EvaluatorResponse"
         "401":
           description: "The credential is missing, malformed, expired, or not trusted"
         "403":
           description: "The credential does not act inside an organization"
         "404":
-          description: "Test version or twin not found"
+          description: "Test, test version, or twin not found"
         "503":
           description: "Test compilation is not configured"
         "422":
@@ -1492,25 +1500,33 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-      x-speakeasy-group: "evaluator_versions"
+      x-speakeasy-group: "evaluators"
       x-speakeasy-name-override: "create"
-  /test-versions/{test_version_id}/evaluators:
     get:
       tags:
         - "tests"
-      summary: "List a test version's evaluators"
-      description: "Lists all compilations, newest first, including pending and failed ones. Retrieve an individual evaluator to read its frozen matchers."
-      operationId: "list_evaluator_versions"
+      summary: "List evaluators"
+      description: "Lists every compilation for a test, optionally filtered by version."
+      operationId: "list_evaluators"
       security:
         - Organization API key: []
       parameters:
-        - name: "test_version_id"
-          in: "path"
+        - name: "test"
+          in: "query"
           required: true
           schema:
             type: "string"
             format: "uuid"
-            title: "Test Version Id"
+            title: "Test"
+        - name: "test_version"
+          in: "query"
+          required: false
+          schema:
+            anyOf:
+              - type: "integer"
+                exclusiveMinimum: 0
+              - type: "null"
+            title: "Test Version"
         - name: "page"
           in: "query"
           required: false
@@ -1538,58 +1554,58 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Page_EvaluatorVersionSummary_"
+                $ref: "#/components/schemas/Page_EvaluatorResponse_"
         "401":
           description: "The credential is missing, malformed, expired, or not trusted"
         "403":
           description: "The credential does not act inside an organization"
         "404":
-          description: "Test version not found"
+          description: "Test not found"
         "422":
           description: "Validation Error"
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-      x-speakeasy-group: "evaluator_versions"
+      x-speakeasy-group: "evaluators"
       x-speakeasy-name-override: "list"
-  /evaluator-versions/{evaluator_version_id}:
+  /evaluators/{evaluator_id}:
     get:
       tags:
         - "tests"
-      summary: "Retrieve an evaluator version"
-      description: "Compilation is asynchronous: poll until `status` is `ready`, when `rules` holds the frozen matchers, or `error`, when `error_message` says why. Only a ready evaluator can start a test run."
-      operationId: "get_evaluator_version"
+      summary: "Retrieve an evaluator"
+      description: "Poll until `status` is `ready`, when rules and provenance are frozen, or `error`, when `last_error` explains the failure."
+      operationId: "get_evaluator"
       security:
         - Organization API key: []
       parameters:
-        - name: "evaluator_version_id"
+        - name: "evaluator_id"
           in: "path"
           required: true
           schema:
             type: "string"
             format: "uuid"
-            title: "Evaluator Version Id"
+            title: "Evaluator Id"
       responses:
         "200":
           description: "Successful Response"
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/EvaluatorVersionResponse"
+                $ref: "#/components/schemas/EvaluatorResponse"
         "401":
           description: "The credential is missing, malformed, expired, or not trusted"
         "403":
           description: "The credential does not act inside an organization"
         "404":
-          description: "Evaluator version not found"
+          description: "Evaluator not found"
         "422":
           description: "Validation Error"
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-      x-speakeasy-group: "evaluator_versions"
+      x-speakeasy-group: "evaluators"
       x-speakeasy-name-override: "retrieve"
   /test-runs:
     post:
@@ -1618,7 +1634,7 @@ paths:
         "403":
           description: "The credential does not act inside an organization"
         "404":
-          description: "Environment, test version or evaluator not found"
+          description: "Environment or evaluator not found"
         "409":
           description: "The evaluator is not ready or compatible, or an attempt is already running"
         "422":
@@ -1646,7 +1662,7 @@ paths:
                 format: "uuid"
               - type: "null"
             title: "Environment Id"
-        - name: "test_version_id"
+        - name: "test"
           in: "query"
           required: false
           schema:
@@ -1654,7 +1670,16 @@ paths:
               - type: "string"
                 format: "uuid"
               - type: "null"
-            title: "Test Version Id"
+            title: "Test"
+        - name: "test_version"
+          in: "query"
+          required: false
+          schema:
+            anyOf:
+              - type: "integer"
+                exclusiveMinimum: 0
+              - type: "null"
+            title: "Test Version"
         - name: "page"
           in: "query"
           required: false
@@ -1732,23 +1757,16 @@ paths:
                 $ref: "#/components/schemas/HTTPValidationError"
       x-speakeasy-group: "test_runs"
       x-speakeasy-name-override: "retrieve"
-  /test-runs/{test_run_id}/evaluations:
+  /evaluations:
     post:
       tags:
         - "tests"
       summary: "Evaluate a test run"
-      description: "Queues a capture of the attempt's traffic and a deterministic match against its pinned evaluator. A checkpoint keeps the attempt open; the first final evaluation closes it, and later ones capture late logs within the same window."
+      description: "Queues a capture and grading with the run's evaluator. Naming another evaluator regrades the latest ready capture for the same phase."
       operationId: "create_evaluation"
       security:
         - Organization API key: []
       parameters:
-        - name: "test_run_id"
-          in: "path"
-          required: true
-          schema:
-            type: "string"
-            format: "uuid"
-            title: "Test Run Id"
         - name: "Idempotency-Key"
           in: "header"
           required: false
@@ -1790,6 +1808,7 @@ paths:
                 $ref: "#/components/schemas/HTTPValidationError"
       x-speakeasy-group: "evaluations"
       x-speakeasy-name-override: "create"
+  /test-runs/{test_run_id}/evaluations:
     get:
       tags:
         - "tests"
@@ -1885,64 +1904,6 @@ paths:
                 $ref: "#/components/schemas/HTTPValidationError"
       x-speakeasy-group: "evaluations"
       x-speakeasy-name-override: "retrieve"
-  /evaluations/{evaluation_id}/regrade:
-    post:
-      tags:
-        - "tests"
-      summary: "Regrade an evaluation"
-      description: "Matches the exact same capture with another ready evaluator of the same test version. No agent rerun, new capture or model call; the prior evaluation is kept."
-      operationId: "regrade_evaluation"
-      security:
-        - Organization API key: []
-      parameters:
-        - name: "evaluation_id"
-          in: "path"
-          required: true
-          schema:
-            type: "string"
-            format: "uuid"
-            title: "Evaluation Id"
-        - name: "Idempotency-Key"
-          in: "header"
-          required: false
-          schema:
-            anyOf:
-              - type: "string"
-                minLength: 1
-                maxLength: 255
-              - type: "null"
-            description: "Replaying the same key and payload returns the same evaluation; reusing it with a different payload answers 409."
-            title: "Idempotency-Key"
-          description: "Replaying the same key and payload returns the same evaluation; reusing it with a different payload answers 409."
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/RegradeRequest"
-      responses:
-        "202":
-          description: "Successful Response"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/EvaluationResponse"
-        "401":
-          description: "The credential is missing, malformed, expired, or not trusted"
-        "403":
-          description: "The credential does not act inside an organization"
-        "404":
-          description: "Evaluation or evaluator version not found"
-        "409":
-          description: "The capture or evaluator is not ready or compatible"
-        "422":
-          description: "Validation Error"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/HTTPValidationError"
-      x-speakeasy-group: "evaluations"
-      x-speakeasy-name-override: "regrade"
   /evaluation-inputs/{input_id}/download:
     get:
       tags:
@@ -2362,23 +2323,50 @@ components:
         - "expires_at"
         - "created_by"
       title: "ApiKeyResponse"
-    CompileRequest:
+    ApiSchemaProvenance:
       properties:
-        twins:
+        twin:
+          type: "string"
+          title: "Twin"
+        twin_version:
+          type: "string"
+          title: "Twin Version"
+        image_digest:
+          type: "string"
+          title: "Image Digest"
+        description:
+          type: "string"
+          title: "Description"
+        resources:
           items:
             type: "string"
-            maxLength: 100
-            minLength: 1
           type: "array"
-          maxItems: 10
-          minItems: 1
-          title: "Twins"
-          description: "Catalog slugs of the twins whose APIs the outcomes are about."
-      additionalProperties: false
+          title: "Resources"
+        sdk_targets:
+          items:
+            type: "string"
+          type: "array"
+          title: "Sdk Targets"
       type: "object"
       required:
-        - "twins"
-      title: "CompileRequest"
+        - "twin"
+        - "twin_version"
+        - "image_digest"
+        - "description"
+      title: "ApiSchemaProvenance"
+    CompilerProvenance:
+      properties:
+        provider:
+          type: "string"
+          title: "Provider"
+        model:
+          type: "string"
+          title: "Model"
+      type: "object"
+      required:
+        - "provider"
+        - "model"
+      title: "CompilerProvenance"
     CreateApiKeyRequest:
       properties:
         name:
@@ -2466,17 +2454,56 @@ components:
       title: "CreateEnvironmentTwinRequest"
     CreateEvaluationRequest:
       properties:
+        test_run_id:
+          type: "string"
+          format: "uuid"
+          title: "Test Run Id"
         phase:
           type: "string"
           enum:
             - "checkpoint"
             - "final"
           title: "Phase"
+        evaluator_id:
+          anyOf:
+            - type: "string"
+              format: "uuid"
+            - type: "null"
+          title: "Evaluator Id"
       additionalProperties: false
       type: "object"
       required:
+        - "test_run_id"
         - "phase"
       title: "CreateEvaluationRequest"
+    CreateEvaluatorRequest:
+      properties:
+        test_id:
+          type: "string"
+          format: "uuid"
+          title: "Test Id"
+        test_version:
+          anyOf:
+            - type: "integer"
+              exclusiveMinimum: 0.0
+            - type: "null"
+          title: "Test Version"
+        twins:
+          items:
+            type: "string"
+            maxLength: 100
+            minLength: 1
+          type: "array"
+          maxItems: 10
+          minItems: 1
+          title: "Twins"
+          description: "Catalog slugs of the twins whose APIs the outcomes are about."
+      additionalProperties: false
+      type: "object"
+      required:
+        - "test_id"
+        - "twins"
+      title: "CreateEvaluatorRequest"
     CreateExportRequest:
       properties:
         environment_twin_ids:
@@ -2602,41 +2629,16 @@ components:
           type: "string"
           format: "uuid"
           title: "Environment Id"
-        test_version_id:
+        evaluator_id:
           type: "string"
           format: "uuid"
-          title: "Test Version Id"
-        evaluator_version_id:
-          type: "string"
-          format: "uuid"
-          title: "Evaluator Version Id"
+          title: "Evaluator Id"
       additionalProperties: false
       type: "object"
       required:
         - "environment_id"
-        - "test_version_id"
-        - "evaluator_version_id"
+        - "evaluator_id"
       title: "CreateTestRunRequest"
-    CreateTestVersionRequest:
-      properties:
-        task_description:
-          type: "string"
-          maxLength: 2000
-          minLength: 1
-          title: "Task Description"
-        outcomes:
-          items:
-            $ref: "#/components/schemas/OutcomeRequest"
-          type: "array"
-          maxItems: 50
-          minItems: 1
-          title: "Outcomes"
-      additionalProperties: false
-      type: "object"
-      required:
-        - "task_description"
-        - "outcomes"
-      title: "CreateTestVersionRequest"
     CreatedApiKeyResponse:
       properties:
         id:
@@ -2827,10 +2829,10 @@ components:
           type: "string"
           format: "uuid"
           title: "Input Id"
-        evaluator_version_id:
+        evaluator_id:
           type: "string"
           format: "uuid"
-          title: "Evaluator Version Id"
+          title: "Evaluator Id"
         regraded_from_id:
           anyOf:
             - type: "string"
@@ -2885,7 +2887,7 @@ components:
       required:
         - "id"
         - "input_id"
-        - "evaluator_version_id"
+        - "evaluator_id"
         - "status"
         - "phase"
         - "coverage_status"
@@ -2893,19 +2895,41 @@ components:
         - "results"
         - "created_at"
       title: "EvaluationResponse"
-    EvaluatorVersionResponse:
+    EvaluatorProvenance:
+      properties:
+        compiler:
+          $ref: "#/components/schemas/CompilerProvenance"
+        api_schemas:
+          items:
+            $ref: "#/components/schemas/ApiSchemaProvenance"
+          type: "array"
+          title: "Api Schemas"
+        executor:
+          $ref: "#/components/schemas/ExecutorProvenance"
+      type: "object"
+      required:
+        - "compiler"
+        - "api_schemas"
+        - "executor"
+      title: "EvaluatorProvenance"
+    EvaluatorResponse:
       properties:
         id:
           type: "string"
           format: "uuid"
           title: "Id"
-        test_version_id:
+        object:
+          type: "string"
+          const: "evaluator"
+          title: "Object"
+          default: "evaluator"
+        test_id:
           type: "string"
           format: "uuid"
-          title: "Test Version Id"
-        version:
+          title: "Test Id"
+        test_version:
           type: "integer"
-          title: "Version"
+          title: "Test Version"
         status:
           type: "string"
           enum:
@@ -2919,15 +2943,6 @@ components:
             type: "string"
           type: "array"
           title: "Twins"
-        error_message:
-          anyOf:
-            - type: "string"
-            - type: "null"
-          title: "Error Message"
-        created_at:
-          type: "string"
-          format: "date-time"
-          title: "Created At"
         rules:
           anyOf:
             - items:
@@ -2935,60 +2950,39 @@ components:
               type: "array"
             - type: "null"
           title: "Rules"
-          description: "The frozen matchers, once the bundle is ready."
-      type: "object"
-      required:
-        - "id"
-        - "test_version_id"
-        - "version"
-        - "status"
-        - "twins"
-        - "created_at"
-      title: "EvaluatorVersionResponse"
-    EvaluatorVersionSummary:
-      properties:
-        id:
-          type: "string"
-          format: "uuid"
-          title: "Id"
-        test_version_id:
-          type: "string"
-          format: "uuid"
-          title: "Test Version Id"
-        version:
-          type: "integer"
-          title: "Version"
-        status:
-          type: "string"
-          enum:
-            - "pending"
-            - "running"
-            - "ready"
-            - "error"
-          title: "Status"
-        twins:
-          items:
-            type: "string"
-          type: "array"
-          title: "Twins"
-        error_message:
+          description: "The frozen matchers, once compilation is ready."
+        provenance:
           anyOf:
-            - type: "string"
+            - $ref: "#/components/schemas/EvaluatorProvenance"
             - type: "null"
-          title: "Error Message"
+        last_error:
+          anyOf:
+            - $ref: "#/components/schemas/LastError"
+            - type: "null"
         created_at:
           type: "string"
           format: "date-time"
           title: "Created At"
+        updated_at:
+          type: "string"
+          format: "date-time"
+          title: "Updated At"
+        completed_at:
+          anyOf:
+            - type: "string"
+              format: "date-time"
+            - type: "null"
+          title: "Completed At"
       type: "object"
       required:
         - "id"
-        - "test_version_id"
-        - "version"
+        - "test_id"
+        - "test_version"
         - "status"
         - "twins"
         - "created_at"
-      title: "EvaluatorVersionSummary"
+        - "updated_at"
+      title: "EvaluatorResponse"
     EvidenceResponse:
       properties:
         id:
@@ -3014,6 +3008,15 @@ components:
         - "source_locator"
         - "summary"
       title: "EvidenceResponse"
+    ExecutorProvenance:
+      properties:
+        version:
+          type: "string"
+          title: "Version"
+      type: "object"
+      required:
+        - "version"
+      title: "ExecutorProvenance"
     ExportDownloadResponse:
       properties:
         url:
@@ -3108,6 +3111,19 @@ components:
           title: "Detail"
       type: "object"
       title: "HTTPValidationError"
+    LastError:
+      properties:
+        code:
+          type: "string"
+          title: "Code"
+        message:
+          type: "string"
+          title: "Message"
+      type: "object"
+      required:
+        - "code"
+        - "message"
+      title: "LastError"
     Matcher:
       properties:
         twin:
@@ -3373,11 +3389,11 @@ components:
         - "size"
         - "pages"
       title: "Page[EvaluationResponse]"
-    Page_EvaluatorVersionSummary_:
+    Page_EvaluatorResponse_:
       properties:
         items:
           items:
-            $ref: "#/components/schemas/EvaluatorVersionSummary"
+            $ref: "#/components/schemas/EvaluatorResponse"
           type: "array"
           title: "Items"
         total:
@@ -3403,7 +3419,7 @@ components:
         - "page"
         - "size"
         - "pages"
-      title: "Page[EvaluatorVersionSummary]"
+      title: "Page[EvaluatorResponse]"
     Page_ExportResponse_:
       properties:
         items:
@@ -3652,37 +3668,6 @@ components:
         - "size"
         - "pages"
       title: "Page[TestRunResponse]"
-    Page_TestVersionResponse_:
-      properties:
-        items:
-          items:
-            $ref: "#/components/schemas/TestVersionResponse"
-          type: "array"
-          title: "Items"
-        total:
-          type: "integer"
-          minimum: 0.0
-          title: "Total"
-        page:
-          type: "integer"
-          minimum: 1.0
-          title: "Page"
-        size:
-          type: "integer"
-          minimum: 1.0
-          title: "Size"
-        pages:
-          type: "integer"
-          minimum: 0.0
-          title: "Pages"
-      type: "object"
-      required:
-        - "items"
-        - "total"
-        - "page"
-        - "size"
-        - "pages"
-      title: "Page[TestVersionResponse]"
     Page_TwinResponse_:
       properties:
         items:
@@ -3768,17 +3753,6 @@ components:
         - "value"
       title: "Predicate"
       description: "One condition on a captured call. Data, never code or SQL."
-    RegradeRequest:
-      properties:
-        evaluator_version_id:
-          type: "string"
-          format: "uuid"
-          title: "Evaluator Version Id"
-      additionalProperties: false
-      type: "object"
-      required:
-        - "evaluator_version_id"
-      title: "RegradeRequest"
     RequestLogBody:
       properties:
         content_type:
@@ -4100,23 +4074,40 @@ components:
           type: "string"
           format: "uuid"
           title: "Id"
+        object:
+          type: "string"
+          const: "test"
+          title: "Object"
+          default: "test"
         name:
           type: "string"
           title: "Name"
-        latest_version_id:
+        version:
+          type: "integer"
+          title: "Version"
+        task_description:
           type: "string"
-          format: "uuid"
-          title: "Latest Version Id"
-        created_at:
-          type: "string"
-          format: "date-time"
-          title: "Created At"
+          title: "Task Description"
+        outcomes:
+          items:
+            $ref: "#/components/schemas/OutcomeResponse"
+          type: "array"
+          title: "Outcomes"
+        created:
+          type: "integer"
+          title: "Created"
+        updated:
+          type: "integer"
+          title: "Updated"
       type: "object"
       required:
         - "id"
         - "name"
-        - "latest_version_id"
-        - "created_at"
+        - "version"
+        - "task_description"
+        - "outcomes"
+        - "created"
+        - "updated"
       title: "TestResponse"
     TestRunResponse:
       properties:
@@ -4128,14 +4119,17 @@ components:
           type: "string"
           format: "uuid"
           title: "Environment Id"
-        test_version_id:
+        test_id:
           type: "string"
           format: "uuid"
-          title: "Test Version Id"
-        evaluator_version_id:
+          title: "Test Id"
+        test_version:
+          type: "integer"
+          title: "Test Version"
+        evaluator_id:
           type: "string"
           format: "uuid"
-          title: "Evaluator Version Id"
+          title: "Evaluator Id"
         execution_status:
           type: "string"
           enum:
@@ -4166,46 +4160,13 @@ components:
       required:
         - "id"
         - "environment_id"
-        - "test_version_id"
-        - "evaluator_version_id"
+        - "test_id"
+        - "test_version"
+        - "evaluator_id"
         - "execution_status"
         - "started_at"
         - "created_at"
       title: "TestRunResponse"
-    TestVersionResponse:
-      properties:
-        id:
-          type: "string"
-          format: "uuid"
-          title: "Id"
-        test_id:
-          type: "string"
-          format: "uuid"
-          title: "Test Id"
-        version:
-          type: "integer"
-          title: "Version"
-        task_description:
-          type: "string"
-          title: "Task Description"
-        outcomes:
-          items:
-            $ref: "#/components/schemas/OutcomeResponse"
-          type: "array"
-          title: "Outcomes"
-        created_at:
-          type: "string"
-          format: "date-time"
-          title: "Created At"
-      type: "object"
-      required:
-        - "id"
-        - "test_id"
-        - "version"
-        - "task_description"
-        - "outcomes"
-        - "created_at"
-      title: "TestVersionResponse"
     TwinResponse:
       properties:
         slug:
@@ -4277,6 +4238,26 @@ components:
       additionalProperties: false
       type: "object"
       title: "UpdateScenarioRequest"
+    UpdateTestRequest:
+      properties:
+        task_description:
+          type: "string"
+          maxLength: 2000
+          minLength: 1
+          title: "Task Description"
+        outcomes:
+          items:
+            $ref: "#/components/schemas/OutcomeRequest"
+          type: "array"
+          maxItems: 50
+          minItems: 1
+          title: "Outcomes"
+      additionalProperties: false
+      type: "object"
+      required:
+        - "task_description"
+        - "outcomes"
+      title: "UpdateTestRequest"
     UserResponse:
       properties:
         id:

@@ -42,7 +42,6 @@ twinbay evaluations [flags]
 * [twinbay](twinbay.md)	 - Twinbay: Backend API
 * [twinbay evaluations create](twinbay_evaluations_create.md)	 - Evaluate a test run
 * [twinbay evaluations list](twinbay_evaluations_list.md)	 - List a test run's evaluations
-* [twinbay evaluations regrade](twinbay_evaluations_regrade.md)	 - Regrade an evaluation
 * [twinbay evaluations retrieve](twinbay_evaluations_retrieve.md)	 - Retrieve an evaluation
 
 Exit codes: 0 ok · 1 runtime · 2 usage · 3 authentication/authorization

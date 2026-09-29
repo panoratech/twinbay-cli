@@ -10,7 +10,8 @@ import (
 
 type ListTestRunsRequest struct {
 	EnvironmentID optionalnullable.OptionalNullable[string] `queryParam:"style=form,explode=true,name=environment_id"`
-	TestVersionID optionalnullable.OptionalNullable[string] `queryParam:"style=form,explode=true,name=test_version_id"`
+	Test          optionalnullable.OptionalNullable[string] `queryParam:"style=form,explode=true,name=test"`
+	TestVersion   optionalnullable.OptionalNullable[int64]  `queryParam:"style=form,explode=true,name=test_version"`
 	// Page number
 	Page *int64 `default:"1" queryParam:"style=form,explode=true,name=page"`
 	// Page size
@@ -35,11 +36,18 @@ func (l *ListTestRunsRequest) GetEnvironmentID() optionalnullable.OptionalNullab
 	return l.EnvironmentID
 }
 
-func (l *ListTestRunsRequest) GetTestVersionID() optionalnullable.OptionalNullable[string] {
+func (l *ListTestRunsRequest) GetTest() optionalnullable.OptionalNullable[string] {
 	if l == nil {
 		return nil
 	}
-	return l.TestVersionID
+	return l.Test
+}
+
+func (l *ListTestRunsRequest) GetTestVersion() optionalnullable.OptionalNullable[int64] {
+	if l == nil {
+		return nil
+	}
+	return l.TestVersion
 }
 
 func (l *ListTestRunsRequest) GetPage() *int64 {

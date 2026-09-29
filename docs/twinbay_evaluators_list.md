@@ -1,19 +1,29 @@
-## twinbay tests
+## twinbay evaluators list
 
-Outcomes described in natural language, compiled once into request matchers, and evaluated deterministically against the traffic an attempt was served
+List evaluators
 
 ### Synopsis
 
-Outcomes described in natural language, compiled once into request matchers, and evaluated deterministically against the traffic an attempt was served.
+Lists every compilation for a test, optionally filtered by version.
 
 ```
-twinbay tests [flags]
+twinbay evaluators list [flags]
+```
+
+### Examples
+
+```
+  twinbay evaluators list --test b1ca31c4-0107-480e-a3ad-308c55b0b0e7
 ```
 
 ### Options
 
 ```
-  -h, --help   help for tests
+  -h, --help                  help for list
+  -p, --page int              Page number (default 1)
+  -s, --size int              Page size (default 50)
+      --test string           [required]
+      --test-version string   integer value
 ```
 
 ### Options inherited from parent commands
@@ -39,12 +49,13 @@ twinbay tests [flags]
 
 ### SEE ALSO
 
-* [twinbay](twinbay.md)	 - Twinbay: Backend API
-* [twinbay tests create](twinbay_tests_create.md)	 - Create a test
-* [twinbay tests list](twinbay_tests_list.md)	 - List tests
-* [twinbay tests list-versions](twinbay_tests_list-versions.md)	 - List a test's versions
-* [twinbay tests retrieve](twinbay_tests_retrieve.md)	 - Retrieve a test
-* [twinbay tests retrieve-version](twinbay_tests_retrieve-version.md)	 - Retrieve a test version
-* [twinbay tests update](twinbay_tests_update.md)	 - Update a test
+* [twinbay evaluators](twinbay_evaluators.md)	 - Operations for evaluators
+
+### Machine interface
+
+* `twinbay evaluators list --usage` — this command's flags, defaults and env vars as machine-readable KDL
+* `twinbay evaluators list --dry-run` — preview the request without OS-keychain access or a network call (human preview on stderr)
+* `--dry-run --output-format json` (or a caller-explicit `--jq`) writes one preview object per request as NDJSON on stdout; jq is not applied to previews
+* `--output-format json` or `--jq <expr>` for machine-readable live output; in agent mode errors are a JSON envelope on stderr
 
 Exit codes: 0 ok · 1 runtime · 2 usage · 3 authentication/authorization

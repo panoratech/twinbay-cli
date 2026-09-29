@@ -126,7 +126,7 @@ This CLI is built to be driven by AI coding agents as well as people: everything
 |-----|---------|
 | `twinbay --help`, `twinbay api-keys list --help` | Commands by category, runnable examples, flags |
 | `twinbay --usage`, `twinbay api-keys list --usage` | The command surface as machine-readable [KDL](https://kdl.dev): commands, aliases, flags, defaults, env vars, config keys |
-| `twinbay environments create --schema` | The exact JSON Schema of the command's request body (all `$ref`s bundled) — build a valid `--body` from it |
+| `twinbay test-runs create --schema` | The exact JSON Schema of the command's request body (all `$ref`s bundled) — build a valid `--body` from it |
 | `twinbay api-keys list --dry-run` | The exact HTTP request (method, URL, headers, body), with no credentials or network call |
 | `twinbay api-keys list --output-format json` (or `--jq`) | Machine-readable output |
 
@@ -146,7 +146,7 @@ twinbay api-keys list --usage
 
 ```bash
 # JSON Schema (draft 2020-12) of the request body, with every $ref bundled under $defs
-twinbay environments create --schema
+twinbay test-runs create --schema
 ```
 
 ### Probe before you spend
@@ -315,14 +315,13 @@ Configuration is stored in `~/.config/twinbay/config.yaml`.
   * [`create`](docs/twinbay_tests_create.md) - Create a test
   * [`list`](docs/twinbay_tests_list.md) - List tests
   * [`retrieve`](docs/twinbay_tests_retrieve.md) - Retrieve a test
-* [`test-versions`](docs/twinbay_test-versions.md) - Operations for test-versions
-  * [`create`](docs/twinbay_test-versions_create.md) - Create a test version
-  * [`list`](docs/twinbay_test-versions_list.md) - List a test's versions
-  * [`retrieve`](docs/twinbay_test-versions_retrieve.md) - Retrieve a test version
-* [`evaluator-versions`](docs/twinbay_evaluator-versions.md) - Operations for evaluator-versions
-  * [`create`](docs/twinbay_evaluator-versions_create.md) - Compile a test version
-  * [`list`](docs/twinbay_evaluator-versions_list.md) - List a test version's evaluators
-  * [`retrieve`](docs/twinbay_evaluator-versions_retrieve.md) - Retrieve an evaluator version
+  * [`update`](docs/twinbay_tests_update.md) - Update a test
+  * [`list-versions`](docs/twinbay_tests_list-versions.md) - List a test's versions
+  * [`retrieve-version`](docs/twinbay_tests_retrieve-version.md) - Retrieve a test version
+* [`evaluators`](docs/twinbay_evaluators.md) - Operations for evaluators
+  * [`create`](docs/twinbay_evaluators_create.md) - Create an evaluator
+  * [`list`](docs/twinbay_evaluators_list.md) - List evaluators
+  * [`retrieve`](docs/twinbay_evaluators_retrieve.md) - Retrieve an evaluator
 * [`test-runs`](docs/twinbay_test-runs.md) - Operations for test-runs
   * [`create`](docs/twinbay_test-runs_create.md) - Start a test run
   * [`list`](docs/twinbay_test-runs_list.md) - List test runs
@@ -331,7 +330,6 @@ Configuration is stored in `~/.config/twinbay/config.yaml`.
   * [`create`](docs/twinbay_evaluations_create.md) - Evaluate a test run
   * [`list`](docs/twinbay_evaluations_list.md) - List a test run's evaluations
   * [`retrieve`](docs/twinbay_evaluations_retrieve.md) - Retrieve an evaluation
-  * [`regrade`](docs/twinbay_evaluations_regrade.md) - Regrade an evaluation
 * [`evaluation-inputs`](docs/twinbay_evaluation-inputs.md) - Operations for evaluation-inputs
   * [`download`](docs/twinbay_evaluation-inputs_download.md) - Sign a link to a preserved capture
 * [`environment-logs`](docs/twinbay_environment-logs.md) - Operations for environment-logs
@@ -349,14 +347,14 @@ Configuration is stored in `~/.config/twinbay/config.yaml`.
 <!-- Start Request Body Input [stdinpiping] -->
 ## Request Body Input
 
-Commands that accept a request body take it three ways, with a clear priority chain. The examples use `twinbay environments create`; every body-bearing command works the same way and prints its exact request schema with `--schema`.
+Commands that accept a request body take it three ways, with a clear priority chain. The examples use `twinbay test-runs create`; every body-bearing command works the same way and prints its exact request schema with `--schema`.
 
 ### Individual flags (highest priority)
 
 Each top-level body field is a flag:
 
 ```bash
-twinbay environments create --save-as-scenario=false
+twinbay test-runs create --environment-id '24e86869-c8aa-4fa2-9d08-6690490dcd5a' --evaluator-id '24e86869-c8aa-4fa2-9d08-6690490dcd5a'
 ```
 
 ### `--body` flag
@@ -364,14 +362,14 @@ twinbay environments create --save-as-scenario=false
 Provide the entire request body as a JSON string:
 
 ```bash
-twinbay environments create --body '{"save_as_scenario":false}'
+twinbay test-runs create --body '{"environment_id":"24e86869-c8aa-4fa2-9d08-6690490dcd5a","evaluator_id":"24e86869-c8aa-4fa2-9d08-6690490dcd5a"}'
 ```
 
 Individual flags override `--body` values:
 
 ```bash
-# Sends {"save_as_scenario":true}
-twinbay environments create --body '{"save_as_scenario":false}' --save-as-scenario=true
+# Sends {"environment_id":"24e86869-c8aa-4fa2-9d08-6690490dcd5a (updated)","evaluator_id":"24e86869-c8aa-4fa2-9d08-6690490dcd5a"}
+twinbay test-runs create --body '{"environment_id":"24e86869-c8aa-4fa2-9d08-6690490dcd5a","evaluator_id":"24e86869-c8aa-4fa2-9d08-6690490dcd5a"}' --environment-id '24e86869-c8aa-4fa2-9d08-6690490dcd5a (updated)'
 ```
 
 ### Stdin piping (lowest priority)
@@ -379,24 +377,24 @@ twinbay environments create --body '{"save_as_scenario":false}' --save-as-scenar
 Pipe JSON into any command that accepts a request body:
 
 ```bash
-echo '{"save_as_scenario":false}' | twinbay environments create
+echo '{"environment_id":"24e86869-c8aa-4fa2-9d08-6690490dcd5a","evaluator_id":"24e86869-c8aa-4fa2-9d08-6690490dcd5a"}' | twinbay test-runs create
 ```
 
 Individual flags override stdin values:
 
 ```bash
-# Sends {"save_as_scenario":true}
-echo '{"save_as_scenario":false}' | twinbay environments create --save-as-scenario=true
+# Sends {"environment_id":"24e86869-c8aa-4fa2-9d08-6690490dcd5a (updated)","evaluator_id":"24e86869-c8aa-4fa2-9d08-6690490dcd5a"}
+echo '{"environment_id":"24e86869-c8aa-4fa2-9d08-6690490dcd5a","evaluator_id":"24e86869-c8aa-4fa2-9d08-6690490dcd5a"}' | twinbay test-runs create --environment-id '24e86869-c8aa-4fa2-9d08-6690490dcd5a (updated)'
 ```
 
 This is useful for chaining commands, reading from files, or scripting:
 
 ```bash
 # Read body from a file
-twinbay environments create < request.json
+twinbay test-runs create < request.json
 
 # Pipe from another command
-curl -s https://example.com/request.json | twinbay environments create
+curl -s https://example.com/request.json | twinbay test-runs create
 ```
 
 ### Priority
@@ -405,7 +403,7 @@ When multiple input methods are used, the priority is:
 
 | Priority | Source | Description |
 |----------|--------|-------------|
-| 1 (highest) | Individual flags | `--save-as-scenario ...` always wins |
+| 1 (highest) | Individual flags | `--environment-id ...` always wins |
 | 2 | `--body` flag | Whole-body JSON via flag |
 | 3 (lowest) | Stdin | Piped JSON input |
 <!-- End Request Body Input [stdinpiping] -->

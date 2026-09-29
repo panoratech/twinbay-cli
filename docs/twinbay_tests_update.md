@@ -1,19 +1,30 @@
-## twinbay tests
+## twinbay tests update
 
-Outcomes described in natural language, compiled once into request matchers, and evaluated deterministically against the traffic an attempt was served
+Update a test
 
 ### Synopsis
 
-Outcomes described in natural language, compiled once into request matchers, and evaluated deterministically against the traffic an attempt was served.
+Appends an immutable definition. Existing runs remain pinned to their version.
 
 ```
-twinbay tests [flags]
+twinbay tests update [test-id] [flags]
+```
+
+### Examples
+
+```
+  twinbay tests update --test-id b513fe0a-0702-4fe7-a57d-00381c144e2a --task-description <value> --outcomes '[]'
 ```
 
 ### Options
 
 ```
-  -h, --help   help for tests
+      --body string               Request body as JSON (alternative to individual flags). Can also be provided via stdin; @path reads a file, @- reads stdin to EOF. Use --schema to print the exact JSON Schema.
+  -h, --help                      help for update
+      --outcomes string           [required]
+      --schema                    Print the exact JSON Schema of the request body and exit
+      --task-description string   [required]
+  -t, --test-id string            string value (or pass it as the [test-id] argument)
 ```
 
 ### Options inherited from parent commands
@@ -39,12 +50,14 @@ twinbay tests [flags]
 
 ### SEE ALSO
 
-* [twinbay](twinbay.md)	 - Twinbay: Backend API
-* [twinbay tests create](twinbay_tests_create.md)	 - Create a test
-* [twinbay tests list](twinbay_tests_list.md)	 - List tests
-* [twinbay tests list-versions](twinbay_tests_list-versions.md)	 - List a test's versions
-* [twinbay tests retrieve](twinbay_tests_retrieve.md)	 - Retrieve a test
-* [twinbay tests retrieve-version](twinbay_tests_retrieve-version.md)	 - Retrieve a test version
-* [twinbay tests update](twinbay_tests_update.md)	 - Update a test
+* [twinbay tests](twinbay_tests.md)	 - Outcomes described in natural language, compiled once into request matchers, and evaluated deterministically against the traffic an attempt was served
+
+### Machine interface
+
+* `twinbay tests update --usage` — this command's flags, defaults and env vars as machine-readable KDL
+* `twinbay tests update --schema` — the exact JSON Schema of the request body (all `$ref`s bundled)
+* `twinbay tests update --dry-run` — preview the request without OS-keychain access or a network call (human preview on stderr)
+* `--dry-run --output-format json` (or a caller-explicit `--jq`) writes one preview object per request as NDJSON on stdout; jq is not applied to previews
+* `--output-format json` or `--jq <expr>` for machine-readable live output; in agent mode errors are a JSON envelope on stderr
 
 Exit codes: 0 ok · 1 runtime · 2 usage · 3 authentication/authorization

@@ -1,19 +1,30 @@
-## twinbay tests
+## twinbay evaluators create
 
-Outcomes described in natural language, compiled once into request matchers, and evaluated deterministically against the traffic an attempt was served
+Create an evaluator
 
 ### Synopsis
 
-Outcomes described in natural language, compiled once into request matchers, and evaluated deterministically against the traffic an attempt was served.
+Queues compilation of a test definition into immutable request matchers. The latest test version is pinned when no version is supplied.
 
 ```
-twinbay tests [flags]
+twinbay evaluators create [flags]
+```
+
+### Examples
+
+```
+  twinbay evaluators create --test-id e3a58ccc-aa80-4c5a-a71a-262fc8302ffc --twins <value>
 ```
 
 ### Options
 
 ```
-  -h, --help   help for tests
+      --body string           Request body as JSON (alternative to individual flags). Can also be provided via stdin; @path reads a file, @- reads stdin to EOF. Use --schema to print the exact JSON Schema.
+  -h, --help                  help for create
+      --schema                Print the exact JSON Schema of the request body and exit
+      --test-id string        [required]
+      --test-version string   integer value
+      --twins stringArray     Catalog slugs of the twins whose APIs the outcomes are about. [required]
 ```
 
 ### Options inherited from parent commands
@@ -39,12 +50,14 @@ twinbay tests [flags]
 
 ### SEE ALSO
 
-* [twinbay](twinbay.md)	 - Twinbay: Backend API
-* [twinbay tests create](twinbay_tests_create.md)	 - Create a test
-* [twinbay tests list](twinbay_tests_list.md)	 - List tests
-* [twinbay tests list-versions](twinbay_tests_list-versions.md)	 - List a test's versions
-* [twinbay tests retrieve](twinbay_tests_retrieve.md)	 - Retrieve a test
-* [twinbay tests retrieve-version](twinbay_tests_retrieve-version.md)	 - Retrieve a test version
-* [twinbay tests update](twinbay_tests_update.md)	 - Update a test
+* [twinbay evaluators](twinbay_evaluators.md)	 - Operations for evaluators
+
+### Machine interface
+
+* `twinbay evaluators create --usage` — this command's flags, defaults and env vars as machine-readable KDL
+* `twinbay evaluators create --schema` — the exact JSON Schema of the request body (all `$ref`s bundled)
+* `twinbay evaluators create --dry-run` — preview the request without OS-keychain access or a network call (human preview on stderr)
+* `--dry-run --output-format json` (or a caller-explicit `--jq`) writes one preview object per request as NDJSON on stdout; jq is not applied to previews
+* `--output-format json` or `--jq <expr>` for machine-readable live output; in agent mode errors are a JSON envelope on stderr
 
 Exit codes: 0 ok · 1 runtime · 2 usage · 3 authentication/authorization

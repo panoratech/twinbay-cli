@@ -32,7 +32,7 @@ func newCatalog(rootSDK *Twinbay, sdkConfig config.SDKConfiguration, hooks *hook
 }
 
 // List available twins
-// Returns the registered code twins newest release first.
+// Returns registered twins, newest release first unless sorted by name.
 func (s *Catalog) List(ctx context.Context, request *operations.ListTwinsRequest, opts ...operations.Option) (*operations.ListTwinsResponse, error) {
 	o := operations.Options{}
 	supportedOptions := []string{
