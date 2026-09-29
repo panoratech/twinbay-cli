@@ -26,7 +26,7 @@ func initCreateCmd(parent *cobra.Command) error {
 		Use:     "create",
 		Short:   "Generate a seed",
 		Long:    "Describes the starting state you want and answers immediately; a worker expands it into rows. Read the seed until it is `ready`, then pass its id as a twin's `seed` when you create an environment.",
-		Example: "  twinbay seeds create --name <value> --twin <value> --prompt <value>",
+		Example: "",
 		Args:    cobra.NoArgs,
 		RunE:    runCreateCmd,
 		Annotations: map[string]string{
@@ -57,36 +57,43 @@ func runCreateCmd(cmd *cobra.Command, args []string) error {
 	if requested, _ := cmd.Flags().GetBool("schema"); requested {
 		return usage.EmitBodySchema(cmd.OutOrStdout(), "create_seed")
 	}
-	request, err := flagutil.BuildRequest[components.CreateSeedRequest](cmd, createCmdMeta, "", "body")
-	if err != nil {
-		return flagutil.WithCLIValidation(err)
-	}
-	s, err := client.NewClient(cmd)
+	res, err := executeCreateCmd(cmd, args, false)
 	if err != nil {
 		return err
 	}
-	sdkOpts, err := output.PrepareCallOpts(cmd)
-	if err != nil {
-		return err
+	if res == nil {
+		return nil
 	}
-	// Dry-run: force skip deserialization so the synthetic empty response
-	// does not cause parse failures in typed response handling.
-	if client.IsDryRun(cmd) {
-		sdkOpts = append(sdkOpts, operations.WithSkipDeserialization())
-	}
-	if err := output.ValidateGlobalServerIndex(cmd, len(sdk.ServerList)); err != nil {
-		return err
-	}
-	if output.WantsRawJSON(cmd) {
-		sdkOpts = append(sdkOpts, operations.WithSkipDeserialization())
-	}
-	res, err := s.Seeds.Create(cmd.Context(), *request, sdkOpts...)
-	if err != nil {
-		return output.Error(cmd, err)
-	}
-
 	if err := output.Result(cmd, res); err != nil {
 		return err
 	}
 	return nil
+}
+func executeCreateCmd(cmd *cobra.Command, args []string, asyncIntent bool) (*operations.CreateSeedResponse, error) {
+	request, err := flagutil.BuildRequest[components.CreateSeedRequest](cmd, createCmdMeta, "", "body")
+	if err != nil {
+		return nil, flagutil.WithCLIValidation(err)
+	}
+	s, err := client.NewClient(cmd)
+	if err != nil {
+		return nil, err
+	}
+	sdkOpts, err := output.PrepareCallOpts(cmd)
+	if err != nil {
+		return nil, err
+	}
+	if client.IsDryRun(cmd) || asyncIntent {
+		sdkOpts = append(sdkOpts, operations.WithSkipDeserialization())
+	}
+	if err := output.ValidateGlobalServerIndex(cmd, len(sdk.ServerList)); err != nil {
+		return nil, err
+	}
+	if asyncIntent || output.WantsRawJSON(cmd) {
+		sdkOpts = append(sdkOpts, operations.WithSkipDeserialization())
+	}
+	res, err := s.Seeds.Create(cmd.Context(), *request, sdkOpts...)
+	if err != nil {
+		return nil, output.Error(cmd, err)
+	}
+	return res, nil
 }

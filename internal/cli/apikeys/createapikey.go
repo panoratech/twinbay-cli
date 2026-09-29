@@ -25,7 +25,7 @@ func initCreateApiKeyCmd(parent *cobra.Command) error {
 		Use:     "create",
 		Short:   "Create an API key",
 		Long:    "Mints a key for the active organization. It acts with the caller's role, read from their membership on every request, so it can never outrank them. The response is the only time the token is readable.",
-		Example: "  twinbay api-keys create --name <value>",
+		Example: "",
 		Args:    cobra.NoArgs,
 		RunE:    runCreateApiKeyCmd,
 		Annotations: map[string]string{

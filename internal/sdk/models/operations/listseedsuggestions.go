@@ -53,6 +53,8 @@ type ListSeedSuggestionsResponse struct {
 	HTTPMeta components.HTTPMetadata `json:"-"`
 	// Successful Response
 	PageSeedSuggestionResponse *components.PageSeedSuggestionResponse
+
+	Next func() (*ListSeedSuggestionsResponse, error)
 }
 
 func (l ListSeedSuggestionsResponse) MarshalJSON() ([]byte, error) {

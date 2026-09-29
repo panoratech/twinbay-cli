@@ -35,6 +35,8 @@ func initListApiKeysCmd(parent *cobra.Command) error {
 	if err := flagutil.ValidateMeta[operations.ListAPIKeysRequest](listAPIKeysCmdMeta); err != nil {
 		return fmt.Errorf("invalid metadata for list-api-keys: %w", err)
 	}
+	cmd.Flags().BoolP("all", "a", false, "Automatically paginate and fetch all results (streams NDJSON for JSON output)")
+	cmd.Flags().Int("max-pages", 0, "Maximum number of pages to fetch when using --all (0 = no limit)")
 	parent.AddCommand(cmd)
 	return nil
 }
@@ -43,6 +45,14 @@ func initListApiKeysCmd(parent *cobra.Command) error {
 func runListApiKeysCmd(cmd *cobra.Command, args []string) error {
 	if usage.UsageRequested(cmd) {
 		return usage.EmitSchema(cmd, cmd.OutOrStdout())
+	}
+	allPages, _ := flagutil.GetBoolFlag(cmd, "all")
+	maxPages, _ := flagutil.GetIntFlag(cmd, "max-pages")
+	if maxPages < 0 {
+		return flagutil.WithCLIValidation(fmt.Errorf("--max-pages must be zero or greater"))
+	}
+	if flagutil.FlagChanged(cmd, "max-pages") && !allPages {
+		return flagutil.WithCLIValidation(fmt.Errorf("--max-pages requires --all"))
 	}
 	req, err := flagutil.BuildRequest[operations.ListAPIKeysRequest](cmd, listAPIKeysCmdMeta, "", "")
 	if err != nil {
@@ -63,6 +73,20 @@ func runListApiKeysCmd(cmd *cobra.Command, args []string) error {
 	}
 	if err := output.ValidateGlobalServerIndex(cmd, len(sdk.ServerList)); err != nil {
 		return err
+	}
+	if allPages && !client.IsDryRun(cmd) {
+		res, err := s.APIKeys.ListAPIKeys(cmd.Context(), req, sdkOpts...)
+		if err != nil {
+			return output.Error(cmd, err)
+		}
+		return output.PaginatedResult(cmd, res, "PageAPIKeyResponse", "Items", maxPages, output.PaginationProbe{
+			Type:       "offsetLimit",
+			CursorKind: "",
+			NextCursor: "",
+			NextURL:    "",
+			Results:    "$.items",
+			HasLimit:   true,
+		})
 	}
 	if output.WantsRawJSON(cmd) {
 		sdkOpts = append(sdkOpts, operations.WithSkipDeserialization())

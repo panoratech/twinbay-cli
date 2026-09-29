@@ -12,6 +12,7 @@ import (
 	"github.com/panoratech/twinbay-cli/internal/sdk/sdkinternal/config"
 	"github.com/panoratech/twinbay-cli/internal/sdk/sdkinternal/hooks"
 	"github.com/panoratech/twinbay-cli/internal/sdk/sdkinternal/utils"
+	"github.com/spyzhov/ajson"
 	"net/http"
 	"net/url"
 )
@@ -70,6 +71,7 @@ func (s *Catalog) List(ctx context.Context, request *operations.ListTwinsRequest
 	if timeout == nil {
 		timeout = s.sdkConfiguration.Timeout
 	}
+	paginationCtx := ctx
 
 	var streamCancel context.CancelFunc
 
@@ -137,6 +139,70 @@ func (s *Catalog) List(ctx context.Context, request *operations.ListTwinsRequest
 			Request:  req,
 			Response: httpRes,
 		},
+	}
+	res.Next = func() (*operations.ListTwinsResponse, error) {
+		if request == nil {
+			request = &operations.ListTwinsRequest{}
+		}
+		rawBody, err := utils.ConsumeRawBody(httpRes)
+		if err != nil {
+			return nil, err
+		}
+
+		b, err := ajson.Unmarshal(rawBody)
+		if err != nil {
+			return nil, err
+		}
+		var p int64 = 1
+		if request.Page != nil {
+			p = *request.Page
+		}
+		nP := int64(p + 1)
+		nPs, err := ajson.Eval(b, "$.pages")
+		if err != nil {
+			return nil, err
+		}
+		if !nPs.IsNumeric() {
+			return nil, nil
+		}
+
+		nPsVal, err := nPs.GetNumeric()
+		if err != nil {
+			return nil, err
+		}
+		// GetNumeric returns as float64
+		if int(nPsVal) <= int(p) {
+			return nil, nil
+		}
+		r, err := ajson.Eval(b, "$.items")
+		if err != nil {
+			return nil, err
+		}
+		if !r.IsArray() {
+			return nil, nil
+		}
+		arr, err := r.GetArray()
+		if err != nil {
+			return nil, err
+		}
+		if len(arr) == 0 {
+			return nil, nil
+		}
+
+		l := 0
+		if request.Size != nil {
+			l = int(*request.Size)
+		}
+		if len(arr) < l {
+			return nil, nil
+		}
+		request.Page = &nP
+
+		return s.List(
+			paginationCtx,
+			request,
+			opts...,
+		)
 	}
 
 	switch {

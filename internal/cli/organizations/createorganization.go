@@ -24,7 +24,7 @@ func initCreateOrganizationCmd(parent *cobra.Command) error {
 		Use:     "create",
 		Short:   "Create an organization",
 		Long:    "Creates the organization in WorkOS with the caller as an admin, then mirrors it locally. The caller's current token is unchanged; refresh the AuthKit session into the new organization to act inside it.",
-		Example: "  twinbay organizations create --name <value>",
+		Example: "",
 		Args:    cobra.NoArgs,
 		RunE:    runCreateOrganizationCmd,
 		Annotations: map[string]string{

@@ -19,10 +19,12 @@ twinbay seeds list [flags]
 ### Options
 
 ```
-  -h, --help          help for list
-  -p, --page int      Page number (default 1)
-  -s, --size int      Page size (default 50)
-  -t, --twin string   Only seeds for this twin's slug.
+  -a, --all             Automatically paginate and fetch all results (streams NDJSON for JSON output)
+  -h, --help            help for list
+      --max-pages int   Maximum number of pages to fetch when using --all (0 = no limit)
+  -p, --page int        Page number (default 1)
+  -s, --size int        Page size (default 50)
+  -t, --twin string     Only seeds for this twin's slug.
 ```
 
 ### Options inherited from parent commands

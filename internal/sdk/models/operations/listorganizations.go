@@ -43,6 +43,8 @@ type ListOrganizationsResponse struct {
 	HTTPMeta components.HTTPMetadata `json:"-"`
 	// One page of the caller's memberships
 	PageMembershipResponse *components.PageMembershipResponse
+
+	Next func() (*ListOrganizationsResponse, error)
 }
 
 func (l ListOrganizationsResponse) MarshalJSON() ([]byte, error) {

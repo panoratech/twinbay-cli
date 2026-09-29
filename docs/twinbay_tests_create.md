@@ -10,12 +10,6 @@ Records the test and its immutable version 1. Nothing is compiled or run.
 twinbay tests create [flags]
 ```
 
-### Examples
-
-```
-  twinbay tests create --task-description <value> --outcomes '[{"slug":"<value>","description":"electrify powerfully antelope yowza","expectation":"required","timing":"at_end"}]' --name <value>
-```
-
 ### Options
 
 ```

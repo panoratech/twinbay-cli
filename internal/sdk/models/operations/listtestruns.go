@@ -68,6 +68,8 @@ type ListTestRunsResponse struct {
 	HTTPMeta components.HTTPMetadata `json:"-"`
 	// Successful Response
 	PageTestRunResponse *components.PageTestRunResponse
+
+	Next func() (*ListTestRunsResponse, error)
 }
 
 func (l ListTestRunsResponse) MarshalJSON() ([]byte, error) {

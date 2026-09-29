@@ -19,7 +19,9 @@ twinbay evaluations list [test-run-id] [flags]
 ### Options
 
 ```
+  -a, --all                  Automatically paginate and fetch all results (streams NDJSON for JSON output)
   -h, --help                 help for list
+      --max-pages int        Maximum number of pages to fetch when using --all (0 = no limit)
   -p, --page int             Page number (default 1)
   -s, --size int             Page size (default 50)
   -t, --test-run-id string   string value (or pass it as the [test-run-id] argument)

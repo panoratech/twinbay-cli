@@ -19,9 +19,11 @@ twinbay catalog list [flags]
 ### Options
 
 ```
-  -h, --help       help for list
-  -p, --page int   integer value (default 1)
-  -s, --size int   integer value (default 50)
+  -a, --all             Automatically paginate and fetch all results (streams NDJSON for JSON output)
+  -h, --help            help for list
+      --max-pages int   Maximum number of pages to fetch when using --all (0 = no limit)
+  -p, --page int        integer value (default 1)
+  -s, --size int        integer value (default 50)
 ```
 
 ### Options inherited from parent commands

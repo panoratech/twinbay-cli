@@ -10,20 +10,14 @@ Queues compilation of a test definition into immutable request matchers. The lat
 twinbay evaluators create [flags]
 ```
 
-### Examples
-
-```
-  twinbay evaluators create --test-id e3a58ccc-aa80-4c5a-a71a-262fc8302ffc --twins <value>
-```
-
 ### Options
 
 ```
       --body string           Request body as JSON (alternative to individual flags). Can also be provided via stdin; @path reads a file, @- reads stdin to EOF. Use --schema to print the exact JSON Schema.
   -h, --help                  help for create
       --schema                Print the exact JSON Schema of the request body and exit
-      --test-id string        [required]
-      --test-version string   integer value
+      --test-id string        Test to compile into matchers. [required]
+      --test-version string   Version to pin. When omitted, evaluator creation pins the latest test version.
       --twins stringArray     Catalog slugs of the twins whose APIs the outcomes are about. [required]
 ```
 

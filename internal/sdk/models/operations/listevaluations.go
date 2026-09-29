@@ -51,6 +51,8 @@ type ListEvaluationsResponse struct {
 	HTTPMeta components.HTTPMetadata `json:"-"`
 	// Successful Response
 	PageEvaluationResponse *components.PageEvaluationResponse
+
+	Next func() (*ListEvaluationsResponse, error)
 }
 
 func (l ListEvaluationsResponse) MarshalJSON() ([]byte, error) {
