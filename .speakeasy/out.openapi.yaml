@@ -291,11 +291,22 @@ paths:
       tags:
         - "catalog"
       summary: "List available twins"
-      description: "Returns the registered code twins newest release first."
+      description: "Returns registered twins, newest release first unless sorted by name."
       operationId: "list_twins"
       security:
         - Organization API key: []
       parameters:
+        - name: "sort"
+          in: "query"
+          required: false
+          schema:
+            anyOf:
+              - const: "name"
+                type: "string"
+              - type: "null"
+            description: "Sort by display name, A-Z (case-insensitive)."
+            title: "Sort"
+          description: "Sort by display name, A-Z (case-insensitive)."
         - name: "page"
           in: "query"
           required: false

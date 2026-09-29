@@ -1,18 +1,18 @@
 lockVersion: 2.0.0
 id: 17397acc-fda0-4de1-af70-9fc00a87dd40
 management:
-  docChecksum: 1604748e96b716748be1169f0c88190a
+  docChecksum: 23ca538c5d5d803d104c6da7fb58a32e
   docVersion: 0.1.0
   speakeasyVersion: 1.799.0
   generationVersion: 2.941.0
-  releaseVersion: 0.3.1
-  configChecksum: 75603f695fef63f7b8e9874a635e99e0
+  releaseVersion: 0.3.2
+  configChecksum: 546bfa6642565dd12442b007c0cb219e
   repoURL: https://github.com/panoratech/twinbay-cli.git
   installationURL: https://github.com/panoratech/twinbay-cli
 persistentEdits:
-  generation_id: 91e55db0-8d24-44cb-8d79-6f972d3a9e5e
-  pristine_commit_hash: 783713c5da7a641976eaf42b45bb811374261d3c
-  pristine_tree_hash: a8826484ba801d014d2594c0f7257be7088401e9
+  generation_id: d4121a7e-3866-4db2-94d4-15ea3dccaabc
+  pristine_commit_hash: f218e5517475a7130e35d9f6fce6215efbfde15e
+  pristine_tree_hash: cc733a647b9512c32693ba53ab29deb63cc2c0ac
 features:
   cli:
     constsAndDefaults: 0.0.0
@@ -75,8 +75,8 @@ trackedFiles:
     pristine_git_object: 72ea2c6b2ed49b2482bbd2e754acf15299b41ddd
   internal/cli/catalog/list.go:
     id: 33ab5c82304d
-    last_write_checksum: sha1:de1d13b5d8f63b2fd63c1d43b1309c06d06e0b3b
-    pristine_git_object: 0aec5985086aa9b415566ff2edaf1eddfa0d2f6b
+    last_write_checksum: sha1:617af73c2b45e37637cf496a259e550a3b28d27a
+    pristine_git_object: edbb837d6c02fa8a99c1a52f510ecccce3d66a0b
   internal/cli/catalog/retrieve.go:
     id: 23e468f45f7c
     last_write_checksum: sha1:5804bba9a1e2659ebbad6f256b7ba3cabafd02c8
@@ -351,8 +351,8 @@ trackedFiles:
     pristine_git_object: cb51bbbf839fee6083d05e02fa3e5b2a6ebac17d
   internal/cli/version.go:
     id: 7b0665492f72
-    last_write_checksum: sha1:782d71dca68f2ff8516a03d5064e4486ba399dd2
-    pristine_git_object: 49189fcb175adb5cb1b68ea431d1fa1891524d75
+    last_write_checksum: sha1:fa35d9e26c74c8d591929b8586b75bf6624a776f
+    pristine_git_object: 04babd322c72761093bdaff9cff67a9e658ca195
   internal/cli/whoami.go:
     id: c1787f2298ec
     last_write_checksum: sha1:19c8f20b8b4b2b6ff3119ffeebcf21d142dd0405
@@ -459,8 +459,8 @@ trackedFiles:
     pristine_git_object: e5a51497624fe86488ecce8f67a4717a3fb00897
   internal/sdk/catalog.go:
     id: 41aaeb4b1535
-    last_write_checksum: sha1:bc298b0b81d167c2507561619c7350677308ff8a
-    pristine_git_object: c75991568ca2bffc34c48a4b8ec74b58f91474f2
+    last_write_checksum: sha1:be11bd8e393837158efb976e3df4f54873b90370
+    pristine_git_object: 757c6717ed36668c862a0c04122aeef54c978c3a
   internal/sdk/environmentexports.go:
     id: b9ceb3786c03
     last_write_checksum: sha1:626c53d7677ddc7f755e9430a28b65cba4848d29
@@ -943,8 +943,8 @@ trackedFiles:
     pristine_git_object: edb494d09979e604ace1dc33caa91b6f9256488c
   internal/sdk/models/operations/listtwins.go:
     id: 735aec5d3069
-    last_write_checksum: sha1:0da8eb6b58ebaaafab8073bbb3756a76c53bfa01
-    pristine_git_object: c29509e23c568c2c783e61b728bfe03842180815
+    last_write_checksum: sha1:71e11967a987b711e15372149671095e367c54db
+    pristine_git_object: 2fd56b0b93554ed82316617680cd39b17393f14a
   internal/sdk/models/operations/options.go:
     id: 6d0d29414e00
     last_write_checksum: sha1:1ba8830b36de958e61f5af7f34eb2f5cc8cff486
@@ -1095,8 +1095,8 @@ trackedFiles:
     pristine_git_object: 3ae1f77851fa6b60c71b18b638a5c83cb5ec3d9c
   internal/sdk/twinbay.go:
     id: 145fe237f269
-    last_write_checksum: sha1:7a2d4cd24c8c520f6a13b2dfdac0745797028d78
-    pristine_git_object: 660bd21608d1fbf22dd22d4dac24be64a8312428
+    last_write_checksum: sha1:dc1380556d7324ce4e2e9b7544f813dc82ef1117
+    pristine_git_object: 05f57d744fee2cf7754f93279cbea5f2b2c84131
   internal/sdk/twinrecords.go:
     id: 89a2b1f050dc
     last_write_checksum: sha1:129036fcb0ea3b3a502698e9ef3d91db4d466b2a
@@ -1135,8 +1135,8 @@ trackedFiles:
     pristine_git_object: d380fbb68da520806a30bcc1d42e008cf2fba8e2
   internal/usage/schema.go:
     id: 0f40f4612437
-    last_write_checksum: sha1:b080d54984e605acac34c0df26559adaaa71485c
-    pristine_git_object: 8e9df4915ca97669381ca444aa377e45e5d28e3c
+    last_write_checksum: sha1:305ae9fb57644b1fbc1eb1c1d1d8e74e484b151e
+    pristine_git_object: b3faba31e24eee03fba6520cf2fb13699eceda75
   scripts/install.ps1:
     id: fee0853709e9
     last_write_checksum: sha1:f0cf32b83208d34433cb61f7c0c17156ea1f6831
@@ -1219,6 +1219,7 @@ examples:
         query:
           page: 1
           size: 50
+          sort: "name"
       responses:
         "200":
           application/json: {"items": [{"slug": "<value>", "name": "<value>", "description": "unfit raw always geez", "version": "<value>"}], "total": 528206, "page": 913390, "size": 490328, "pages": 909476}
