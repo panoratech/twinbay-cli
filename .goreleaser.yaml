@@ -53,5 +53,27 @@ release:
   prerelease: auto
   mode: append
 
+# Publishes Casks/twinbay.rb to panoratech/homebrew-tap, so users can run
+# `brew install panoratech/tap/twinbay`. Skipped until the release workflow
+# has a HOMEBREW_TAP_GITHUB_TOKEN secret that can push to the tap repository.
+homebrew_casks:
+  - name: twinbay
+    ids: [twinbay]
+    binaries: [twinbay]
+    homepage: https://twinbay.ai
+    description: Command-line interface for the Twinbay API
+    license: MIT
+    repository:
+      owner: panoratech
+      name: homebrew-tap
+      token: '{{ index .Env "HOMEBREW_TAP_GITHUB_TOKEN" }}'
+    skip_upload: '{{ if index .Env "HOMEBREW_TAP_GITHUB_TOKEN" }}false{{ else }}true{{ end }}'
+    hooks:
+      post:
+        install: |
+          if OS.mac?
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/twinbay"]
+          end
+
 checksum:
   name_template: "checksums.txt"

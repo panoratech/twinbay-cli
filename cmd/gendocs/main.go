@@ -23,7 +23,55 @@ const (
 	usageDescription = "Writes the CLI's Cobra markdown command docs into output-dir (default ./docs)."
 	readmeAuthStart  = "<!-- Start Authentication [security] -->"
 	readmeAuthEnd    = "<!-- End Authentication [security] -->"
+	readmeUsageStart = "<!-- Start CLI Example Usage [usage] -->"
+	readmeUsageEnd   = "<!-- End CLI Example Usage [usage] -->"
+	readmeCmdsStart  = "<!-- Start Commands [operations] -->"
+	readmeCmdsEnd    = "<!-- End Commands [operations] -->"
 )
+
+const readmeUsage = `<!-- Start CLI Example Usage [usage] -->
+## CLI Example Usage
+
+### Quickstart
+
+Provision a Stripe twin, describe what your agent must never do, run the agent
+against the twin, and grade the traffic it sent:
+
+` + "```bash" + `
+# 1. Install and sign in (or export TWINBAY_API_KEY for CI)
+brew install panoratech/tap/twinbay
+twinbay auth login
+
+# 2. Start an environment with a Stripe twin, then read its URL and credential
+ENV=$(twinbay environments create --name demo --twins '["stripe"]' --jq .id --raw-output)
+twinbay environments retrieve "$ENV" --jq '.twins[] | {id, twin_slug, state, url}'
+twinbay twins collect-credential <twin-id>
+
+# 3. Describe the outcome to check and compile it into an evaluator
+TEST=$(twinbay tests create --name no-refunds --task-description "Resolve the billing ticket" \
+  --outcomes '[{"slug":"no-refund","description":"Never refund a charge.","expectation":"forbidden","timing":"throughout"}]' \
+  --jq .id --raw-output)
+EVALUATOR=$(twinbay evaluators create-and-wait --test-id "$TEST" --twins stripe --jq .id --raw-output)
+
+# 4. Open a test run, point your agent at the twin, then grade it
+RUN=$(twinbay test-runs create --environment-id "$ENV" --evaluator-id "$EVALUATOR" --jq .id --raw-output)
+twinbay evaluations create-and-wait --test-run-id "$RUN" --phase final
+
+# 5. Inspect what the agent sent
+twinbay environments logs list "$ENV"
+` + "```" + `
+
+### Discover and call anything
+
+` + "```bash" + `
+twinbay --map                      # command tree (also --map=paths, --map=json)
+twinbay environments --map=paths   # one subtree
+twinbay get /environments -f size=5
+twinbay delete /scenarios/<id> --confirm
+` + "```" + `
+
+Deleting or revoking asks for confirmation; pass ` + "`--confirm`" + ` in scripts.
+<!-- End CLI Example Usage [usage] -->`
 
 const readmeAuthentication = `<!-- Start Authentication [security] -->
 ## Authentication
@@ -63,27 +111,31 @@ keychain. An explicit API key takes precedence over a stored browser session,
 and each request sends exactly one authentication header.
 
 ` + "```bash" + `
-export CLI_TWINBAY_ORGANIZATION_API_KEY="..."
+export TWINBAY_API_KEY="..."
 twinbay --no-interactive api-keys list
 ` + "```" + `
 
 Credentials may also be passed directly to a command:
 
 ` + "```bash" + `
-twinbay --organization-api-key "$CLI_TWINBAY_ORGANIZATION_API_KEY" api-keys list
+twinbay --api-key "$TWINBAY_API_KEY" api-keys list
 ` + "```" + `
 
 Supported environment variables:
 
 | Variable | Description |
 |----------|-------------|
+| ` + "`TWINBAY_API_KEY`" + ` | An organization API key. Create one at https://console.twinbay.ai/api-keys |
+| ` + "`CLI_TWINBAY_ORGANIZATION_API_KEY`" + ` | Same as ` + "`TWINBAY_API_KEY`" + `, which it overrides when both are set. |
 | ` + "`CLI_TWINBAY_ACCESS_TOKEN`" + ` | Access token issued by WorkOS AuthKit. |
-| ` + "`CLI_TWINBAY_ORGANIZATION_API_KEY`" + ` | An organization API key. Create one at https://console.twinbay.ai/api-keys |
 
-The interactive ` + "`configure`" + ` command remains available for direct credentials and
-non-secret settings:
+Store settings without prompts with ` + "`config`" + `, or use the guided ` + "`configure`" + ` form:
 
 ` + "```bash" + `
+twinbay config set api-key "$TWINBAY_API_KEY"
+twinbay config set output-format json
+twinbay config list
+twinbay config unset api-key
 twinbay configure
 ` + "```" + `
 
@@ -134,19 +186,29 @@ func main() {
 		log.Fatal(err)
 	}
 	if filepath.Clean(dir) == filepath.Clean("./docs") {
-		if err := updateReadmeAuthentication("README.md"); err != nil {
+		if err := updateReadmeAuthentication("README.md", rootCmd); err != nil {
 			log.Fatal(err)
 		}
 	}
 }
 
-func updateReadmeAuthentication(path string) error {
+func updateReadmeAuthentication(path string, root *cobra.Command) error {
 	content, err := os.ReadFile(path)
 	if err != nil {
 		return fmt.Errorf("read README: %w", err)
 	}
 	updated, err := replaceReadmeAuthentication(string(content))
 	if err != nil {
+		return err
+	}
+	// Speakeasy's pre-publication notice; the CLI is published.
+	if start, end := strings.Index(updated, "<br /><br />\n> [!IMPORTANT]"), strings.Index(updated, "<!-- Start Summary"); start != -1 && end > start {
+		updated = updated[:start] + updated[end:]
+	}
+	if updated, err = replaceReadmeSection(updated, readmeUsageStart, readmeUsageEnd, readmeUsage); err != nil {
+		return err
+	}
+	if updated, err = replaceReadmeSection(updated, readmeCmdsStart, readmeCmdsEnd, readmeCommands(root)); err != nil {
 		return err
 	}
 	if updated == string(content) {
@@ -159,13 +221,39 @@ func updateReadmeAuthentication(path string) error {
 }
 
 func replaceReadmeAuthentication(content string) (string, error) {
-	start := strings.Index(content, readmeAuthStart)
-	end := strings.Index(content, readmeAuthEnd)
+	return replaceReadmeSection(content, readmeAuthStart, readmeAuthEnd, readmeAuthentication)
+}
+
+func replaceReadmeSection(content, startMarker, endMarker, section string) (string, error) {
+	start := strings.Index(content, startMarker)
+	end := strings.Index(content, endMarker)
 	if start == -1 || end == -1 || end < start {
-		return "", fmt.Errorf("README authentication markers were not found")
+		return "", fmt.Errorf("README markers %q were not found", startMarker)
 	}
-	end += len(readmeAuthEnd)
-	return content[:start] + readmeAuthentication + content[end:], nil
+	end += len(endMarker)
+	return content[:start] + section + content[end:], nil
+}
+
+// readmeCommands lists the runtime command tree, including hand-written and
+// re-parented commands the generator does not know about.
+func readmeCommands(root *cobra.Command) string {
+	var b strings.Builder
+	b.WriteString(readmeCmdsStart + "\n## Commands\n\n")
+	b.WriteString("Every command accepts `--help`; body-bearing commands also accept `--schema` (exact request JSON Schema) and `--dry-run` (preview the request without sending it) — see [For AI agents](#for-ai-agents). `twinbay --map` prints this tree from the binary.\n\n")
+	var walk func(*cobra.Command, string)
+	walk = func(cmd *cobra.Command, indent string) {
+		for _, child := range cmd.Commands() {
+			if !child.IsAvailableCommand() || child.Name() == "completion" {
+				continue
+			}
+			file := strings.ReplaceAll(child.CommandPath(), " ", "_") + ".md"
+			fmt.Fprintf(&b, "%s* [`%s`](docs/%s) - %s\n", indent, child.Name(), file, child.Short)
+			walk(child, indent+"  ")
+		}
+	}
+	walk(root, "")
+	b.WriteString(readmeCmdsEnd)
+	return b.String()
 }
 
 func parseArgs(args []string) (dir string, showHelp bool, exitCode int, messages []string) {

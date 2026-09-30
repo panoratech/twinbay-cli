@@ -598,9 +598,10 @@ func (c *DryRunClient) Do(req *http.Request) (*http.Response, error) {
 		contentType = "application/json"
 		syntheticBody = []byte(`{"access_token":"[DRY-RUN]","token_type":"Bearer","expires_in":3600}`)
 	}
+	status := dryRunStatus(c.Cmd)
 	return &http.Response{
-		StatusCode: http.StatusOK,
-		Status:     "200 OK",
+		StatusCode: status,
+		Status:     fmt.Sprintf("%d %s", status, http.StatusText(status)),
 		Header:     http.Header{"Content-Type": []string{contentType}},
 		Body:       io.NopCloser(bytes.NewReader(syntheticBody)),
 		Request:    req,
