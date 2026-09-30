@@ -27,7 +27,7 @@ func initCreateCmd(parent *cobra.Command) error {
 		Use:     "create",
 		Short:   "Create an evaluator",
 		Long:    "Queues compilation of a test definition into immutable request matchers. The latest test version is pinned when no version is supplied.",
-		Example: "",
+		Example: "  twinbay evaluators create --test-id e3a58ccc-aa80-4c5a-a71a-262fc8302ffc --twins <value>",
 		Args:    cobra.NoArgs,
 		RunE:    runCreateCmd,
 		Annotations: map[string]string{
@@ -58,43 +58,36 @@ func runCreateCmd(cmd *cobra.Command, args []string) error {
 	if requested, _ := cmd.Flags().GetBool("schema"); requested {
 		return usage.EmitBodySchema(cmd.OutOrStdout(), "create_evaluator")
 	}
-	res, err := executeCreateCmd(cmd, args, false)
-	if err != nil {
-		return err
-	}
-	if res == nil {
-		return nil
-	}
-	if err := output.Result(cmd, res); err != nil {
-		return err
-	}
-	return nil
-}
-func executeCreateCmd(cmd *cobra.Command, args []string, asyncIntent bool) (*operations.CreateEvaluatorResponse, error) {
 	request, err := flagutil.BuildRequest[components.CreateEvaluatorRequest](cmd, createCmdMeta, "", "body")
 	if err != nil {
-		return nil, flagutil.WithCLIValidation(err)
+		return flagutil.WithCLIValidation(err)
 	}
 	s, err := client.NewClient(cmd)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	sdkOpts, err := output.PrepareCallOpts(cmd)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	if client.IsDryRun(cmd) || asyncIntent {
+	// Dry-run: force skip deserialization so the synthetic empty response
+	// does not cause parse failures in typed response handling.
+	if client.IsDryRun(cmd) {
 		sdkOpts = append(sdkOpts, operations.WithSkipDeserialization())
 	}
 	if err := output.ValidateGlobalServerIndex(cmd, len(sdk.ServerList)); err != nil {
-		return nil, err
+		return err
 	}
-	if asyncIntent || output.WantsRawJSON(cmd) {
+	if output.WantsRawJSON(cmd) {
 		sdkOpts = append(sdkOpts, operations.WithSkipDeserialization())
 	}
 	res, err := s.Evaluators.Create(cmd.Context(), *request, sdkOpts...)
 	if err != nil {
-		return nil, output.Error(cmd, err)
+		return output.Error(cmd, err)
 	}
-	return res, nil
+
+	if err := output.Result(cmd, res); err != nil {
+		return err
+	}
+	return nil
 }

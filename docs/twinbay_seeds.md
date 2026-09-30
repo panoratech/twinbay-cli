@@ -43,7 +43,6 @@ twinbay seeds [flags]
 
 * [twinbay](twinbay.md)	 - Twinbay: Backend API
 * [twinbay seeds create](twinbay_seeds_create.md)	 - Generate a seed
-* [twinbay seeds create-and-wait](twinbay_seeds_create-and-wait.md)	 - Generate a seed and wait
 * [twinbay seeds delete](twinbay_seeds_delete.md)	 - Delete a seed
 * [twinbay seeds list](twinbay_seeds_list.md)	 - List seeds
 * [twinbay seeds list-suggestions](twinbay_seeds_list-suggestions.md)	 - List suggested starting states

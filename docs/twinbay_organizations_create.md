@@ -10,6 +10,12 @@ Creates the organization in WorkOS with the caller as an admin, then mirrors it 
 twinbay organizations create [flags]
 ```
 
+### Examples
+
+```
+  twinbay organizations create --name <value>
+```
+
 ### Options
 
 ```

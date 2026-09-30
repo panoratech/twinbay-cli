@@ -10,6 +10,12 @@ Describes the starting state you want and answers immediately; a worker expands 
 twinbay seeds create [flags]
 ```
 
+### Examples
+
+```
+  twinbay seeds create --name <value> --twin <value> --prompt <value>
+```
+
 ### Options
 
 ```

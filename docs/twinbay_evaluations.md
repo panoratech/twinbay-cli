@@ -43,7 +43,6 @@ twinbay evaluations [flags]
 
 * [twinbay](twinbay.md)	 - Twinbay: Backend API
 * [twinbay evaluations create](twinbay_evaluations_create.md)	 - Evaluate a test run
-* [twinbay evaluations create-and-wait](twinbay_evaluations_create-and-wait.md)	 - Evaluate a test run and wait
 * [twinbay evaluations list](twinbay_evaluations_list.md)	 - List a test run's evaluations
 * [twinbay evaluations retrieve](twinbay_evaluations_retrieve.md)	 - Retrieve an evaluation
 

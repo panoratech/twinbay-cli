@@ -27,7 +27,7 @@ func initUpdateCmd(parent *cobra.Command) error {
 		Use:     "update",
 		Short:   "Replace a twin record",
 		Long:    "Replace a twin record",
-		Example: "",
+		Example: "  twinbay twin-records update --twin-id 451d82e1-87a3-491b-8175-ac9e7e0c04b5 --resource <value> --external-id <id> --fields '{\"key\":\"<value>\"}'",
 		Args:    cobra.NoArgs,
 		RunE:    runUpdateCmd,
 		Annotations: map[string]string{

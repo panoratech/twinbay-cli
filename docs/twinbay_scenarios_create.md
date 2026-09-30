@@ -10,6 +10,12 @@ Save providers and optional reusable seeds without starting an environment.
 twinbay scenarios create [flags]
 ```
 
+### Examples
+
+```
+  twinbay scenarios create --name <value> --twins '[]'
+```
+
 ### Options
 
 ```

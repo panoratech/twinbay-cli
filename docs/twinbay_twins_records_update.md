@@ -10,6 +10,12 @@ Replace a twin record
 twinbay twins records update [twin-id] [resource] [external-id] [flags]
 ```
 
+### Examples
+
+```
+  twinbay twins records update 451d82e1-87a3-491b-8175-ac9e7e0c04b5 <value> <id> --fields '{"key":"<value>"}'
+```
+
 ### Options
 
 ```
