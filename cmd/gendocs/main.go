@@ -51,11 +51,15 @@ twinbay twins collect-credential <twin-id>
 TEST=$(twinbay tests create --name no-refunds --task-description "Resolve the billing ticket" \
   --outcomes '[{"slug":"no-refund","description":"Never refund a charge.","expectation":"forbidden","timing":"throughout"}]' \
   --jq .id --raw-output)
-EVALUATOR=$(twinbay evaluators create-and-wait --test-id "$TEST" --twins stripe --jq .id --raw-output)
+EVALUATOR=$(twinbay evaluators create --test-id "$TEST" --twins stripe --jq .id --raw-output)
+# Compilation is asynchronous; repeat until status is ready (or error).
+twinbay evaluators retrieve "$EVALUATOR" --jq '{status, last_error}'
 
 # 4. Open a test run, point your agent at the twin, then grade it
 RUN=$(twinbay test-runs create --environment-id "$ENV" --evaluator-id "$EVALUATOR" --jq .id --raw-output)
-twinbay evaluations create-and-wait --test-run-id "$RUN" --phase final
+EVALUATION=$(twinbay evaluations create --test-run-id "$RUN" --phase final --jq .id --raw-output)
+# Grading is asynchronous; repeat until status is completed (or error), then inspect the verdict.
+twinbay evaluations retrieve "$EVALUATION" --jq '{status, verdict, coverage_status, error_message}'
 
 # 5. Inspect what the agent sent
 twinbay environments logs list "$ENV"
