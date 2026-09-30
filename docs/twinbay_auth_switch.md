@@ -1,24 +1,19 @@
-## twinbay tests update
+## twinbay auth switch
 
-Update a test
+Change the active organization
 
 ### Synopsis
 
-Appends an immutable definition. Existing runs remain pinned to their version.
+Refresh the stored AuthKit session into another organization. The argument may be a Twinbay organization ID, WorkOS organization ID, or exact name.
 
 ```
-twinbay tests update [test-id] [flags]
+twinbay auth switch [organization] [flags]
 ```
 
 ### Options
 
 ```
-      --body string               Request body as JSON (alternative to individual flags). Can also be provided via stdin; @path reads a file, @- reads stdin to EOF. Use --schema to print the exact JSON Schema.
-  -h, --help                      help for update
-      --outcomes string           [required]
-      --schema                    Print the exact JSON Schema of the request body and exit
-      --task-description string   [required]
-  -t, --test-id string            string value (or pass it as the [test-id] argument)
+  -h, --help   help for switch
 ```
 
 ### Options inherited from parent commands
@@ -45,14 +40,6 @@ twinbay tests update [test-id] [flags]
 
 ### SEE ALSO
 
-* [twinbay tests](twinbay_tests.md)	 - Outcomes described in natural language, compiled once into request matchers, and evaluated deterministically against the traffic an attempt was served
-
-### Machine interface
-
-* `twinbay tests update --usage` — this command's flags, defaults and env vars as machine-readable KDL
-* `twinbay tests update --schema` — the exact JSON Schema of the request body (all `$ref`s bundled)
-* `twinbay tests update --dry-run` — preview the request without OS-keychain access or a network call (human preview on stderr)
-* `--dry-run --output-format json` (or a caller-explicit `--jq`) writes one preview object per request as NDJSON on stdout; jq is not applied to previews
-* `--output-format json` or `--jq <expr>` for machine-readable live output; in agent mode errors are a JSON envelope on stderr
+* [twinbay auth](twinbay_auth.md)	 - Manage authentication credentials
 
 Exit codes: 0 ok · 1 runtime · 2 usage · 3 authentication/authorization

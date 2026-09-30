@@ -1,15 +1,15 @@
 ## twinbay auth login
 
-Interactively configure authentication credentials
+Sign in through a browser
 
 ### Synopsis
 
-Interactively configure authentication credentials for twinbay.
-Secret credentials are stored in the OS keychain when available,
-with a config file fallback.
+Sign in to Twinbay through WorkOS AuthKit's device authorization flow.
 
-All fields are optional — press Enter to skip any field you don't need.
-Use the configure command for both authentication and global parameters.
+The CLI displays a verification URL and code, opens the URL when possible, and
+stores the resulting renewable session in the OS keychain. Use --no-browser on
+headless hosts. An explicit --organization-api-key or --access-token is stored
+without opening a browser.
 
 ```
 twinbay auth login [flags]
@@ -18,12 +18,14 @@ twinbay auth login [flags]
 ### Options
 
 ```
-  -h, --help   help for login
+  -h, --help         help for login
+      --no-browser   Display the verification URL and code without opening a browser
 ```
 
 ### Options inherited from parent commands
 
 ```
+      --access-token string           Access token issued by WorkOS AuthKit.
       --agent-mode                    Enable structured errors and default TOON output for AI coding agents. Automatically enabled when a known agent environment is detected (CLAUDECODE, CURSOR_AGENT, etc.). Use --agent-mode=false to disable.
       --color string                  Control colored output: auto (color when output is a TTY), always, or never. Respects NO_COLOR and FORCE_COLOR env vars. (default "auto")
   -d, --debug                         Log request and response diagnostics to stderr

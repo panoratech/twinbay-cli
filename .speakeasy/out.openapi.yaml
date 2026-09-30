@@ -25,8 +25,6 @@ paths:
           description: "The credential is missing, malformed, expired, or not trusted"
         "403":
           description: "The token names an organization with a role we do not model"
-      security:
-        - Organization API key: []
       x-speakeasy-name-override: "retrieve"
   /organizations:
     get:
@@ -35,8 +33,6 @@ paths:
       summary: "List your organizations"
       description: "Every organization the caller is a member of, with their role in each, newest membership first. Independent of the organization the current token acts in. Paginated: walk the pages with `page` and `size`."
       operationId: "list_organizations"
-      security:
-        - Organization API key: []
       parameters:
         - name: "page"
           in: "query"
@@ -92,8 +88,6 @@ paths:
       summary: "Create an organization"
       description: "Creates the organization in WorkOS with the caller as an admin, then mirrors it locally. The caller's current token is unchanged; refresh the AuthKit session into the new organization to act inside it."
       operationId: "create_organization"
-      security:
-        - Organization API key: []
       requestBody:
         required: true
         content:
@@ -131,8 +125,6 @@ paths:
                 $ref: "#/components/schemas/MembershipResponse"
         "401":
           description: "The credential is missing, malformed, expired, or not trusted"
-      security:
-        - Organization API key: []
       x-speakeasy-ignore: true
   /organizations/current:
     get:
@@ -152,8 +144,6 @@ paths:
           description: "The credential is missing, malformed, expired, or not trusted"
         "403":
           description: "The credential does not act inside an organization"
-      security:
-        - Organization API key: []
       x-speakeasy-name-override: "retrieve"
     patch:
       tags:
@@ -184,8 +174,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-      security:
-        - Organization API key: []
       x-speakeasy-name-override: "update"
   /organizations/current/api-keys:
     post:
@@ -194,8 +182,6 @@ paths:
       summary: "Create an API key"
       description: "Mints a key for the active organization. It acts with the caller's role, read from their membership on every request, so it can never outrank them. The response is the only time the token is readable."
       operationId: "create_api_key"
-      security:
-        - Organization API key: []
       requestBody:
         required: true
         content:
@@ -225,8 +211,6 @@ paths:
       summary: "List API keys"
       description: "Every key of the active organization that has not been revoked, newest first. A key that has expired is still listed, so that it can be read and cleaned up rather than vanishing unexplained; `expires_at` says which. Tokens are never included. Paginated: walk the pages with `page` and `size`."
       operationId: "list_api_keys"
-      security:
-        - Organization API key: []
       parameters:
         - name: "page"
           in: "query"
@@ -285,8 +269,6 @@ paths:
       summary: "Revoke an API key"
       description: "The key stops working immediately. Its row stays, so a key seen in a log can still be named, and its token can never be minted again."
       operationId: "revoke_api_key"
-      security:
-        - Organization API key: []
       parameters:
         - name: "api_key_id"
           in: "path"
@@ -317,8 +299,6 @@ paths:
       summary: "List available twins"
       description: "Returns registered twins, newest release first unless sorted by name."
       operationId: "list_twins"
-      security:
-        - Organization API key: []
       parameters:
         - name: "sort"
           in: "query"
@@ -385,8 +365,6 @@ paths:
         - "catalog"
       summary: "Retrieve a twin"
       operationId: "get_twin"
-      security:
-        - Organization API key: []
       parameters:
         - name: "twin_slug"
           in: "path"
@@ -422,8 +400,6 @@ paths:
       summary: "Create an environment"
       description: "Records the environment and queues each twin for provisioning. The twins are not serving yet: read each one with `wait_for=ready`, then collect its API key."
       operationId: "create_environment"
-      security:
-        - Organization API key: []
       requestBody:
         required: true
         content:
@@ -453,8 +429,6 @@ paths:
         - "environments"
       summary: "List environments"
       operationId: "list_environments"
-      security:
-        - Organization API key: []
       parameters:
         - name: "page"
           in: "query"
@@ -513,8 +487,6 @@ paths:
         - "environments"
       summary: "Retrieve an environment"
       operationId: "get_environment"
-      security:
-        - Organization API key: []
       parameters:
         - name: "environment_id"
           in: "path"
@@ -548,8 +520,6 @@ paths:
       summary: "Retrieve a twin"
       description: "With `wait_for`, the answer is held until the twin reaches that state, a run of it settles, or the wait runs out — so a caller waiting for a twin to serve sends one request rather than polling."
       operationId: "get_environment_twin"
-      security:
-        - Organization API key: []
       parameters:
         - name: "twin_id"
           in: "path"
@@ -595,8 +565,6 @@ paths:
       summary: "Start a twin"
       description: "Queues a fresh container. Its state and credentials are new."
       operationId: "start_environment_twin"
-      security:
-        - Organization API key: []
       parameters:
         - name: "twin_id"
           in: "path"
@@ -631,8 +599,6 @@ paths:
       summary: "Stop a twin"
       description: "Queues the container for destruction. Everything it holds is lost."
       operationId: "stop_environment_twin"
-      security:
-        - Organization API key: []
       parameters:
         - name: "twin_id"
           in: "path"
@@ -667,8 +633,6 @@ paths:
       summary: "Collect the twin's API key"
       description: "Returns the key the twin's current container minted."
       operationId: "collect_environment_twin_credential"
-      security:
-        - Organization API key: []
       parameters:
         - name: "twin_id"
           in: "path"
@@ -702,8 +666,6 @@ paths:
         - "twins"
       summary: "List twin state"
       operationId: "list_environment_records"
-      security:
-        - Organization API key: []
       parameters:
         - name: "twin_id"
           in: "path"
@@ -746,8 +708,6 @@ paths:
         - "twins"
       summary: "Replace a twin record"
       operationId: "update_environment_record"
-      security:
-        - Organization API key: []
       parameters:
         - name: "twin_id"
           in: "path"
@@ -799,8 +759,6 @@ paths:
         - "twins"
       summary: "Advance a deterministic twin lifecycle"
       operationId: "advance_environment"
-      security:
-        - Organization API key: []
       parameters:
         - name: "twin_id"
           in: "path"
@@ -844,8 +802,6 @@ paths:
       summary: "Create a scenario"
       description: "Save providers and optional reusable seeds without starting an environment."
       operationId: "create_scenario"
-      security:
-        - Organization API key: []
       requestBody:
         required: true
         content:
@@ -876,8 +832,6 @@ paths:
       summary: "List scenarios"
       description: "Start an environment from a scenario by sending its id as `scenario` to `POST /environments`."
       operationId: "list_scenarios"
-      security:
-        - Organization API key: []
       parameters:
         - name: "include_public"
           in: "query"
@@ -944,8 +898,6 @@ paths:
       summary: "Retrieve a scenario"
       description: "A community scenario another organization published is readable here with `owned` false; editing, deleting and starting it stay with its organization."
       operationId: "get_scenario"
-      security:
-        - Organization API key: []
       parameters:
         - name: "scenario_id"
           in: "path"
@@ -980,8 +932,6 @@ paths:
       summary: "Update a scenario"
       description: "Change the name or replace provider selections. Existing environments are untouched."
       operationId: "update_scenario"
-      security:
-        - Organization API key: []
       parameters:
         - name: "scenario_id"
           in: "path"
@@ -1020,8 +970,6 @@ paths:
       summary: "Delete a scenario"
       description: "Referenced seeds and environments already started from it are untouched."
       operationId: "delete_scenario"
-      security:
-        - Organization API key: []
       parameters:
         - name: "scenario_id"
           in: "path"
@@ -1051,8 +999,6 @@ paths:
       summary: "Generate a seed"
       description: "Describes the starting state you want and answers immediately; a worker expands it into rows. Read the seed until it is `ready`, then pass its id as a twin's `seed` when you create an environment."
       operationId: "create_seed"
-      security:
-        - Organization API key: []
       requestBody:
         required: true
         content:
@@ -1082,8 +1028,6 @@ paths:
         - "seeds"
       summary: "List seeds"
       operationId: "list_seeds"
-      security:
-        - Organization API key: []
       parameters:
         - name: "twin"
           in: "query"
@@ -1153,8 +1097,6 @@ paths:
       summary: "List suggested starting states"
       description: "Described states the product ships for each twin that can be seeded. Send one back as a seed's `prompt`, edited or as it stands."
       operationId: "list_seed_suggestions"
-      security:
-        - Organization API key: []
       parameters:
         - name: "twin"
           in: "query"
@@ -1225,8 +1167,6 @@ paths:
         - "seeds"
       summary: "Retrieve a seed"
       operationId: "get_seed"
-      security:
-        - Organization API key: []
       parameters:
         - name: "seed_id"
           in: "path"
@@ -1261,8 +1201,6 @@ paths:
       summary: "Delete a seed"
       description: "Refused while an environment or a scenario still uses it."
       operationId: "delete_seed"
-      security:
-        - Organization API key: []
       parameters:
         - name: "seed_id"
           in: "path"
@@ -1296,8 +1234,6 @@ paths:
       summary: "Create a test"
       description: "Records the test and its immutable version 1. Nothing is compiled or run."
       operationId: "create_test"
-      security:
-        - Organization API key: []
       requestBody:
         required: true
         content:
@@ -1327,8 +1263,6 @@ paths:
         - "tests"
       summary: "List tests"
       operationId: "list_tests"
-      security:
-        - Organization API key: []
       parameters:
         - name: "page"
           in: "query"
@@ -1387,8 +1321,6 @@ paths:
         - "tests"
       summary: "Retrieve a test"
       operationId: "get_test"
-      security:
-        - Organization API key: []
       parameters:
         - name: "test_id"
           in: "path"
@@ -1423,8 +1355,6 @@ paths:
       summary: "Update a test"
       description: "Appends an immutable definition. Existing runs remain pinned to their version."
       operationId: "update_test"
-      security:
-        - Organization API key: []
       parameters:
         - name: "test_id"
           in: "path"
@@ -1465,8 +1395,6 @@ paths:
         - "tests"
       summary: "List a test's versions"
       operationId: "list_test_versions"
-      security:
-        - Organization API key: []
       parameters:
         - name: "test_id"
           in: "path"
@@ -1535,8 +1463,6 @@ paths:
         - "tests"
       summary: "Retrieve a test version"
       operationId: "get_test_version"
-      security:
-        - Organization API key: []
       parameters:
         - name: "test_id"
           in: "path"
@@ -1579,8 +1505,6 @@ paths:
       summary: "Create an evaluator"
       description: "Queues compilation of a test definition into immutable request matchers. The latest test version is pinned when no version is supplied."
       operationId: "create_evaluator"
-      security:
-        - Organization API key: []
       requestBody:
         required: true
         content:
@@ -1616,8 +1540,6 @@ paths:
       summary: "List evaluators"
       description: "Lists every compilation for a test, optionally filtered by version."
       operationId: "list_evaluators"
-      security:
-        - Organization API key: []
       parameters:
         - name: "test"
           in: "query"
@@ -1696,8 +1618,6 @@ paths:
       summary: "Retrieve an evaluator"
       description: "Poll until `status` is `ready`, when rules and provenance are frozen, or `error`, when `last_error` explains the failure."
       operationId: "get_evaluator"
-      security:
-        - Organization API key: []
       parameters:
         - name: "evaluator_id"
           in: "path"
@@ -1734,8 +1654,6 @@ paths:
       summary: "Start a test run"
       description: "Opens an attempt: traffic the environment serves from now on is attributed to it. Does not launch an agent or reset twins. An environment runs one attempt at a time."
       operationId: "create_test_run"
-      security:
-        - Organization API key: []
       requestBody:
         required: true
         content:
@@ -1770,8 +1688,6 @@ paths:
         - "tests"
       summary: "List test runs"
       operationId: "list_test_runs"
-      security:
-        - Organization API key: []
       parameters:
         - name: "environment_id"
           in: "query"
@@ -1858,8 +1774,6 @@ paths:
         - "tests"
       summary: "Retrieve a test run"
       operationId: "get_test_run"
-      security:
-        - Organization API key: []
       parameters:
         - name: "test_run_id"
           in: "path"
@@ -1896,8 +1810,6 @@ paths:
       summary: "Evaluate a test run"
       description: "Queues a capture and grading with the run's evaluator. Naming another evaluator regrades the latest ready capture for the same phase."
       operationId: "create_evaluation"
-      security:
-        - Organization API key: []
       parameters:
         - name: "Idempotency-Key"
           in: "header"
@@ -1946,8 +1858,6 @@ paths:
         - "tests"
       summary: "List a test run's evaluations"
       operationId: "list_evaluations"
-      security:
-        - Organization API key: []
       parameters:
         - name: "test_run_id"
           in: "path"
@@ -2017,8 +1927,6 @@ paths:
       summary: "Retrieve an evaluation"
       description: "Evaluation is asynchronous: poll until `status` is `completed` or `error`; `verdict` is `pending` until then. Only a `passed` verdict is a pass: `failed`, `inconclusive` and `error` are not. `coverage_status` says whether the capture holds every call the attempt's window served, and each result cites the evidence it was judged on."
       operationId: "get_evaluation"
-      security:
-        - Organization API key: []
       parameters:
         - name: "evaluation_id"
           in: "path"
@@ -2054,8 +1962,6 @@ paths:
         - "tests"
       summary: "Sign a link to a preserved capture"
       operationId: "download_evaluation_input"
-      security:
-        - Organization API key: []
       parameters:
         - name: "input_id"
           in: "path"
@@ -2093,8 +1999,6 @@ paths:
         - "environments"
       summary: "List recent environment request logs"
       operationId: "list_request_logs"
-      security:
-        - Organization API key: []
       parameters:
         - name: "environment_id"
           in: "path"
@@ -2170,8 +2074,6 @@ paths:
         - "environments"
       summary: "Retrieve an environment request log"
       operationId: "get_request_log"
-      security:
-        - Organization API key: []
       parameters:
         - name: "environment_id"
           in: "path"
@@ -2215,8 +2117,6 @@ paths:
       summary: "Export an environment's traffic"
       description: "Records the slice to export and answers immediately; a worker writes the file. An empty body exports the whole environment for all of time."
       operationId: "create_export"
-      security:
-        - Organization API key: []
       parameters:
         - name: "environment_id"
           in: "path"
@@ -2259,8 +2159,6 @@ paths:
         - "environments"
       summary: "List an environment's exports"
       operationId: "list_exports"
-      security:
-        - Organization API key: []
       parameters:
         - name: "environment_id"
           in: "path"
@@ -2327,8 +2225,6 @@ paths:
         - "environments"
       summary: "Retrieve an export"
       operationId: "get_export"
-      security:
-        - Organization API key: []
       parameters:
         - name: "environment_id"
           in: "path"
@@ -2372,8 +2268,6 @@ paths:
       summary: "Sign a link to an exported file"
       description: "A short-lived download URL for a ready export. JSON rather than a redirect, so the expiry is visible and no client has to follow one."
       operationId: "download_export"
-      security:
-        - Organization API key: []
       parameters:
         - name: "environment_id"
           in: "path"
@@ -2429,6 +2323,7 @@ paths:
                 type: "object"
                 title: "Response Read Root"
       x-speakeasy-ignore: true
+      security: []
   /health:
     get:
       tags:
@@ -2446,6 +2341,7 @@ paths:
                 type: "object"
                 title: "Response Read Health"
       x-speakeasy-ignore: true
+      security: []
 components:
   schemas:
     AdvanceEnvironmentRequest:
@@ -4504,6 +4400,10 @@ components:
         - "type"
       title: "ValidationError"
   securitySchemes:
+    Access token:
+      type: "http"
+      description: "Access token issued by WorkOS AuthKit."
+      scheme: "bearer"
     Organization API key:
       type: "apiKey"
       description: "An organization API key. Create one at https://console.twinbay.ai/api-keys"
@@ -4641,3 +4541,6 @@ x-speakeasy-cli-commands:
       hints:
         CLI_ASYNC_FAILED: "Inspect failure in the terminal response."
         CLI_ASYNC_TIMEOUT: "Resume with seeds retrieve and the returned id."
+security:
+  - Access token: []
+  - Organization API key: []

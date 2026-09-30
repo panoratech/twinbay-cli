@@ -7,9 +7,10 @@ Manage authentication credentials
 Manage authentication credentials for twinbay.
 
 Subcommands:
-  login   - Interactively configure credentials
+  login   - Sign in through a browser
+  switch  - Change the active organization
   whoami  - Display current authentication status
-  logout  - Clear all stored credentials
+  logout  - End the browser session and clear stored credentials
 
 ```
 twinbay auth [flags]
@@ -24,6 +25,7 @@ twinbay auth [flags]
 ### Options inherited from parent commands
 
 ```
+      --access-token string           Access token issued by WorkOS AuthKit.
       --agent-mode                    Enable structured errors and default TOON output for AI coding agents. Automatically enabled when a known agent environment is detected (CLAUDECODE, CURSOR_AGENT, etc.). Use --agent-mode=false to disable.
       --color string                  Control colored output: auto (color when output is a TTY), always, or never. Respects NO_COLOR and FORCE_COLOR env vars. (default "auto")
   -d, --debug                         Log request and response diagnostics to stderr
@@ -45,8 +47,9 @@ twinbay auth [flags]
 ### SEE ALSO
 
 * [twinbay](twinbay.md)	 - Twinbay: Backend API
-* [twinbay auth login](twinbay_auth_login.md)	 - Interactively configure authentication credentials
-* [twinbay auth logout](twinbay_auth_logout.md)	 - Clear all stored authentication credentials
-* [twinbay auth whoami](twinbay_auth_whoami.md)	 - Display current authentication configuration
+* [twinbay auth login](twinbay_auth_login.md)	 - Sign in through a browser
+* [twinbay auth logout](twinbay_auth_logout.md)	 - End the browser session and clear stored credentials
+* [twinbay auth switch](twinbay_auth_switch.md)	 - Change the active organization
+* [twinbay auth whoami](twinbay_auth_whoami.md)	 - Display the current user, organization, and credential sources
 
 Exit codes: 0 ok · 1 runtime · 2 usage · 3 authentication/authorization

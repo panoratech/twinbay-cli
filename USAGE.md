@@ -1,6 +1,6 @@
 <!-- Start SDK Example Usage [usage] -->
 ```bash
-twinbay users retrieve --organization-api-key test_api_key
+twinbay users retrieve --access-token 'Bearer test_token'
 
 ```
 <!-- End SDK Example Usage [usage] -->
