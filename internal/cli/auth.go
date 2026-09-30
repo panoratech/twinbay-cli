@@ -107,6 +107,13 @@ func runAuthLoginCmd(cmd *cobra.Command, args []string) error {
 	if formMode == interactive.FormOff {
 		// Non-interactive: store any explicitly-set flags without prompting
 		changed := false
+		if f := cmd.Flags().Lookup("access-token"); f != nil && f.Changed {
+			v, _ := cmd.Flags().GetString("access-token")
+			if config.StoreSecret("access-token", v, &cfg.Security.AccessToken) == nil {
+				keychainStored = true
+			}
+			changed = true
+		}
 		if f := cmd.Flags().Lookup("organization-api-key"); f != nil && f.Changed {
 			v, _ := cmd.Flags().GetString("organization-api-key")
 			if config.StoreSecret("organization-api-key", v, &cfg.Security.OrganizationAPIKey) == nil {
@@ -120,33 +127,79 @@ func runAuthLoginCmd(cmd *cobra.Command, args []string) error {
 		}
 	} else {
 
-		var authOrganizationAPIKey string
-
 		accessible := formMode == interactive.FormAccessible
 
-		fields := []huh.Field{
-			huh.NewInput().
-				Title("An organization API key. Create one at https://console.twinbay.ai/api-keys").
-				Description("--organization-api-key").
-				EchoMode(huh.EchoModePassword).
-				Placeholder(maskSecret(config.GetStoredSecret("organization-api-key", cfg.Security.OrganizationAPIKey))).
-				Value(&authOrganizationAPIKey),
-		}
+		var selectedScheme string
+		schemeSelect := huh.NewSelect[string]().
+			Title("Authentication Method").
+			Description("Choose which credentials to configure").
+			Options(
+				huh.NewOption("Access token issued by WorkOS AuthKit.", "access-token"),
+				huh.NewOption("An organization API key. Create one at https://console.twinbay.ai/api-keys", "organization-api-key"),
+			).
+			Value(&selectedScheme)
 
-		form := huh.NewForm(huh.NewGroup(fields...)).
-			WithAccessible(accessible).
-			WithTheme(authFormTheme()).
-			WithWidth(authFormWidth()).
-			WithShowHelp(false)
-
-		if err := form.Run(); err != nil {
+		if err := huh.NewForm(huh.NewGroup(schemeSelect)).WithAccessible(accessible).WithTheme(authFormTheme()).WithWidth(authFormWidth()).WithShowHelp(false).Run(); err != nil {
 			return fmt.Errorf("auth login: %w", err)
 		}
 
-		if authOrganizationAPIKey != "" {
-			if config.StoreSecret("organization-api-key", authOrganizationAPIKey, &cfg.Security.OrganizationAPIKey) == nil {
-				keychainStored = true
+		switch selectedScheme {
+		case "access-token":
+			var authAccessToken string
+
+			fields := []huh.Field{
+				huh.NewInput().
+					Title("Access token issued by WorkOS AuthKit.").
+					Description("--access-token").
+					EchoMode(huh.EchoModePassword).
+					Placeholder(maskSecret(config.GetStoredSecret("access-token", cfg.Security.AccessToken))).
+					Value(&authAccessToken),
 			}
+
+			form := huh.NewForm(huh.NewGroup(fields...)).
+				WithAccessible(accessible).
+				WithTheme(authFormTheme()).
+				WithWidth(authFormWidth()).
+				WithShowHelp(false)
+
+			if err := form.Run(); err != nil {
+				return fmt.Errorf("auth login: %w", err)
+			}
+
+			if authAccessToken != "" {
+				if config.StoreSecret("access-token", authAccessToken, &cfg.Security.AccessToken) == nil {
+					keychainStored = true
+				}
+			}
+
+		case "organization-api-key":
+			var authOrganizationAPIKey string
+
+			fields := []huh.Field{
+				huh.NewInput().
+					Title("An organization API key. Create one at https://console.twinbay.ai/api-keys").
+					Description("--organization-api-key").
+					EchoMode(huh.EchoModePassword).
+					Placeholder(maskSecret(config.GetStoredSecret("organization-api-key", cfg.Security.OrganizationAPIKey))).
+					Value(&authOrganizationAPIKey),
+			}
+
+			form := huh.NewForm(huh.NewGroup(fields...)).
+				WithAccessible(accessible).
+				WithTheme(authFormTheme()).
+				WithWidth(authFormWidth()).
+				WithShowHelp(false)
+
+			if err := form.Run(); err != nil {
+				return fmt.Errorf("auth login: %w", err)
+			}
+
+			if authOrganizationAPIKey != "" {
+				if config.StoreSecret("organization-api-key", authOrganizationAPIKey, &cfg.Security.OrganizationAPIKey) == nil {
+					keychainStored = true
+				}
+			}
+
 		}
 
 	}
@@ -173,6 +226,10 @@ func runAuthLogoutCmd(cmd *cobra.Command, args []string) error {
 		cfg = &config.Config{}
 	}
 
+	if config.KeyringAvailable() {
+		_ = config.DeleteKeyringValue("access-token")
+	}
+	cfg.Security.AccessToken = ""
 	if config.KeyringAvailable() {
 		_ = config.DeleteKeyringValue("organization-api-key")
 	}

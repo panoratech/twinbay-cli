@@ -1,12 +1,11 @@
 ## twinbay auth logout
 
-Clear all stored authentication credentials
+End the browser session and clear stored credentials
 
 ### Synopsis
 
-Clear all stored authentication credentials from both the OS keychain and config file.
-
-This removes all credentials previously set via auth login or configure.
+End the WorkOS browser session and clear all stored authentication credentials
+from both the OS keychain and config file.
 
 ```
 twinbay auth logout [flags]
@@ -21,6 +20,7 @@ twinbay auth logout [flags]
 ### Options inherited from parent commands
 
 ```
+      --access-token string           Access token issued by WorkOS AuthKit.
       --agent-mode                    Enable structured errors and default TOON output for AI coding agents. Automatically enabled when a known agent environment is detected (CLAUDECODE, CURSOR_AGENT, etc.). Use --agent-mode=false to disable.
       --color string                  Control colored output: auto (color when output is a TTY), always, or never. Respects NO_COLOR and FORCE_COLOR env vars. (default "auto")
   -d, --debug                         Log request and response diagnostics to stderr

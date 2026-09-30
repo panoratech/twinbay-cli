@@ -126,7 +126,7 @@ twinbay seeds create-and-wait --name aging-backlog --twin zendesk "50 open ticke
 ### Example
 
 ```bash
-twinbay users retrieve --organization-api-key test_api_key
+twinbay users retrieve --access-token 'Bearer test_token'
 
 ```
 <!-- End CLI Example Usage [usage] -->
@@ -254,42 +254,60 @@ Long-running commands poll to a terminal response; human progress goes to stderr
 <!-- Start Authentication [security] -->
 ## Authentication
 
-Authentication credentials can be configured in four ways (in order of priority):
+### Browser login (recommended for workstations)
 
-### 1. Command-line flags
+Sign in with WorkOS AuthKit. The CLI opens a browser, displays the verification
+URL and user code as a fallback, and stores the renewable session only in the OS
+keychain:
 
-Pass credentials directly as flags to any command:
+```bash
+twinbay auth login
+twinbay auth whoami
+```
+
+For a headless host, keep the browser closed and follow the printed URL and code:
+
+```bash
+twinbay auth login --no-browser
+```
+
+Switch the active organization by Twinbay ID, WorkOS ID, or exact name, then end
+the remote session and clear local credentials when finished:
+
+```bash
+twinbay auth switch <organization>
+twinbay auth logout
+```
+
+Browser sessions require an available macOS Keychain, Linux Secret Service, or
+Windows Credential Locker. They never fall back to the config file.
+
+### API keys for CI and noninteractive use
+
+API-key flags and environment variables do not open a browser or read the
+keychain. An explicit API key takes precedence over a stored browser session,
+and each request sends exactly one authentication header.
+
+```bash
+export CLI_TWINBAY_ORGANIZATION_API_KEY="..."
+twinbay --no-interactive api-keys list
+```
+
+Credentials may also be passed directly to a command:
 
 ```bash
 twinbay --organization-api-key "$CLI_TWINBAY_ORGANIZATION_API_KEY" api-keys list
 ```
 
-### 2. Environment variables
-
-Set credentials via environment variables:
+Supported environment variables:
 
 | Variable | Description |
 |----------|-------------|
+| `CLI_TWINBAY_ACCESS_TOKEN` | Access token issued by WorkOS AuthKit. |
 | `CLI_TWINBAY_ORGANIZATION_API_KEY` | An organization API key. Create one at https://console.twinbay.ai/api-keys |
 
-### 3. OS Keychain (recommended for workstations)
-
-Credentials are stored securely in your operating system's keychain when you run:
-
-```bash
-twinbay configure
-```
-
-Secret credentials (tokens, API keys, passwords) are automatically stored in:
-- **macOS**: Keychain
-- **Linux**: GNOME Keyring / KWallet (via D-Bus Secret Service)
-- **Windows**: Windows Credential Locker
-
-If no keychain is available (e.g., in CI environments), credentials fall back to the config file.
-
-### 4. Configuration file
-
-Run the interactive `configure` command to store non-secret settings:
+The interactive `configure` command remains available for direct credentials and
+non-secret settings:
 
 ```bash
 twinbay configure

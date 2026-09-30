@@ -1,19 +1,11 @@
 ## twinbay auth whoami
 
-Display current authentication configuration
+Display the current user, organization, and credential sources
 
 ### Synopsis
 
-Display the currently configured settings and their sources.
-
-Sources are shown as:
-  [flag]    - Set via command line flag
-  [env]     - Set via environment variable (CLI_TWINBAY_*)
-  [keyring] - Set via OS keychain (stored by login/configure command)
-  [config]  - Set via config file (~/.config/twinbay/config.yaml)
-  [unset]   - Not configured
-
-Credential values are masked for security.
+Display the stored browser-session identity and active organization,
+along with any directly configured credential sources.
 
 ```
 twinbay auth whoami [flags]
@@ -28,6 +20,7 @@ twinbay auth whoami [flags]
 ### Options inherited from parent commands
 
 ```
+      --access-token string           Access token issued by WorkOS AuthKit.
       --agent-mode                    Enable structured errors and default TOON output for AI coding agents. Automatically enabled when a known agent environment is detected (CLAUDECODE, CURSOR_AGENT, etc.). Use --agent-mode=false to disable.
       --color string                  Control colored output: auto (color when output is a TTY), always, or never. Respects NO_COLOR and FORCE_COLOR env vars. (default "auto")
   -d, --debug                         Log request and response diagnostics to stderr

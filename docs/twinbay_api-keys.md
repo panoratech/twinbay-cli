@@ -19,6 +19,7 @@ twinbay api-keys [flags]
 ### Options inherited from parent commands
 
 ```
+      --access-token string           Access token issued by WorkOS AuthKit.
       --agent-mode                    Enable structured errors and default TOON output for AI coding agents. Automatically enabled when a known agent environment is detected (CLAUDECODE, CURSOR_AGENT, etc.). Use --agent-mode=false to disable.
       --color string                  Control colored output: auto (color when output is a TTY), always, or never. Respects NO_COLOR and FORCE_COLOR env vars. (default "auto")
   -d, --debug                         Log request and response diagnostics to stderr
