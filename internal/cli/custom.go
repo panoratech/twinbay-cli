@@ -100,14 +100,14 @@ func nestSubresources(root *cobra.Command) error {
 		{"environments", "environment-exports", "exports", "Exports of an environment's traffic", environmentexports.InitEnvironmentExportsRoot},
 		{"twins", "twin-records", "records", "Records a provisioned twin holds", twinrecords.InitTwinRecordsRoot},
 	} {
-		parent := findCommandByPath(root, []string{nest.parent})
+		parent := commandAt(root, []string{nest.parent})
 		if parent == nil {
 			return fmt.Errorf("nest %s: parent %q does not exist", nest.old, nest.parent)
 		}
 		if err := nest.init(parent); err != nil {
 			return fmt.Errorf("nest %s: %w", nest.old, err)
 		}
-		group := findCommandByPath(parent, []string{nest.old})
+		group := commandAt(parent, []string{nest.old})
 		if group == nil {
 			return fmt.Errorf("nest %s: generated group was renamed", nest.old)
 		}
@@ -115,12 +115,12 @@ func nestSubresources(root *cobra.Command) error {
 		for _, leaf := range group.Commands() {
 			adoptNestedCommand(leaf, nest.old+" "+leaf.Name())
 		}
-		deprecateTree(findCommandByPath(root, []string{nest.old}), root.Name()+" "+nest.parent+" "+nest.name)
+		deprecateTree(commandAt(root, []string{nest.old}), root.Name()+" "+nest.parent+" "+nest.name)
 	}
 
 	// Test versions are operations on the tests group itself, so build a
 	// fresh tests tree and adopt its version commands.
-	testsCmd := findCommandByPath(root, []string{"tests"})
+	testsCmd := commandAt(root, []string{"tests"})
 	scratch := &cobra.Command{Use: "scratch"}
 	if testsCmd == nil || tests.InitTestsRoot(scratch) != nil {
 		return errors.New("nest tests versions: tests group unavailable")
@@ -135,9 +135,9 @@ func nestSubresources(root *cobra.Command) error {
 	}
 	usage.MarkDynamic(versions)
 	testsCmd.AddCommand(versions)
-	fresh := findCommandByPath(scratch, []string{"tests"})
+	fresh := commandAt(scratch, []string{"tests"})
 	for _, move := range []struct{ old, name string }{{"list-versions", "list"}, {"retrieve-version", "retrieve"}} {
-		leaf := findCommandByPath(fresh, []string{move.old})
+		leaf := commandAt(fresh, []string{move.old})
 		if leaf == nil {
 			return fmt.Errorf("nest tests versions: generated %q was renamed", move.old)
 		}
@@ -145,7 +145,7 @@ func nestSubresources(root *cobra.Command) error {
 		leaf.Use, leaf.Aliases = move.name+strings.TrimPrefix(leaf.Use, move.old), nil
 		versions.AddCommand(leaf)
 		adoptNestedCommand(leaf, "tests "+move.old)
-		deprecateTree(findCommandByPath(testsCmd, []string{move.old}), root.Name()+" tests versions "+move.name)
+		deprecateTree(commandAt(testsCmd, []string{move.old}), root.Name()+" tests versions "+move.name)
 	}
 	return nil
 }
@@ -263,8 +263,8 @@ func requireConfirmation(cmd *cobra.Command) {
 }
 
 func consolidateWhoami(root *cobra.Command) {
-	top := findCommandByPath(root, []string{"whoami"})
-	auth := findCommandByPath(root, []string{"auth", "whoami"})
+	top := commandAt(root, []string{"whoami"})
+	auth := commandAt(root, []string{"auth", "whoami"})
 	if top == nil || auth == nil {
 		return
 	}
@@ -279,4 +279,24 @@ func exactArgs(n int) cobra.PositionalArgs {
 		}
 		return cobra.ExactArgs(n)(cmd, args)
 	}
+}
+
+// commandAt walks path from root by command name. Kept here rather than
+// reusing the generated findCommandByPath, which only exists while the spec
+// declares intent commands.
+func commandAt(root *cobra.Command, path []string) *cobra.Command {
+	for _, name := range path {
+		var next *cobra.Command
+		for _, child := range root.Commands() {
+			if child.Name() == name {
+				next = child
+				break
+			}
+		}
+		if next == nil {
+			return nil
+		}
+		root = next
+	}
+	return root
 }
