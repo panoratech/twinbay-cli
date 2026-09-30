@@ -19,11 +19,13 @@ twinbay environment-exports create [environment-id] [flags]
 ### Options
 
 ```
-      --body string             Request body as JSON (alternative to individual flags). Can also be provided via stdin; @path reads a file, @- reads stdin to EOF. Use --schema to print the exact JSON Schema.
-  -b, --body-param string       JSON object
-  -e, --environment-id string   string value (or pass it as the [environment-id] argument)
-  -h, --help                    help for create
-      --schema                  Print the exact JSON Schema of the request body and exit
+      --body string                                 Request body as JSON (alternative to individual flags). Can also be provided via stdin; @path reads a file, @- reads stdin to EOF. Use --schema to print the exact JSON Schema.
+  -e, --environment-id string                       string value (or pass it as the [environment-id] argument)
+      --environment-twin-ids environment_twins.id   Twin slots inside this environment to export, by environment_twins.id. Omitted exports every twin; an empty list would export none, which is never what a caller means.
+  -h, --help                                        help for create
+      --occurred-from string                        Export calls served at or after this instant.
+      --occurred-until string                       Export calls served at or before this instant. An export never reads past the moment it was asked for, whatever this says.
+      --schema                                      Print the exact JSON Schema of the request body and exit
 ```
 
 ### Options inherited from parent commands

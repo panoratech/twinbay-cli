@@ -24,8 +24,9 @@ twinbay [flags]
       --include-headers               Include HTTP response headers in the output
       --interactive                   Prompt for missing inputs and open guided configure/auth forms (forms fall back to line prompts on stdin off-TTY) (default true)
   -q, --jq string                     Filter and transform output using a jq expression (e.g., '.name', '.items[] | .id')
+      --map string[="tree"]           Print the commands below this one instead of running it: tree (default), paths or json
       --no-interactive                Disable all interactive features (auto-prompting, explorer auto-launch, TUI forms)
-      --organization-api-key string   An organization API key. Create one at https://console.twinbay.ai/api-keys
+      --organization-api-key string   An organization API key. Create one at https://console.twinbay.ai/api-keys (alias --api-key; env TWINBAY_API_KEY)
   -o, --output-format string          Specify the output format. Options: pretty, json, yaml, table, toon. (default "pretty")
       --raw-output                    Write --jq string results as raw text instead of JSON strings (like jq -r); non-string results stay JSON
       --server string                 Select a server by index (for indexed servers) or name (for named servers)
@@ -39,23 +40,26 @@ twinbay [flags]
 * [twinbay api-keys](twinbay_api-keys.md)	 - Long-lived credentials for callers that cannot hold an AuthKit session — agents, SDKs, CI
 * [twinbay auth](twinbay_auth.md)	 - Manage authentication credentials
 * [twinbay catalog](twinbay_catalog.md)	 - Browse the digital twins available for new environments
+* [twinbay config](twinbay_config.md)	 - List, set and unset CLI settings without prompts
 * [twinbay configure](twinbay_configure.md)	 - Configure authentication credentials and preferences
-* [twinbay environment-exports](twinbay_environment-exports.md)	 - Operations for environment-exports
-* [twinbay environment-logs](twinbay_environment-logs.md)	 - Operations for environment-logs
+* [twinbay delete](twinbay_delete.md)	 - Send a DELETE request to an API path
 * [twinbay environments](twinbay_environments.md)	 - Create and edit isolated provider environments
 * [twinbay evaluation-inputs](twinbay_evaluation-inputs.md)	 - Operations for evaluation-inputs
 * [twinbay evaluations](twinbay_evaluations.md)	 - Operations for evaluations
 * [twinbay evaluators](twinbay_evaluators.md)	 - Operations for evaluators
 * [twinbay explore](twinbay_explore.md)	 - Interactively browse and run commands
+* [twinbay get](twinbay_get.md)	 - Send a GET request to an API path
 * [twinbay organizations](twinbay_organizations.md)	 - Organizations the caller belongs to
+* [twinbay patch](twinbay_patch.md)	 - Send a PATCH request to an API path
+* [twinbay post](twinbay_post.md)	 - Send a POST request to an API path
+* [twinbay put](twinbay_put.md)	 - Send a PUT request to an API path
 * [twinbay scenarios](twinbay_scenarios.md)	 - Reusable starting setups of provider twins and optional seeds
 * [twinbay seeds](twinbay_seeds.md)	 - Starting states for a twin
 * [twinbay test-runs](twinbay_test-runs.md)	 - Operations for test-runs
 * [twinbay tests](twinbay_tests.md)	 - Outcomes described in natural language, compiled once into request matchers, and evaluated deterministically against the traffic an attempt was served
-* [twinbay twin-records](twinbay_twin-records.md)	 - Operations for twin-records
 * [twinbay twins](twinbay_twins.md)	 - Manage provisioned twins by their IDs
 * [twinbay users](twinbay_users.md)	 - The current user
 * [twinbay version](twinbay_version.md)	 - Print the CLI version
-* [twinbay whoami](twinbay_whoami.md)	 - Display current authentication configuration
+* [twinbay whoami](twinbay_whoami.md)	 - Display the current user, organization, and credential sources
 
 Exit codes: 0 ok · 1 runtime · 2 usage · 3 authentication/authorization

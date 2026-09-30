@@ -28,8 +28,9 @@ twinbay twins [flags]
       --include-headers               Include HTTP response headers in the output
       --interactive                   Prompt for missing inputs and open guided configure/auth forms (forms fall back to line prompts on stdin off-TTY) (default true)
   -q, --jq string                     Filter and transform output using a jq expression (e.g., '.name', '.items[] | .id')
+      --map string[="tree"]           Print the commands below this one instead of running it: tree (default), paths or json
       --no-interactive                Disable all interactive features (auto-prompting, explorer auto-launch, TUI forms)
-      --organization-api-key string   An organization API key. Create one at https://console.twinbay.ai/api-keys
+      --organization-api-key string   An organization API key. Create one at https://console.twinbay.ai/api-keys (alias --api-key; env TWINBAY_API_KEY)
   -o, --output-format string          Specify the output format. Options: pretty, json, yaml, table, toon. (default "pretty")
       --raw-output                    Write --jq string results as raw text instead of JSON strings (like jq -r); non-string results stay JSON
       --server string                 Select a server by index (for indexed servers) or name (for named servers)
@@ -43,6 +44,7 @@ twinbay twins [flags]
 * [twinbay](twinbay.md)	 - Twinbay: Backend API
 * [twinbay twins advance](twinbay_twins_advance.md)	 - Advance a deterministic twin lifecycle
 * [twinbay twins collect-credential](twinbay_twins_collect-credential.md)	 - Collect the twin's API key
+* [twinbay twins records](twinbay_twins_records.md)	 - Records a provisioned twin holds
 * [twinbay twins retrieve](twinbay_twins_retrieve.md)	 - Retrieve a twin
 * [twinbay twins start](twinbay_twins_start.md)	 - Start a twin
 * [twinbay twins stop](twinbay_twins_stop.md)	 - Stop a twin

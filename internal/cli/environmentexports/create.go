@@ -17,7 +17,9 @@ import (
 
 var createCmdMeta = []flagutil.FlagMeta{
 	{FlagName: "environment-id", Shorthand: "e", FieldPath: "EnvironmentID", Kind: flagutil.FlagKindString, Required: true, Description: "[required]"},
-	{FlagName: "body-param", Shorthand: "b", FieldPath: "Body", Kind: flagutil.FlagKindJSON, Optional: true, Annotations: `request:"mediaType=application/json"`, Description: "JSON object"},
+	{FlagName: "environment-twin-ids", FieldPath: "Body.EnvironmentTwinIds", Kind: flagutil.FlagKindJSON, Optional: true, Annotations: `json:"environment_twin_ids,omitempty"`, Description: "Twin slots inside this environment to export, by `environment_twins.id`. Omitted exports every twin; an empty list would export none, which is never what a caller means."},
+	{FlagName: "occurred-from", FieldPath: "Body.OccurredFrom", Kind: flagutil.FlagKindJSON, Optional: true, Annotations: `json:"occurred_from,omitempty"`, Description: "Export calls served at or after this instant."},
+	{FlagName: "occurred-until", FieldPath: "Body.OccurredUntil", Kind: flagutil.FlagKindJSON, Optional: true, Annotations: `json:"occurred_until,omitempty"`, Description: "Export calls served at or before this instant. An export never reads past the moment it was asked for, whatever this says."},
 }
 
 // initCreateCmd initializes the create command.
