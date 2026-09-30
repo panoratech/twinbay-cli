@@ -15,7 +15,7 @@ import (
 // which propagates the value here (see cmd/twinbay/main.go):
 //
 //	go build -ldflags "-X main.version=x.y.z" ./cmd/twinbay
-var Version = "0.4.2"
+var Version = "0.5.0"
 
 // BuildTime is optionally set at build time via ldflags targeting the main package.
 var BuildTime string

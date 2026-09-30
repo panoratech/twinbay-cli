@@ -43,9 +43,6 @@ var rootCmd *cobra.Command
 func NewRootCommand() (*cobra.Command, error) {
 	cobra.AddTemplateFunc("groupedFlagUsages", groupedFlagUsages)
 	cobra.AddTemplateFunc("groupedGlobalFlagUsages", groupedGlobalFlagUsages)
-	cobra.AddTemplateFunc("compactHelpDefaults", compactHelpDefaults)
-	cobra.AddTemplateFunc("compactHelpFooter", compactHelpFooter)
-	cobra.AddTemplateFunc("compactRootHelpFooter", compactRootHelpFooter)
 	rootCmd := &cobra.Command{
 		Use:           "twinbay",
 		Short:         "Twinbay: Backend API",
@@ -56,19 +53,9 @@ func NewRootCommand() (*cobra.Command, error) {
 			if usage.UsageRequested(cmd) {
 				return usage.EmitSchema(cmd, cmd.OutOrStdout())
 			}
-			if compactHelpGlobalRequested(cmd) {
-				out := cmd.OutOrStdout()
-				fmt.Fprintln(out, "Global flags (apply to every command):")
-				fmt.Fprintln(out)
-				_, err := fmt.Fprintln(out, renderGroupedFlags(cmd.Root().PersistentFlags(), "Global Flags"))
-				return err
-			}
 			return cmd.Help()
 		},
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			if compactHelpGlobalRequested(cmd) {
-				return nil
-			}
 			if usage.UsageRequested(cmd) {
 				return nil
 			}
@@ -86,7 +73,6 @@ func NewRootCommand() (*cobra.Command, error) {
 			return nil
 		},
 	}
-	rootCmd.Flags().Bool("help-global", false, "Print global flags shared by every command")
 	if err := users.InitUsersRoot(rootCmd); err != nil {
 		return nil, fmt.Errorf("init users: %w", err)
 	}
@@ -218,14 +204,9 @@ func NewRootCommand() (*cobra.Command, error) {
 
 	rootCmd.SetUsageTemplate(groupedUsageTemplate())
 
-	if err := initIntentCmds(rootCmd); err != nil {
-		return nil, err
-	}
-
 	// Cobra creates its default help and completion commands lazily inside Execute.
 	rootCmd.InitDefaultHelpCmd()
 	rootCmd.InitDefaultCompletionCmd()
-	applyDeclaredCommandOrder(rootCmd)
 	interactive.Intercept(rootCmd)
 	usage.Intercept(rootCmd)
 	// Cobra validates Args before any PersistentPreRunE runs.
@@ -561,88 +542,6 @@ func renderGroupedFlags(flags *pflag.FlagSet, fallbackHeader string) string {
 	return strings.TrimRight(buf.String(), "\n")
 }
 
-func compactHelpGlobalRequested(cmd *cobra.Command) bool {
-	if cmd == nil || cmd.Root() == nil {
-		return false
-	}
-	requested, err := cmd.Root().Flags().GetBool("help-global")
-	return err == nil && requested
-}
-
-func compactMachineInterface(cmd *cobra.Command) string {
-	if cmd == nil || cmd.Root() == nil {
-		return ""
-	}
-	cmd.InheritedFlags()
-	has := func(name string) bool {
-		return cmd.Flags().Lookup(name) != nil || cmd.InheritedFlags().Lookup(name) != nil
-	}
-	parts := []string{}
-	if has("json") {
-		parts = append(parts, "--json")
-	} else if has("output-format") {
-		parts = append(parts, "--output-format json")
-	}
-	if has("transform") {
-		parts = append(parts, "--transform <dot.path>")
-	} else if has("jq") {
-		parts = append(parts, "--jq <expr>")
-	}
-	if has("raw") {
-		parts = append(parts, "--raw")
-	}
-	if has("dry-run") {
-		parts = append(parts, "--dry-run")
-	}
-	if has("usage") {
-		parts = append(parts, "--usage")
-	}
-	return strings.Join(parts, " · ")
-}
-
-func compactHelpDefaults(cmd *cobra.Command) string {
-	if cmd == nil || cmd.Annotations == nil {
-		return ""
-	}
-	return cmd.Annotations["speakeasy_help_defaults"]
-}
-
-func compactHelpFooter(cmd *cobra.Command) string {
-	if cmd == nil || cmd.Annotations["speakeasy_help_footer"] == "false" {
-		return ""
-	}
-	lines := []string{}
-	if machine := compactMachineInterface(cmd); machine != "" {
-		lines = append(lines, "Machine interface: "+machine)
-	}
-	lines = append(lines, "Globals (auth, network, output): "+cmd.Root().Name()+" --help-global")
-	learn := cmd.Annotations["speakeasy_help_learn"]
-	escalate := cmd.Annotations["speakeasy_help_escalate"]
-	switch {
-	case learn != "" && escalate != "":
-		lines = append(lines, "Learn: "+learn+" · escalate: "+escalate)
-	case learn != "":
-		lines = append(lines, "Learn: "+learn)
-	case escalate != "":
-		lines = append(lines, "Escalate: "+escalate)
-	}
-	return strings.Join(lines, string(rune(10)))
-}
-
-func compactRootHelpFooter(cmd *cobra.Command) string {
-	if cmd == nil || cmd.Root() == nil {
-		return ""
-	}
-	rootName := cmd.Root().Name()
-	lines := []string{}
-	if machine := compactMachineInterface(cmd); machine != "" {
-		lines = append(lines, "Machine interface: "+machine)
-	}
-	lines = append(lines, "Globals (auth, network, output): "+rootName+" --help-global")
-	lines = append(lines, "Setup: export CLI_TWINBAY_ORGANIZATION_API_KEY=...   or   "+rootName+" configure")
-	return strings.Join(lines, string(rune(10)))
-}
-
 // groupedUsageTemplate returns Cobra's default usage template with the local
 // and global Flags sections replaced to use grouped rendering.
 // Built at runtime via strings.Replace to avoid template delimiter conflicts
@@ -653,24 +552,22 @@ func groupedUsageTemplate() string {
 	nl := string(rune(10))
 	defaultTmpl := (&cobra.Command{}).UsageTemplate()
 
-	oldLocalCondition := ob + "if .HasAvailableLocalFlags" + cb
-	oldLocal := oldLocalCondition + nl + nl + "Flags:" + nl + ob + ".LocalFlags.FlagUsages | trimTrailingWhitespaces" + cb + ob + "end" + cb
-	newLocalCondition := ob + "if and .HasParent .HasAvailableLocalFlags" + cb
-	newLocal := newLocalCondition + nl + nl + ob + "groupedFlagUsages .LocalFlags | trimTrailingWhitespaces" + cb + ob + "end" + cb
-	result := strings.Replace(defaultTmpl, oldLocal, newLocal, 1)
+	// Replace local flags section
+	oldLocal := "Flags:\n" + ob + ".LocalFlags.FlagUsages | trimTrailingWhitespaces" + cb
+	replLocal := ob + "groupedFlagUsages .LocalFlags | trimTrailingWhitespaces" + cb
+	result := strings.Replace(defaultTmpl, oldLocal, replLocal, 1)
 
-	defaults := ob + "with compactHelpDefaults ." + cb + nl + nl + "Defaults: " + ob + "." + cb + ob + "end" + cb
-	result = strings.Replace(result, newLocalCondition, defaults+newLocalCondition, 1)
+	// Replace global flags section
+	oldGlobal := "Global Flags:\n" + ob + ".InheritedFlags.FlagUsages | trimTrailingWhitespaces" + cb
+	replGlobal := ob + "groupedGlobalFlagUsages .InheritedFlags | trimTrailingWhitespaces" + cb
+	result = strings.Replace(result, oldGlobal, replGlobal, 1)
 
-	oldGlobal := ob + "if .HasAvailableInheritedFlags" + cb + nl + nl + "Global Flags:" + nl + ob + ".InheritedFlags.FlagUsages | trimTrailingWhitespaces" + cb + ob + "end" + cb
-	result = strings.Replace(result, oldGlobal, "", 1)
-
-	result = strings.Replace(result, nl+nl+"Examples:"+nl, nl+nl+"Just works:"+nl, 1)
-
-	oldFooter := ob + "if .HasAvailableSubCommands" + cb + nl + nl + "Use \"" + ob + ".CommandPath" + cb + " [command] --help\" for more information about a command." + ob + "end" + cb
-	rootFooter := ob + "if not .HasParent" + cb + ob + "with compactRootHelpFooter ." + cb + nl + nl + ob + "." + cb + ob + "end" + cb + ob + "end" + cb
-	commandFooter := ob + "if .HasParent" + cb + ob + "with compactHelpFooter ." + cb + nl + nl + ob + "." + cb + ob + "end" + cb + ob + "end" + cb
-	result = strings.Replace(result, oldFooter, rootFooter+oldFooter+commandFooter, 1)
+	oldFooter := "for more information about a command." + ob + "end" + cb
+	replFooter := "for more information about a command." +
+		ob + "if not .HasParent" + cb +
+		"\n\nMachine interface: --usage (command tree as KDL) · --schema (request JSON Schema, on commands with a body) · --dry-run (request preview, no credentials) · --output-format json · --jq <expr>" +
+		ob + "end" + cb + ob + "end" + cb
+	result = strings.Replace(result, oldFooter, replFooter, 1)
 
 	result = strings.TrimRight(result, nl) + nl + nl + clierrors.HelpFooter + nl
 
