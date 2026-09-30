@@ -216,3 +216,25 @@ func TestReplaceReadmeAuthentication(t *testing.T) {
 		t.Fatalf("replacement changed content outside the markers:\n%s", got)
 	}
 }
+
+func TestReadmeUsageUsesCurrentAsyncCommands(t *testing.T) {
+	for _, stale := range []string{
+		"twinbay evaluators create-and-wait",
+		"twinbay evaluations create-and-wait",
+	} {
+		if strings.Contains(readmeUsage, stale) {
+			t.Errorf("readme usage contains removed command %q", stale)
+		}
+	}
+
+	for _, current := range []string{
+		"twinbay evaluators create ",
+		"twinbay evaluators retrieve ",
+		"twinbay evaluations create ",
+		"twinbay evaluations retrieve ",
+	} {
+		if !strings.Contains(readmeUsage, current) {
+			t.Errorf("readme usage is missing current command %q", current)
+		}
+	}
+}
