@@ -20,7 +20,6 @@ twinbay [flags]
       --dry-run                       Preview API requests without sending them (no network, no OS keychain). Human preview on stderr; with -o json or --jq, one JSON object per request on stdout. Local mutation commands (auth login, auth logout and configure) make no request: they skip prompts and writes and report a no-op (stderr, or one JSON object on stdout in the machine form)
   -H, --header stringArray            Set a custom HTTP request header (format: "Key: Value"). Can be specified multiple times.
   -h, --help                          help for twinbay
-      --help-global                   Print global flags shared by every command
       --include-headers               Include HTTP response headers in the output
       --interactive                   Prompt for missing inputs and open guided configure/auth forms (forms fall back to line prompts on stdin off-TTY) (default true)
   -q, --jq string                     Filter and transform output using a jq expression (e.g., '.name', '.items[] | .id')

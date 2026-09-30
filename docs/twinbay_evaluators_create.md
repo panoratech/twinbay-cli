@@ -10,6 +10,12 @@ Queues compilation of a test definition into immutable request matchers. The lat
 twinbay evaluators create [flags]
 ```
 
+### Examples
+
+```
+  twinbay evaluators create --test-id e3a58ccc-aa80-4c5a-a71a-262fc8302ffc --twins <value>
+```
+
 ### Options
 
 ```

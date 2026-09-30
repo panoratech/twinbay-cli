@@ -10,6 +10,12 @@ List twin state
 twinbay twins records list [twin-id] [resource] [flags]
 ```
 
+### Examples
+
+```
+  twinbay twins records list 2139f026-ec79-4ceb-a569-557048598e0d <value>
+```
+
 ### Options
 
 ```

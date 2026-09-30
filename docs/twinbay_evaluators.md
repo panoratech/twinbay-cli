@@ -43,7 +43,6 @@ twinbay evaluators [flags]
 
 * [twinbay](twinbay.md)	 - Twinbay: Backend API
 * [twinbay evaluators create](twinbay_evaluators_create.md)	 - Create an evaluator
-* [twinbay evaluators create-and-wait](twinbay_evaluators_create-and-wait.md)	 - Create an evaluator and wait
 * [twinbay evaluators list](twinbay_evaluators_list.md)	 - List evaluators
 * [twinbay evaluators retrieve](twinbay_evaluators_retrieve.md)	 - Retrieve an evaluator
 

@@ -156,7 +156,7 @@ This CLI is built to be driven by AI coding agents as well as people: everything
 |-----|---------|
 | `twinbay --help`, `twinbay api-keys list --help` | Commands by category, runnable examples, flags |
 | `twinbay --usage`, `twinbay api-keys list --usage` | The command surface as machine-readable [KDL](https://kdl.dev): commands, aliases, flags, defaults, env vars, config keys |
-| `twinbay evaluators create-and-wait --schema` | The exact JSON Schema of the command's request body (all `$ref`s bundled) — build a valid `--body` from it |
+| `twinbay test-runs create --schema` | The exact JSON Schema of the command's request body (all `$ref`s bundled) — build a valid `--body` from it |
 | `twinbay api-keys list --dry-run` | The exact HTTP request (method, URL, headers, body), with no credentials or network call |
 | `twinbay api-keys list --output-format json` (or `--jq`) | Machine-readable output |
 
@@ -176,7 +176,7 @@ twinbay api-keys list --usage
 
 ```bash
 # JSON Schema (draft 2020-12) of the request body, with every $ref bundled under $defs
-twinbay evaluators create-and-wait --schema
+twinbay test-runs create --schema
 ```
 
 ### Probe before you spend
@@ -186,7 +186,6 @@ Start quota-spending commands with `--dry-run`. It validates inputs, resolves th
 ```bash
 # Human preview: the [DRY-RUN] block is on stderr and stdout is empty
 twinbay api-keys list --dry-run
-twinbay evaluators create-and-wait --test-id 7ef34f0b-0ae6-4e26-ae92-f49d239d4d7d --twins stripe --dry-run
 
 # Machine preview: compact JSON on stdout and silent stderr
 twinbay api-keys list --dry-run --output-format json
@@ -222,7 +221,7 @@ Required-input prompts and guided `configure` / `auth login` forms are enabled b
 
 ```bash
 # Prompt for missing command inputs
-twinbay evaluators create-and-wait --interactive
+twinbay api-keys list --interactive
 
 # Open the guided configuration form
 twinbay configure --interactive
@@ -249,11 +248,6 @@ Outside agent mode, explicit JSON and `--jq` preserve the compatibility envelope
 
 `error_type` is one of `authentication_error`, `authorization_error`, `not_found`, `validation_error`, `rate_limit_error`, `server_error`, `api_error`, `connection_error`, `protocol_error`, `runtime_error`, `unsupported_error`, `async_failed`, `async_timeout`, `async_unknown_state`. Classification derives from the HTTP status and transport evidence; `error_reason` is absent for API errors. Status-less local failures may use `CLI_VALIDATION`, `CLI_CONNECTION`, `CLI_PROTOCOL`, `CLI_RUNTIME`, `CLI_UNAVAILABLE`, `CLI_AUTHENTICATION`, or the async polling reasons `CLI_ASYNC_FAILED`, `CLI_ASYNC_TIMEOUT`, and `CLI_ASYNC_UNKNOWN_STATE`. `hints` preserves server guidance first, adds the most specific local taxonomy guidance, then typed CLI and command-specific guidance, removing exact duplicates. `exit_code` is always the code for the final `error_type` shown in the envelope: 1 runtime, 2 usage, or 3 authentication/authorization.
 
-```bash
-# "evaluators create-and-wait" declares hints for CLI_ASYNC_FAILED, CLI_ASYNC_TIMEOUT; a failing request returns them in the envelope
-twinbay evaluators create-and-wait --test-id 7ef34f0b-0ae6-4e26-ae92-f49d239d4d7d --twins stripe
-```
-
 ### Lists, streams, and files
 
 List commands accept `--all` to fetch every page and stream results as they arrive (one JSON value per line with `--output-format json`; `--max-pages N` bounds the walk).
@@ -263,8 +257,6 @@ Structured output and agent mode never write pagination hints to stderr; if a la
 ```bash
 twinbay api-keys list --all --output-format json
 ```
-
-Long-running commands poll to a terminal response; human progress goes to stderr and machine-mode success keeps stderr silent. Add `--async` to `twinbay evaluators create-and-wait --test-id 7ef34f0b-0ae6-4e26-ae92-f49d239d4d7d --twins stripe` to return its handle immediately, or tune foreground polling with `--poll-interval <duration>` and `--poll-timeout <duration>`. Resume an escaped or timed-out operation with `twinbay evaluators retrieve --evaluator-id <id>`.
 <!-- End For AI agents [agents] -->
 
 <!-- Start Authentication [security] -->
@@ -375,12 +367,10 @@ Every command accepts `--help`; body-bearing commands also accept `--schema` (ex
   * [`download`](docs/twinbay_evaluation-inputs_download.md) - Sign a link to a preserved capture
 * [`evaluations`](docs/twinbay_evaluations.md) - Operations for evaluations
   * [`create`](docs/twinbay_evaluations_create.md) - Evaluate a test run
-  * [`create-and-wait`](docs/twinbay_evaluations_create-and-wait.md) - Evaluate a test run and wait
   * [`list`](docs/twinbay_evaluations_list.md) - List a test run's evaluations
   * [`retrieve`](docs/twinbay_evaluations_retrieve.md) - Retrieve an evaluation
 * [`evaluators`](docs/twinbay_evaluators.md) - Operations for evaluators
   * [`create`](docs/twinbay_evaluators_create.md) - Create an evaluator
-  * [`create-and-wait`](docs/twinbay_evaluators_create-and-wait.md) - Create an evaluator and wait
   * [`list`](docs/twinbay_evaluators_list.md) - List evaluators
   * [`retrieve`](docs/twinbay_evaluators_retrieve.md) - Retrieve an evaluator
 * [`explore`](docs/twinbay_explore.md) - Interactively browse and run commands
@@ -401,7 +391,6 @@ Every command accepts `--help`; body-bearing commands also accept `--schema` (ex
   * [`update`](docs/twinbay_scenarios_update.md) - Update a scenario
 * [`seeds`](docs/twinbay_seeds.md) - Starting states for a twin
   * [`create`](docs/twinbay_seeds_create.md) - Generate a seed
-  * [`create-and-wait`](docs/twinbay_seeds_create-and-wait.md) - Generate a seed and wait
   * [`delete`](docs/twinbay_seeds_delete.md) - Delete a seed
   * [`list`](docs/twinbay_seeds_list.md) - List seeds
   * [`list-suggestions`](docs/twinbay_seeds_list-suggestions.md) - List suggested starting states

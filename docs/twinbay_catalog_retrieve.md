@@ -10,6 +10,12 @@ Retrieve a twin
 twinbay catalog retrieve [twin-slug] [flags]
 ```
 
+### Examples
+
+```
+  twinbay catalog retrieve --twin-slug <value>
+```
+
 ### Options
 
 ```

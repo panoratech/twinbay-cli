@@ -10,6 +10,12 @@ Appends an immutable definition. Existing runs remain pinned to their version.
 twinbay tests update [test-id] [flags]
 ```
 
+### Examples
+
+```
+  twinbay tests update --test-id b513fe0a-0702-4fe7-a57d-00381c144e2a --task-description <value> --outcomes '[]'
+```
+
 ### Options
 
 ```

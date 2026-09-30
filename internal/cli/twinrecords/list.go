@@ -25,7 +25,7 @@ func initListCmd(parent *cobra.Command) error {
 		Use:     "list",
 		Short:   "List twin state",
 		Long:    "List twin state",
-		Example: "",
+		Example: "  twinbay twin-records list --twin-id 2139f026-ec79-4ceb-a569-557048598e0d --resource <value>",
 		Args:    cobra.NoArgs,
 		RunE:    runListCmd,
 		Annotations: map[string]string{
