@@ -9,10 +9,6 @@ management:
   configChecksum: 58528ce54d0489125cfae6ae22e65af2
   repoURL: https://github.com/panoratech/twinbay-cli.git
   installationURL: https://github.com/panoratech/twinbay-cli
-persistentEdits:
-  generation_id: 2d2141ce-a068-4c2b-91a8-b9733b318534
-  pristine_commit_hash: d105703c3ff912006c0b0b40779f660d290567b4
-  pristine_tree_hash: 485a7700f85796c8cb7a010e327cad49065f8029
 features:
   cli:
     cliCommands: 0.1.4
