@@ -1,16 +1,28 @@
 overlay: 1.0.0
 info:
-  title: API keys only, Twinbay branding
+  title: Twinbay CLI customizations
   version: 0.0.1
 actions:
-  # The API accepts either a WorkOS access token or an organization API key. A
-  # browser can get the former; a terminal cannot, so the CLI only offers keys.
-  - target: $.paths.*.*.security[0]
-    description: Drop the WorkOS access token option from every operation.
+  # The backend repeats the same alternatives on every protected operation.
+  # Hoist them in the CLI input so generated async recipes can reuse global
+  # authentication while preserving both supported credential types.
+  - target: $
+    description: Configure bearer sessions and organization API keys globally.
+    update:
+      security:
+        - Access token: []
+        - Organization API key: []
+  - target: $.paths.*.*.security
+    description: Use the global authentication alternatives.
     remove: true
-  - target: $.components.securitySchemes['Access token']
-    description: Drop the now-unreferenced access token scheme.
-    remove: true
+  - target: $.paths['/'].get
+    description: Keep the API root public.
+    update:
+      security: []
+  - target: $.paths['/health'].get
+    description: Keep the health endpoint public.
+    update:
+      security: []
 
   - target: $.paths['/organizations/default'].post
     description: Hide idempotent onboarding provisioning from the CLI.
