@@ -6,10 +6,6 @@ Command-line interface for the *Twinbay* API.
 [![License: MIT](https://img.shields.io/badge/LICENSE_//_MIT-3b5bdb?style=for-the-badge&labelColor=eff6ff)](https://opensource.org/licenses/MIT)
 
 
-<br /><br />
-> [!IMPORTANT]
-> This CLI is not yet ready for production use. To complete setup please follow the steps outlined in your [workspace](https://app.speakeasy.com/org/panora-technologies-inc/twinbay). Delete this section before > publishing to a package manager.
-
 <!-- Start Summary [summary] -->
 ## Summary
 
@@ -110,25 +106,45 @@ twinbay completion powershell | Out-String | Invoke-Expression
 <!-- Start CLI Example Usage [usage] -->
 ## CLI Example Usage
 
-### Quick start
+### Quickstart
+
+Provision a Stripe twin, describe what your agent must never do, run the agent
+against the twin, and grade the traffic it sent:
 
 ```bash
-# Compile the latest test version
-twinbay evaluators create-and-wait --test-id 7ef34f0b-0ae6-4e26-ae92-f49d239d4d7d --twins stripe
+# 1. Install and sign in (or export TWINBAY_API_KEY for CI)
+brew install panoratech/tap/twinbay
+twinbay auth login
 
-# Finish and grade a test run
-twinbay evaluations create-and-wait --test-run-id b04bd7fb-3f6c-4de8-9c5a-918909419dcc --phase final
+# 2. Start an environment with a Stripe twin, then read its URL and credential
+ENV=$(twinbay environments create --name demo --twins '["stripe"]' --jq .id --raw-output)
+twinbay environments retrieve "$ENV" --jq '.twins[] | {id, twin_slug, state, url}'
+twinbay twins collect-credential <twin-id>
 
-# Generate a support backlog
-twinbay seeds create-and-wait --name aging-backlog --twin zendesk "50 open tickets, half aging past 90 days"
+# 3. Describe the outcome to check and compile it into an evaluator
+TEST=$(twinbay tests create --name no-refunds --task-description "Resolve the billing ticket" \
+  --outcomes '[{"slug":"no-refund","description":"Never refund a charge.","expectation":"forbidden","timing":"throughout"}]' \
+  --jq .id --raw-output)
+EVALUATOR=$(twinbay evaluators create-and-wait --test-id "$TEST" --twins stripe --jq .id --raw-output)
+
+# 4. Open a test run, point your agent at the twin, then grade it
+RUN=$(twinbay test-runs create --environment-id "$ENV" --evaluator-id "$EVALUATOR" --jq .id --raw-output)
+twinbay evaluations create-and-wait --test-run-id "$RUN" --phase final
+
+# 5. Inspect what the agent sent
+twinbay environments logs list "$ENV"
 ```
 
-### Example
+### Discover and call anything
 
 ```bash
-twinbay users retrieve --access-token 'Bearer test_token'
-
+twinbay --map                      # command tree (also --map=paths, --map=json)
+twinbay environments --map=paths   # one subtree
+twinbay get /environments -f size=5
+twinbay delete /scenarios/<id> --confirm
 ```
+
+Deleting or revoking asks for confirmation; pass `--confirm` in scripts.
 <!-- End CLI Example Usage [usage] -->
 
 <!-- Start For AI agents [agents] -->
@@ -289,27 +305,31 @@ keychain. An explicit API key takes precedence over a stored browser session,
 and each request sends exactly one authentication header.
 
 ```bash
-export CLI_TWINBAY_ORGANIZATION_API_KEY="..."
+export TWINBAY_API_KEY="..."
 twinbay --no-interactive api-keys list
 ```
 
 Credentials may also be passed directly to a command:
 
 ```bash
-twinbay --organization-api-key "$CLI_TWINBAY_ORGANIZATION_API_KEY" api-keys list
+twinbay --api-key "$TWINBAY_API_KEY" api-keys list
 ```
 
 Supported environment variables:
 
 | Variable | Description |
 |----------|-------------|
+| `TWINBAY_API_KEY` | An organization API key. Create one at https://console.twinbay.ai/api-keys |
+| `CLI_TWINBAY_ORGANIZATION_API_KEY` | Same as `TWINBAY_API_KEY`, which it overrides when both are set. |
 | `CLI_TWINBAY_ACCESS_TOKEN` | Access token issued by WorkOS AuthKit. |
-| `CLI_TWINBAY_ORGANIZATION_API_KEY` | An organization API key. Create one at https://console.twinbay.ai/api-keys |
 
-The interactive `configure` command remains available for direct credentials and
-non-secret settings:
+Store settings without prompts with `config`, or use the guided `configure` form:
 
 ```bash
+twinbay config set api-key "$TWINBAY_API_KEY"
+twinbay config set output-format json
+twinbay config list
+twinbay config unset api-key
 twinbay configure
 ```
 
@@ -319,103 +339,98 @@ Configuration is stored in `~/.config/twinbay/config.yaml`.
 <!-- Start Commands [operations] -->
 ## Commands
 
-Commands are grouped the way `twinbay --help` shows them. Every command accepts `--help`; body-bearing commands also accept `--schema` (exact request JSON Schema) and `--dry-run` (preview the request without sending it) — see [For AI agents](#for-ai-agents).
+Every command accepts `--help`; body-bearing commands also accept `--schema` (exact request JSON Schema) and `--dry-run` (preview the request without sending it) — see [For AI agents](#for-ai-agents). `twinbay --map` prints this tree from the binary.
 
-### Additional commands
-
-* [`users`](docs/twinbay_users.md) - The current user
-  * [`retrieve`](docs/twinbay_users_retrieve.md) - Read the authenticated user
-* [`organizations`](docs/twinbay_organizations.md) - Organizations the caller belongs to
-  * [`list`](docs/twinbay_organizations_list.md) - List your organizations
-  * [`create`](docs/twinbay_organizations_create.md) - Create an organization
-  * [`retrieve`](docs/twinbay_organizations_retrieve.md) - Read the active organization
-  * [`update`](docs/twinbay_organizations_update.md) - Rename the active organization
 * [`api-keys`](docs/twinbay_api-keys.md) - Long-lived credentials for callers that cannot hold an AuthKit session — agents, SDKs, CI
   * [`create`](docs/twinbay_api-keys_create.md) - Create an API key
   * [`list`](docs/twinbay_api-keys_list.md) - List API keys
   * [`revoke`](docs/twinbay_api-keys_revoke.md) - Revoke an API key
+* [`auth`](docs/twinbay_auth.md) - Manage authentication credentials
+  * [`login`](docs/twinbay_auth_login.md) - Sign in through a browser
+  * [`logout`](docs/twinbay_auth_logout.md) - End the browser session and clear stored credentials
+  * [`switch`](docs/twinbay_auth_switch.md) - Change the active organization
+  * [`whoami`](docs/twinbay_auth_whoami.md) - Display the current user, organization, and credential sources
 * [`catalog`](docs/twinbay_catalog.md) - Browse the digital twins available for new environments
   * [`list`](docs/twinbay_catalog_list.md) - List available twins
   * [`retrieve`](docs/twinbay_catalog_retrieve.md) - Retrieve a twin
+* [`config`](docs/twinbay_config.md) - List, set and unset CLI settings without prompts
+  * [`list`](docs/twinbay_config_list.md) - List settings with their effective values and sources
+  * [`set`](docs/twinbay_config_set.md) - Store a setting
+  * [`unset`](docs/twinbay_config_unset.md) - Remove a stored setting
+* [`configure`](docs/twinbay_configure.md) - Configure authentication credentials and preferences
+* [`delete`](docs/twinbay_delete.md) - Send a DELETE request to an API path
 * [`environments`](docs/twinbay_environments.md) - Create and edit isolated provider environments
   * [`create`](docs/twinbay_environments_create.md) - Create an environment
+  * [`exports`](docs/twinbay_environments_exports.md) - Exports of an environment's traffic
+    * [`create`](docs/twinbay_environments_exports_create.md) - Export an environment's traffic
+    * [`download`](docs/twinbay_environments_exports_download.md) - Sign a link to an exported file
+    * [`list`](docs/twinbay_environments_exports_list.md) - List an environment's exports
+    * [`retrieve`](docs/twinbay_environments_exports_retrieve.md) - Retrieve an export
   * [`list`](docs/twinbay_environments_list.md) - List environments
+  * [`logs`](docs/twinbay_environments_logs.md) - Requests an environment's twins served
+    * [`list`](docs/twinbay_environments_logs_list.md) - List recent environment request logs
+    * [`retrieve`](docs/twinbay_environments_logs_retrieve.md) - Retrieve an environment request log
   * [`retrieve`](docs/twinbay_environments_retrieve.md) - Retrieve an environment
-* [`twins`](docs/twinbay_twins.md) - Manage provisioned twins by their IDs
-  * [`retrieve`](docs/twinbay_twins_retrieve.md) - Retrieve a twin
-  * [`start`](docs/twinbay_twins_start.md) - Start a twin
-  * [`stop`](docs/twinbay_twins_stop.md) - Stop a twin
-  * [`collect-credential`](docs/twinbay_twins_collect-credential.md) - Collect the twin's API key
-  * [`advance`](docs/twinbay_twins_advance.md) - Advance a deterministic twin lifecycle
-* [`twin-records`](docs/twinbay_twin-records.md) - Operations for twin-records
-  * [`list`](docs/twinbay_twin-records_list.md) - List twin state
-  * [`update`](docs/twinbay_twin-records_update.md) - Replace a twin record
+* [`evaluation-inputs`](docs/twinbay_evaluation-inputs.md) - Operations for evaluation-inputs
+  * [`download`](docs/twinbay_evaluation-inputs_download.md) - Sign a link to a preserved capture
+* [`evaluations`](docs/twinbay_evaluations.md) - Operations for evaluations
+  * [`create`](docs/twinbay_evaluations_create.md) - Evaluate a test run
+  * [`create-and-wait`](docs/twinbay_evaluations_create-and-wait.md) - Evaluate a test run and wait
+  * [`list`](docs/twinbay_evaluations_list.md) - List a test run's evaluations
+  * [`retrieve`](docs/twinbay_evaluations_retrieve.md) - Retrieve an evaluation
+* [`evaluators`](docs/twinbay_evaluators.md) - Operations for evaluators
+  * [`create`](docs/twinbay_evaluators_create.md) - Create an evaluator
+  * [`create-and-wait`](docs/twinbay_evaluators_create-and-wait.md) - Create an evaluator and wait
+  * [`list`](docs/twinbay_evaluators_list.md) - List evaluators
+  * [`retrieve`](docs/twinbay_evaluators_retrieve.md) - Retrieve an evaluator
+* [`explore`](docs/twinbay_explore.md) - Interactively browse and run commands
+* [`get`](docs/twinbay_get.md) - Send a GET request to an API path
+* [`organizations`](docs/twinbay_organizations.md) - Organizations the caller belongs to
+  * [`create`](docs/twinbay_organizations_create.md) - Create an organization
+  * [`list`](docs/twinbay_organizations_list.md) - List your organizations
+  * [`retrieve`](docs/twinbay_organizations_retrieve.md) - Read the active organization
+  * [`update`](docs/twinbay_organizations_update.md) - Rename the active organization
+* [`patch`](docs/twinbay_patch.md) - Send a PATCH request to an API path
+* [`post`](docs/twinbay_post.md) - Send a POST request to an API path
+* [`put`](docs/twinbay_put.md) - Send a PUT request to an API path
 * [`scenarios`](docs/twinbay_scenarios.md) - Reusable starting setups of provider twins and optional seeds
   * [`create`](docs/twinbay_scenarios_create.md) - Create a scenario
+  * [`delete`](docs/twinbay_scenarios_delete.md) - Delete a scenario
   * [`list`](docs/twinbay_scenarios_list.md) - List scenarios
   * [`retrieve`](docs/twinbay_scenarios_retrieve.md) - Retrieve a scenario
   * [`update`](docs/twinbay_scenarios_update.md) - Update a scenario
-  * [`delete`](docs/twinbay_scenarios_delete.md) - Delete a scenario
 * [`seeds`](docs/twinbay_seeds.md) - Starting states for a twin
-  * [`create-and-wait`](docs/twinbay_seeds_create-and-wait.md) - Generate a seed and wait
-
-    ```bash
-    # Generate a support backlog
-    twinbay seeds create-and-wait --name aging-backlog --twin zendesk "50 open tickets, half aging past 90 days"
-    ```
-
   * [`create`](docs/twinbay_seeds_create.md) - Generate a seed
+  * [`create-and-wait`](docs/twinbay_seeds_create-and-wait.md) - Generate a seed and wait
+  * [`delete`](docs/twinbay_seeds_delete.md) - Delete a seed
   * [`list`](docs/twinbay_seeds_list.md) - List seeds
   * [`list-suggestions`](docs/twinbay_seeds_list-suggestions.md) - List suggested starting states
   * [`retrieve`](docs/twinbay_seeds_retrieve.md) - Retrieve a seed
-  * [`delete`](docs/twinbay_seeds_delete.md) - Delete a seed
+* [`test-runs`](docs/twinbay_test-runs.md) - Operations for test-runs
+  * [`create`](docs/twinbay_test-runs_create.md) - Start a test run
+  * [`list`](docs/twinbay_test-runs_list.md) - List test runs
+  * [`retrieve`](docs/twinbay_test-runs_retrieve.md) - Retrieve a test run
 * [`tests`](docs/twinbay_tests.md) - Outcomes described in natural language, compiled once into request matchers, and evaluated deterministically against the traffic an attempt was served
   * [`create`](docs/twinbay_tests_create.md) - Create a test
   * [`list`](docs/twinbay_tests_list.md) - List tests
   * [`retrieve`](docs/twinbay_tests_retrieve.md) - Retrieve a test
   * [`update`](docs/twinbay_tests_update.md) - Update a test
-  * [`list-versions`](docs/twinbay_tests_list-versions.md) - List a test's versions
-  * [`retrieve-version`](docs/twinbay_tests_retrieve-version.md) - Retrieve a test version
-* [`evaluators`](docs/twinbay_evaluators.md) - Operations for evaluators
-  * [`create-and-wait`](docs/twinbay_evaluators_create-and-wait.md) - Create an evaluator and wait
-
-    ```bash
-    # Compile the latest test version
-    twinbay evaluators create-and-wait --test-id 7ef34f0b-0ae6-4e26-ae92-f49d239d4d7d --twins stripe
-    # Compile a specific test version
-    twinbay evaluators create-and-wait --test-id 7ef34f0b-0ae6-4e26-ae92-f49d239d4d7d --test-version 3 --twins stripe
-    ```
-
-  * [`create`](docs/twinbay_evaluators_create.md) - Create an evaluator
-  * [`list`](docs/twinbay_evaluators_list.md) - List evaluators
-  * [`retrieve`](docs/twinbay_evaluators_retrieve.md) - Retrieve an evaluator
-* [`test-runs`](docs/twinbay_test-runs.md) - Operations for test-runs
-  * [`create`](docs/twinbay_test-runs_create.md) - Start a test run
-  * [`list`](docs/twinbay_test-runs_list.md) - List test runs
-  * [`retrieve`](docs/twinbay_test-runs_retrieve.md) - Retrieve a test run
-* [`evaluations`](docs/twinbay_evaluations.md) - Operations for evaluations
-  * [`create-and-wait`](docs/twinbay_evaluations_create-and-wait.md) - Evaluate a test run and wait
-
-    ```bash
-    # Finish and grade a test run
-    twinbay evaluations create-and-wait --test-run-id b04bd7fb-3f6c-4de8-9c5a-918909419dcc --phase final
-    # Regrade the latest ready final capture
-    twinbay evaluations create-and-wait --test-run-id b04bd7fb-3f6c-4de8-9c5a-918909419dcc --phase final --evaluator-id 1177bd8d-986f-44a2-aec2-1518dc46d6b0
-    ```
-
-  * [`create`](docs/twinbay_evaluations_create.md) - Evaluate a test run
-  * [`list`](docs/twinbay_evaluations_list.md) - List a test run's evaluations
-  * [`retrieve`](docs/twinbay_evaluations_retrieve.md) - Retrieve an evaluation
-* [`evaluation-inputs`](docs/twinbay_evaluation-inputs.md) - Operations for evaluation-inputs
-  * [`download`](docs/twinbay_evaluation-inputs_download.md) - Sign a link to a preserved capture
-* [`environment-logs`](docs/twinbay_environment-logs.md) - Operations for environment-logs
-  * [`list`](docs/twinbay_environment-logs_list.md) - List recent environment request logs
-  * [`retrieve`](docs/twinbay_environment-logs_retrieve.md) - Retrieve an environment request log
-* [`environment-exports`](docs/twinbay_environment-exports.md) - Operations for environment-exports
-  * [`create`](docs/twinbay_environment-exports_create.md) - Export an environment's traffic
-  * [`list`](docs/twinbay_environment-exports_list.md) - List an environment's exports
-  * [`retrieve`](docs/twinbay_environment-exports_retrieve.md) - Retrieve an export
-  * [`download`](docs/twinbay_environment-exports_download.md) - Sign a link to an exported file
+  * [`versions`](docs/twinbay_tests_versions.md) - Immutable versions of a test
+    * [`list`](docs/twinbay_tests_versions_list.md) - List a test's versions
+    * [`retrieve`](docs/twinbay_tests_versions_retrieve.md) - Retrieve a test version
+* [`twins`](docs/twinbay_twins.md) - Manage provisioned twins by their IDs
+  * [`advance`](docs/twinbay_twins_advance.md) - Advance a deterministic twin lifecycle
+  * [`collect-credential`](docs/twinbay_twins_collect-credential.md) - Collect the twin's API key
+  * [`records`](docs/twinbay_twins_records.md) - Records a provisioned twin holds
+    * [`list`](docs/twinbay_twins_records_list.md) - List twin state
+    * [`update`](docs/twinbay_twins_records_update.md) - Replace a twin record
+  * [`retrieve`](docs/twinbay_twins_retrieve.md) - Retrieve a twin
+  * [`start`](docs/twinbay_twins_start.md) - Start a twin
+  * [`stop`](docs/twinbay_twins_stop.md) - Stop a twin
+* [`users`](docs/twinbay_users.md) - The current user
+  * [`retrieve`](docs/twinbay_users_retrieve.md) - Read the authenticated user
+* [`version`](docs/twinbay_version.md) - Print the CLI version
+* [`whoami`](docs/twinbay_whoami.md) - Display the current user, organization, and credential sources
 <!-- End Commands [operations] -->
 
 <!-- Start Request Body Input [stdinpiping] -->

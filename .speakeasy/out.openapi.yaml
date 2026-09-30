@@ -2129,10 +2129,7 @@ paths:
         content:
           application/json:
             schema:
-              anyOf:
-                - $ref: "#/components/schemas/CreateExportRequest"
-                - type: "null"
-              title: "Payload"
+              $ref: '#/components/schemas/CreateExportRequest'
       responses:
         "202":
           description: "Successful Response"

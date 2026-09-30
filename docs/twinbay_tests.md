@@ -28,8 +28,9 @@ twinbay tests [flags]
       --include-headers               Include HTTP response headers in the output
       --interactive                   Prompt for missing inputs and open guided configure/auth forms (forms fall back to line prompts on stdin off-TTY) (default true)
   -q, --jq string                     Filter and transform output using a jq expression (e.g., '.name', '.items[] | .id')
+      --map string[="tree"]           Print the commands below this one instead of running it: tree (default), paths or json
       --no-interactive                Disable all interactive features (auto-prompting, explorer auto-launch, TUI forms)
-      --organization-api-key string   An organization API key. Create one at https://console.twinbay.ai/api-keys
+      --organization-api-key string   An organization API key. Create one at https://console.twinbay.ai/api-keys (alias --api-key; env TWINBAY_API_KEY)
   -o, --output-format string          Specify the output format. Options: pretty, json, yaml, table, toon. (default "pretty")
       --raw-output                    Write --jq string results as raw text instead of JSON strings (like jq -r); non-string results stay JSON
       --server string                 Select a server by index (for indexed servers) or name (for named servers)
@@ -43,9 +44,8 @@ twinbay tests [flags]
 * [twinbay](twinbay.md)	 - Twinbay: Backend API
 * [twinbay tests create](twinbay_tests_create.md)	 - Create a test
 * [twinbay tests list](twinbay_tests_list.md)	 - List tests
-* [twinbay tests list-versions](twinbay_tests_list-versions.md)	 - List a test's versions
 * [twinbay tests retrieve](twinbay_tests_retrieve.md)	 - Retrieve a test
-* [twinbay tests retrieve-version](twinbay_tests_retrieve-version.md)	 - Retrieve a test version
 * [twinbay tests update](twinbay_tests_update.md)	 - Update a test
+* [twinbay tests versions](twinbay_tests_versions.md)	 - Immutable versions of a test
 
 Exit codes: 0 ok · 1 runtime · 2 usage · 3 authentication/authorization

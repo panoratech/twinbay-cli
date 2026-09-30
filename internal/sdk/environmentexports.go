@@ -65,7 +65,7 @@ func (s *EnvironmentExports) Create(ctx context.Context, request operations.Crea
 		OperationID:      "create_export",
 		SecuritySource:   s.sdkConfiguration.Security,
 	}
-	bodyReader, reqContentType, err := utils.SerializeRequestBody(ctx, request, true, true, "Body", "json", `request:"mediaType=application/json"`)
+	bodyReader, reqContentType, err := utils.SerializeRequestBody(ctx, request, false, true, "Body", "json", `request:"mediaType=application/json"`)
 	if err != nil {
 		return nil, err
 	}

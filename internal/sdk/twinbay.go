@@ -152,10 +152,10 @@ func WithTimeout(timeout time.Duration) SDKOption {
 // New creates a new instance of the SDK with the provided options
 func New(opts ...SDKOption) *Twinbay {
 	sdk := &Twinbay{
-		SDKVersion: "0.4.1",
+		SDKVersion: "0.4.2",
 		sdkConfiguration: config.SDKConfiguration{
-			UserAgent:         "speakeasy-sdk/go 0.4.1 2.941.0 0.1.0 github.com/panoratech/twinbay-cli/internal/sdk",
-			SDKVersion:        "0.4.1",
+			UserAgent:         "speakeasy-sdk/go 0.4.2 2.941.0 0.1.0 github.com/panoratech/twinbay-cli/internal/sdk",
+			SDKVersion:        "0.4.2",
 			GenVersion:        "2.941.0",
 			OpenAPIDocVersion: "0.1.0",
 			ServerList:        ServerList,
