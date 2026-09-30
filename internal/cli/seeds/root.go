@@ -23,7 +23,7 @@ func InitSeedsRoot(parent *cobra.Command) error {
 		},
 	}
 
-	if err := initCreateCmd(SeedsCmd); err != nil {
+	if err := initEnqueueCmd(SeedsCmd); err != nil {
 		return err
 	}
 

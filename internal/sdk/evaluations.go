@@ -32,9 +32,9 @@ func newEvaluations(rootSDK *Twinbay, sdkConfig config.SDKConfiguration, hooks *
 	}
 }
 
-// Create - Evaluate a test run
+// Enqueue - Evaluate a test run
 // Queues a capture and grading with the run's evaluator. Naming another evaluator regrades the latest ready capture for the same phase.
-func (s *Evaluations) Create(ctx context.Context, request operations.CreateEvaluationRequest, opts ...operations.Option) (*operations.CreateEvaluationResponse, error) {
+func (s *Evaluations) Enqueue(ctx context.Context, request operations.CreateEvaluationRequest, opts ...operations.Option) (*operations.CreateEvaluationResponse, error) {
 	o := operations.Options{}
 	supportedOptions := []string{
 		operations.SupportedOptionTimeout,

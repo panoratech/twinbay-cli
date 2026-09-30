@@ -33,9 +33,9 @@ func newSeeds(rootSDK *Twinbay, sdkConfig config.SDKConfiguration, hooks *hooks.
 	}
 }
 
-// Create - Generate a seed
+// Enqueue - Generate a seed
 // Describes the starting state you want and answers immediately; a worker expands it into rows. Read the seed until it is `ready`, then pass its id as a twin's `seed` when you create an environment.
-func (s *Seeds) Create(ctx context.Context, request components.CreateSeedRequest, opts ...operations.Option) (*operations.CreateSeedResponse, error) {
+func (s *Seeds) Enqueue(ctx context.Context, request components.CreateSeedRequest, opts ...operations.Option) (*operations.CreateSeedResponse, error) {
 	o := operations.Options{}
 	supportedOptions := []string{
 		operations.SupportedOptionTimeout,

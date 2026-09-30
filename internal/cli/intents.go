@@ -20,24 +20,24 @@ func init() {
 
 func initIntentCmds(rootCmd *cobra.Command) error {
 	if parent := findCommandByPath(rootCmd, []string{"evaluators"}); parent == nil {
-		return fmt.Errorf("declared parent %q for intent command %q does not exist in the generated CLI", "evaluators", "evaluators-create-and-wait")
+		return fmt.Errorf("declared parent %q for intent command %q does not exist in the generated CLI", "evaluators", "evaluators-create")
 	} else {
-		if err := evaluators.InitIntentEvaluatorsCreateAndWait(parent); err != nil {
-			return fmt.Errorf("init intent evaluators-create-and-wait: %w", err)
+		if err := evaluators.InitIntentEvaluatorsCreate(parent); err != nil {
+			return fmt.Errorf("init intent evaluators-create: %w", err)
 		}
 	}
 	if parent := findCommandByPath(rootCmd, []string{"evaluations"}); parent == nil {
-		return fmt.Errorf("declared parent %q for intent command %q does not exist in the generated CLI", "evaluations", "evaluations-create-and-wait")
+		return fmt.Errorf("declared parent %q for intent command %q does not exist in the generated CLI", "evaluations", "evaluations-create")
 	} else {
-		if err := evaluations.InitIntentEvaluationsCreateAndWait(parent); err != nil {
-			return fmt.Errorf("init intent evaluations-create-and-wait: %w", err)
+		if err := evaluations.InitIntentEvaluationsCreate(parent); err != nil {
+			return fmt.Errorf("init intent evaluations-create: %w", err)
 		}
 	}
 	if parent := findCommandByPath(rootCmd, []string{"seeds"}); parent == nil {
-		return fmt.Errorf("declared parent %q for intent command %q does not exist in the generated CLI", "seeds", "seeds-create-and-wait")
+		return fmt.Errorf("declared parent %q for intent command %q does not exist in the generated CLI", "seeds", "seeds-create")
 	} else {
-		if err := seeds.InitIntentSeedsCreateAndWait(parent); err != nil {
-			return fmt.Errorf("init intent seeds-create-and-wait: %w", err)
+		if err := seeds.InitIntentSeedsCreate(parent); err != nil {
+			return fmt.Errorf("init intent seeds-create: %w", err)
 		}
 	}
 
@@ -112,9 +112,9 @@ type intentOrderEntry struct {
 }
 
 var intentDeclarationOrder = []intentOrderEntry{
-	{ParentPath: []string{"evaluators"}, Name: "create-and-wait"},
-	{ParentPath: []string{"evaluations"}, Name: "create-and-wait"},
-	{ParentPath: []string{"seeds"}, Name: "create-and-wait"},
+	{ParentPath: []string{"evaluators"}, Name: "create"},
+	{ParentPath: []string{"evaluations"}, Name: "create"},
+	{ParentPath: []string{"seeds"}, Name: "create"},
 }
 
 func applyDeclaredCommandOrder(rootCmd *cobra.Command) {

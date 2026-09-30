@@ -23,7 +23,7 @@ func InitEvaluatorsRoot(parent *cobra.Command) error {
 		},
 	}
 
-	if err := initCreateCmd(EvaluatorsCmd); err != nil {
+	if err := initEnqueueCmd(EvaluatorsCmd); err != nil {
 		return err
 	}
 

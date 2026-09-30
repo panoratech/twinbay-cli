@@ -32,9 +32,9 @@ func newEvaluators(rootSDK *Twinbay, sdkConfig config.SDKConfiguration, hooks *h
 	}
 }
 
-// Create an evaluator
+// Enqueue - Create an evaluator
 // Queues compilation of a test definition into immutable request matchers. The latest test version is pinned when no version is supplied.
-func (s *Evaluators) Create(ctx context.Context, request components.CreateEvaluatorRequest, opts ...operations.Option) (*operations.CreateEvaluatorResponse, error) {
+func (s *Evaluators) Enqueue(ctx context.Context, request components.CreateEvaluatorRequest, opts ...operations.Option) (*operations.CreateEvaluatorResponse, error) {
 	o := operations.Options{}
 	supportedOptions := []string{
 		operations.SupportedOptionTimeout,
