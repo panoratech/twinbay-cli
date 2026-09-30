@@ -41,8 +41,8 @@ cli:
   defaultTimeout: ""
   distribution:
     homebrew:
-      enabled: true
-      tap: panoratech/homebrew-tap
+      enabled: false
+      tap: ""
     nfpm:
       enabled: false
       formats: deb,rpm

@@ -56,6 +56,9 @@ release:
 # Publishes Casks/twinbay.rb to panoratech/homebrew-tap, so users can run
 # `brew install panoratech/tap/twinbay`. Skipped until the release workflow
 # has a HOMEBREW_TAP_GITHUB_TOKEN secret that can push to the tap repository.
+# Configured here instead of gen.yaml's distribution.homebrew: that setting
+# regenerates release.yaml with a GPG import step that fails without
+# CLI_GPG_SECRET_KEY, although casks are not signed.
 homebrew_casks:
   - name: twinbay
     ids: [twinbay]
