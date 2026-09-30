@@ -216,12 +216,13 @@ func NewRootCommand() (*cobra.Command, error) {
 		_ = rootCmd.PersistentFlags().SetAnnotation(ga.flag, "speakeasy:group", []string{ga.group})
 	}
 
+	if err := installCustomCommands(rootCmd); err != nil {
+		return nil, err
+	}
+
 	rootCmd.SetUsageTemplate(groupedUsageTemplate())
 
 	if err := initIntentCmds(rootCmd); err != nil {
-		return nil, err
-	}
-	if err := installCustomCommands(rootCmd); err != nil {
 		return nil, err
 	}
 
