@@ -28,3 +28,15 @@ actions:
     description: Hide idempotent onboarding provisioning from the CLI.
     update:
       x-speakeasy-ignore: true
+
+  - target: $.paths['/environments/{environment_id}/exports'].post.requestBody.content['application/json'].schema
+    description: >-
+      The backend accepts a null body, which the generator cannot flatten and
+      surfaces as a duplicate --body-param flag. The CLI never needs to send
+      null (an omitted or empty body means the same thing), so expose the
+      object's fields as flags.
+    remove: true
+  - target: $.paths['/environments/{environment_id}/exports'].post.requestBody.content['application/json']
+    update:
+      schema:
+        $ref: '#/components/schemas/CreateExportRequest'

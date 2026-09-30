@@ -221,6 +221,9 @@ func NewRootCommand() (*cobra.Command, error) {
 	if err := initIntentCmds(rootCmd); err != nil {
 		return nil, err
 	}
+	if err := installCustomCommands(rootCmd); err != nil {
+		return nil, err
+	}
 
 	// Cobra creates its default help and completion commands lazily inside Execute.
 	rootCmd.InitDefaultHelpCmd()
