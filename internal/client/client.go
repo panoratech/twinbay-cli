@@ -8,6 +8,7 @@ import (
 	"github.com/panoratech/twinbay-cli/internal/config"
 	"github.com/panoratech/twinbay-cli/internal/flagutil"
 	"github.com/panoratech/twinbay-cli/internal/sdk"
+	"github.com/panoratech/twinbay-cli/internal/sdk/models/components"
 	"github.com/panoratech/twinbay-cli/internal/testclient"
 	"github.com/spf13/cobra"
 	"net"
@@ -101,3 +102,29 @@ func resolveStringFlag(cmd *cobra.Command, name string) string {
 }
 
 // buildGlobalSecurity reads security credentials with priority: flag > env var > keyring > config.
+func buildGlobalSecurity(cmd *cobra.Command, allowedSecurityFields []string) components.Security {
+	// Resolve request credentials: flag > env var > keyring > config file (keyring skipped for dry-run)
+	var (
+		accessToken        string
+		organizationAPIKey string
+	)
+	credentialSources := map[string]string{}
+	accessToken, credentialSources["access-token"] = config.ResolveRequestSecurityCredential(cmd, "access-token")
+	organizationAPIKey, credentialSources["organization-api-key"] = config.ResolveRequestSecurityCredential(cmd, "organization-api-key")
+	globalSecurity := components.Security{}
+	// Rank the alternatives by how explicitly the caller supplied them
+	// (flag > env > keyring > config; complete before partial at the same
+	// tier) and send exactly one: an explicit credential picks its scheme
+	// regardless of the declared order.
+	credentialCandidates := []config.CredentialCandidate{
+		{Field: "AccessToken", Complete: accessToken != "", Sources: []string{credentialSources["access-token"]}},
+		{Field: "OrganizationAPIKey", Complete: organizationAPIKey != "", Sources: []string{credentialSources["organization-api-key"]}},
+	}
+	switch config.PickCredential(credentialCandidates, allowedSecurityFields) {
+	case 0:
+		globalSecurity.AccessToken = &accessToken
+	case 1:
+		globalSecurity.OrganizationAPIKey = &organizationAPIKey
+	}
+	return globalSecurity
+}

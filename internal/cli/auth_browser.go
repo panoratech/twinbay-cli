@@ -11,13 +11,75 @@ import (
 	"github.com/panoratech/twinbay-cli/internal/config"
 	"github.com/panoratech/twinbay-cli/internal/flagutil"
 	"github.com/panoratech/twinbay-cli/internal/interactive"
+	"github.com/panoratech/twinbay-cli/internal/output"
 	"github.com/panoratech/twinbay-cli/internal/sdk"
 	"github.com/panoratech/twinbay-cli/internal/sdk/models/components"
+	"github.com/panoratech/twinbay-cli/internal/usage"
 	"github.com/spf13/cobra"
 	"github.com/zalando/go-keyring"
 )
 
 var newAuthManager = authkit.NewManager
+
+// installBrowserAuthCommands keeps the generated auth command intact while
+// replacing only the runtime handlers owned by the AuthKit integration.
+func installBrowserAuthCommands(authCmd *cobra.Command) {
+	if authCmd == nil {
+		return
+	}
+	authCmd.Long = `Manage authentication credentials for twinbay.
+
+Subcommands:
+  login   - Sign in through a browser
+  switch  - Change the active organization
+  whoami  - Display current authentication status
+  logout  - End the browser session and clear stored credentials`
+
+	for _, sub := range authCmd.Commands() {
+		switch sub.Name() {
+		case "login":
+			sub.Short = "Sign in through a browser"
+			sub.Long = `Sign in to Twinbay through WorkOS AuthKit's device authorization flow.
+
+The CLI displays a verification URL and code, opens the URL when possible, and
+stores the resulting renewable session in the OS keychain. Use --no-browser on
+headless hosts. An explicit --organization-api-key or --access-token is stored
+without opening a browser.`
+			sub.RunE = runBrowserLoginCmd
+			if sub.Flags().Lookup("no-browser") == nil {
+				sub.Flags().Bool("no-browser", false, "Display the verification URL and code without opening a browser")
+			}
+			usage.MarkDynamic(sub)
+		case "whoami":
+			sub.Short = "Display the current user, organization, and credential sources"
+			sub.Long = `Display the stored browser-session identity and active organization,
+along with any directly configured credential sources.`
+			sub.RunE = runBrowserWhoamiCmd
+			usage.MarkDynamic(sub)
+		case "logout":
+			sub.Short = "End the browser session and clear stored credentials"
+			sub.Long = `End the WorkOS browser session and clear all stored authentication credentials
+from both the OS keychain and config file.`
+			sub.RunE = runBrowserLogoutCmd
+			usage.MarkDynamic(sub)
+		}
+	}
+
+	for _, sub := range authCmd.Commands() {
+		if sub.Name() == "switch" {
+			return
+		}
+	}
+	switchCmd := &cobra.Command{
+		Use:   "switch [organization]",
+		Short: "Change the active organization",
+		Long:  "Refresh the stored AuthKit session into another organization. The argument may be a Twinbay organization ID, WorkOS organization ID, or exact name.",
+		Args:  cobra.MaximumNArgs(1),
+		RunE:  runAuthSwitchCmd,
+	}
+	usage.MarkDynamic(switchCmd)
+	authCmd.AddCommand(switchCmd)
+}
 
 func runBrowserLoginCmd(cmd *cobra.Command, _ []string) error {
 	if dryRunLocalNoop(cmd, "auth login changes local credentials only (no Twinbay API request); nothing was changed.") {
@@ -195,4 +257,61 @@ func runBrowserLogoutCmd(cmd *cobra.Command, _ []string) error {
 	}
 	fmt.Fprintln(cmd.OutOrStdout(), "Signed out and cleared stored credentials.")
 	return remoteErr
+}
+
+func runBrowserWhoamiCmd(cmd *cobra.Command, _ []string) error {
+	if usage.UsageRequested(cmd) {
+		return usage.EmitSchema(cmd, cmd.OutOrStdout())
+	}
+
+	manager := newAuthManager()
+	session, sessionErr := manager.Session(cmd.Context())
+	if sessionErr != nil && !errors.Is(sessionErr, authkit.ErrNoSession) {
+		return sessionErr
+	}
+
+	if output.IsMachineMode(cmd) {
+		info := map[string]any{
+			"config_file":        config.GetConfigPath(),
+			"environment_prefix": "CLI_TWINBAY_",
+		}
+		credentials := map[string]any{}
+		for _, name := range []string{"access-token", "organization-api-key"} {
+			value, source := config.ResolveSecurityCredential(cmd, name)
+			credentials[name] = map[string]any{"source": source, "value": maskSecret(value)}
+		}
+		info["credentials"] = credentials
+		if session != nil {
+			info["browser_session"] = map[string]any{
+				"source": "keyring", "user_id": session.User.ID, "email": session.User.Email,
+				"organization_id": session.OrganizationID,
+			}
+		} else {
+			info["browser_session"] = map[string]any{"source": "unset"}
+		}
+		return output.LocalResult(cmd, info)
+	}
+
+	out := cmd.OutOrStdout()
+	fmt.Fprintln(out, "Configuration")
+	fmt.Fprintln(out, "=============")
+	fmt.Fprintln(out)
+	fmt.Fprintf(out, "Config file: %s\n", config.GetConfigPath())
+	fmt.Fprintln(out, "Environment prefix: CLI_TWINBAY_")
+	fmt.Fprintln(out)
+	fmt.Fprintln(out, "Credentials:")
+	if session != nil {
+		fmt.Fprintf(out, "  browser session             [keyring] %s", session.User.Email)
+		if session.OrganizationID != "" {
+			fmt.Fprintf(out, " (organization %s)", session.OrganizationID)
+		}
+		fmt.Fprintln(out)
+	} else {
+		fmt.Fprintln(out, "  browser session             [unset  ]")
+	}
+	for _, name := range []string{"access-token", "organization-api-key"} {
+		value, source := config.ResolveSecurityCredential(cmd, name)
+		fmt.Fprintf(out, "  --%-25s [%-7s] %s\n", name, source, maskSecret(value))
+	}
+	return nil
 }
