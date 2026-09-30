@@ -25,7 +25,7 @@ func initRetrieveCmd(parent *cobra.Command) error {
 		Use:     "retrieve [twin-slug]",
 		Short:   "Retrieve a twin",
 		Long:    "Retrieve a twin",
-		Example: "",
+		Example: "  twinbay catalog retrieve --twin-slug <value>",
 		Args:    flagutil.PositionalFlagArgs,
 		RunE:    runRetrieveCmd,
 		Annotations: map[string]string{
