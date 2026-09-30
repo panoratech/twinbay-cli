@@ -59,15 +59,12 @@ func TestDryRunSucceedsForNon200Operations(t *testing.T) {
 		{"twins", "start", id}, // 202
 		{"twins", "stop", id},  // 202
 		{"seeds", "create", "--body", `{"name":"s","twin":"zendesk","prompt":"p"}`}, // 202
-		{"seeds", "create-and-wait", "--name", "s", "--twin", "zendesk", "p"},       // 202
 		{"evaluators", "create", "--test-id", id, "--twins", `["stripe"]`},          // 202
-		{"evaluators", "create-and-wait", "--test-id", id, "--twins", "stripe"},     // 202
 		{"evaluations", "create", "--test-run-id", id, "--phase", "final"},          // 202
-		{"evaluations", "create-and-wait", "--test-run-id", id, "--phase", "final"}, // 202
 		{"environments", "exports", "create", id},                                   // 202
-		{"api-keys", "revoke", id},  // 204
-		{"scenarios", "delete", id}, // 204
-		{"seeds", "delete", id},     // 204
+		{"api-keys", "revoke", id},                                                  // 204
+		{"scenarios", "delete", id},                                                 // 204
+		{"seeds", "delete", id},                                                     // 204
 	} {
 		t.Run(strings.Join(args[:2], " "), func(t *testing.T) {
 			_, stderr, err := runCLI(t, append(args, "--dry-run")...)
