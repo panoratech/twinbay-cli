@@ -5,13 +5,12 @@ package operations
 
 import (
 	"github.com/panoratech/twinbay-cli/internal/sdk/models/components"
-	"github.com/panoratech/twinbay-cli/internal/sdk/optionalnullable"
 	"github.com/panoratech/twinbay-cli/internal/sdk/sdkinternal/utils"
 )
 
 type CreateExportRequest struct {
-	EnvironmentID string                                                            `pathParam:"style=simple,explode=false,name=environment_id"`
-	Body          optionalnullable.OptionalNullable[components.CreateExportRequest] `request:"mediaType=application/json"`
+	EnvironmentID string                          `pathParam:"style=simple,explode=false,name=environment_id"`
+	Body          *components.CreateExportRequest `request:"mediaType=application/json"`
 }
 
 func (c CreateExportRequest) MarshalJSON() ([]byte, error) {
@@ -32,7 +31,7 @@ func (c *CreateExportRequest) GetEnvironmentID() string {
 	return c.EnvironmentID
 }
 
-func (c *CreateExportRequest) GetBody() optionalnullable.OptionalNullable[components.CreateExportRequest] {
+func (c *CreateExportRequest) GetBody() *components.CreateExportRequest {
 	if c == nil {
 		return nil
 	}
