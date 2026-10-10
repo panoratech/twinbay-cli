@@ -43,7 +43,10 @@ twinbay organizations [flags]
 
 * [twinbay](twinbay.md)	 - Twinbay: Backend API
 * [twinbay organizations create](twinbay_organizations_create.md)	 - Create an organization
+* [twinbay organizations invite](twinbay_organizations_invite.md)	 - Invite an organization member
 * [twinbay organizations list](twinbay_organizations_list.md)	 - List your organizations
+* [twinbay organizations list-invitations](twinbay_organizations_list-invitations.md)	 - List pending organization invitations
+* [twinbay organizations list-members](twinbay_organizations_list-members.md)	 - List active organization members
 * [twinbay organizations retrieve](twinbay_organizations_retrieve.md)	 - Read the active organization
 * [twinbay organizations update](twinbay_organizations_update.md)	 - Rename the active organization
 

@@ -1,16 +1,28 @@
-## twinbay
+## twinbay billing list-invoices
 
-Twinbay: Backend API
+List issued invoices
 
 ### Synopsis
 
-Twinbay: Backend API
+The active organization's most recent finalized invoices, newest first, with the payment status and PDF Stripe reports for each.
 
 ```
-twinbay [flags]
+twinbay billing list-invoices [flags]
+```
+
+### Examples
+
+```
+  twinbay billing list-invoices
 ```
 
 ### Options
+
+```
+  -h, --help   help for list-invoices
+```
+
+### Options inherited from parent commands
 
 ```
       --access-token string           Access token issued by WorkOS AuthKit.
@@ -19,7 +31,6 @@ twinbay [flags]
   -d, --debug                         Log request and response diagnostics to stderr
       --dry-run                       Preview API requests without sending them (no network, no OS keychain). Human preview on stderr; with -o json or --jq, one JSON object per request on stdout. Local mutation commands (auth login, auth logout and configure) make no request: they skip prompts and writes and report a no-op (stderr, or one JSON object on stdout in the machine form)
   -H, --header stringArray            Set a custom HTTP request header (format: "Key: Value"). Can be specified multiple times.
-  -h, --help                          help for twinbay
       --include-headers               Include HTTP response headers in the output
       --interactive                   Prompt for missing inputs and open guided configure/auth forms (forms fall back to line prompts on stdin off-TTY) (default true)
   -q, --jq string                     Filter and transform output using a jq expression (e.g., '.name', '.items[] | .id')
@@ -36,30 +47,13 @@ twinbay [flags]
 
 ### SEE ALSO
 
-* [twinbay api-keys](twinbay_api-keys.md)	 - Long-lived credentials for callers that cannot hold an AuthKit session — agents, SDKs, CI
-* [twinbay auth](twinbay_auth.md)	 - Manage authentication credentials
 * [twinbay billing](twinbay_billing.md)	 - The active organization's plan, its limits, and what the current period has cost so far
-* [twinbay catalog](twinbay_catalog.md)	 - Browse the digital twins available for new environments
-* [twinbay config](twinbay_config.md)	 - List, set and unset CLI settings without prompts
-* [twinbay configure](twinbay_configure.md)	 - Configure authentication credentials and preferences
-* [twinbay delete](twinbay_delete.md)	 - Send a DELETE request to an API path
-* [twinbay environments](twinbay_environments.md)	 - Create and edit isolated provider environments
-* [twinbay evaluation-inputs](twinbay_evaluation-inputs.md)	 - Operations for evaluation-inputs
-* [twinbay evaluations](twinbay_evaluations.md)	 - Operations for evaluations
-* [twinbay evaluators](twinbay_evaluators.md)	 - Operations for evaluators
-* [twinbay explore](twinbay_explore.md)	 - Interactively browse and run commands
-* [twinbay get](twinbay_get.md)	 - Send a GET request to an API path
-* [twinbay organizations](twinbay_organizations.md)	 - Organizations the caller belongs to
-* [twinbay patch](twinbay_patch.md)	 - Send a PATCH request to an API path
-* [twinbay post](twinbay_post.md)	 - Send a POST request to an API path
-* [twinbay put](twinbay_put.md)	 - Send a PUT request to an API path
-* [twinbay scenarios](twinbay_scenarios.md)	 - Reusable starting setups of provider twins and optional seeds
-* [twinbay seeds](twinbay_seeds.md)	 - Starting states for a twin
-* [twinbay test-runs](twinbay_test-runs.md)	 - Operations for test-runs
-* [twinbay tests](twinbay_tests.md)	 - Outcomes described in natural language, compiled once into request matchers, and evaluated deterministically against the traffic an attempt was served
-* [twinbay twins](twinbay_twins.md)	 - Manage provisioned twins by their IDs
-* [twinbay users](twinbay_users.md)	 - The current user
-* [twinbay version](twinbay_version.md)	 - Print the CLI version
-* [twinbay whoami](twinbay_whoami.md)	 - Display the current user, organization, and credential sources
+
+### Machine interface
+
+* `twinbay billing list-invoices --usage` — this command's flags, defaults and env vars as machine-readable KDL
+* `twinbay billing list-invoices --dry-run` — preview the request without OS-keychain access or a network call (human preview on stderr)
+* `--dry-run --output-format json` (or a caller-explicit `--jq`) writes one preview object per request as NDJSON on stdout; jq is not applied to previews
+* `--output-format json` or `--jq <expr>` for machine-readable live output; in agent mode errors are a JSON envelope on stderr
 
 Exit codes: 0 ok · 1 runtime · 2 usage · 3 authentication/authorization

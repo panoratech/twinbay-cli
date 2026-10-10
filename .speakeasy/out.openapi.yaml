@@ -175,6 +175,158 @@ paths:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
       x-speakeasy-name-override: "update"
+  /organizations/current/members:
+    get:
+      tags:
+        - "organizations"
+      summary: "List active organization members"
+      description: "Reads the active organization's roster from WorkOS. Available to members and admins. Paginated: walk the pages with `page` and `size`."
+      operationId: "list_current_organization_members"
+      parameters:
+        - name: "page"
+          in: "query"
+          required: false
+          schema:
+            type: "integer"
+            minimum: 1
+            description: "Page number"
+            default: 1
+            title: "Page"
+          description: "Page number"
+        - name: "size"
+          in: "query"
+          required: false
+          schema:
+            type: "integer"
+            maximum: 100
+            minimum: 1
+            description: "Page size"
+            default: 50
+            title: "Size"
+          description: "Page size"
+      responses:
+        "200":
+          description: "Successful Response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Page_OrganizationMemberResponse_"
+        "401":
+          description: "The credential is missing, malformed, expired, or not trusted"
+        "403":
+          description: "The credential does not act inside an organization"
+        "422":
+          description: "Validation Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+      x-speakeasy-name-override: "list-members"
+      x-speakeasy-pagination:
+        type: "offsetLimit"
+        inputs:
+          - name: "page"
+            in: "parameters"
+            type: "page"
+          - name: "size"
+            in: "parameters"
+            type: "limit"
+        outputs:
+          results: "$.items"
+          numPages: "$.pages"
+  /organizations/current/invitations:
+    get:
+      tags:
+        - "organizations"
+      summary: "List pending organization invitations"
+      description: "Reads pending invitations for the active organization from WorkOS. Invitation tokens and acceptance URLs are never returned."
+      operationId: "list_current_organization_invitations"
+      parameters:
+        - name: "page"
+          in: "query"
+          required: false
+          schema:
+            type: "integer"
+            minimum: 1
+            description: "Page number"
+            default: 1
+            title: "Page"
+          description: "Page number"
+        - name: "size"
+          in: "query"
+          required: false
+          schema:
+            type: "integer"
+            maximum: 100
+            minimum: 1
+            description: "Page size"
+            default: 50
+            title: "Size"
+          description: "Page size"
+      responses:
+        "200":
+          description: "Successful Response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Page_InvitationResponse_"
+        "401":
+          description: "The credential is missing, malformed, expired, or not trusted"
+        "403":
+          description: "The credential does not act inside an organization"
+        "422":
+          description: "Validation Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+      x-speakeasy-name-override: "list-invitations"
+      x-speakeasy-pagination:
+        type: "offsetLimit"
+        inputs:
+          - name: "page"
+            in: "parameters"
+            type: "page"
+          - name: "size"
+            in: "parameters"
+            type: "limit"
+        outputs:
+          results: "$.items"
+          numPages: "$.pages"
+    post:
+      tags:
+        - "organizations"
+      summary: "Invite an organization member"
+      description: "Sends a WorkOS invitation to join the active organization. Requires an AuthKit session and the **admin** role."
+      operationId: "invite_current_organization_member"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateInvitationRequest"
+      responses:
+        "201":
+          description: "Successful Response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvitationResponse"
+        "401":
+          description: "The credential is missing, malformed, expired, or not trusted"
+        "403":
+          description: "The caller is not an admin or used an API key"
+        "409":
+          description: "The email is already a member or has a pending invitation"
+        "502":
+          description: "WorkOS could not create the invitation"
+        "422":
+          description: "Validation Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+      x-speakeasy-name-override: "invite"
   /organizations/current/api-keys:
     post:
       tags:
@@ -292,6 +444,138 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
+  /organizations/current/billing:
+    get:
+      tags:
+        - "billing"
+      summary: "Read the plan, credits and current usage"
+      description: "The active organization's plan, the limits it imposes, its remaining credit balance, and the draft invoice for the current period."
+      operationId: "read_billing"
+      responses:
+        "200":
+          description: "The plan, its limits, credits and invoice so far"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BillingResponse"
+        "401":
+          description: "The credential is missing, malformed, expired, or not trusted"
+      x-speakeasy-name-override: "retrieve"
+  /organizations/current/billing/invoices:
+    get:
+      tags:
+        - "billing"
+      summary: "List issued invoices"
+      description: "The active organization's most recent finalized invoices, newest first, with the payment status and PDF Stripe reports for each."
+      operationId: "list_invoices"
+      responses:
+        "200":
+          description: "Successful Response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvoicesResponse"
+        "401":
+          description: "The credential is missing, malformed, expired, or not trusted"
+      x-speakeasy-name-override: "list_invoices"
+  /organizations/current/billing/payment-method:
+    get:
+      tags:
+        - "billing"
+      summary: "Read the payment method"
+      description: "The card pay as you go charges, or null when none is saved."
+      operationId: "read_payment_method"
+      responses:
+        "200":
+          description: "Successful Response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentMethodResponse"
+        "401":
+          description: "The credential is missing, malformed, expired, or not trusted"
+      x-speakeasy-name-override: "retrieve_payment_method"
+  /organizations/current/billing/checkout:
+    post:
+      tags:
+        - "billing"
+      summary: "Start an upgrade"
+      description: "Opens a Stripe Checkout page that saves a card. Stripe returns the caller to `return_url` with a `checkout_session` query parameter to finish the upgrade with. Requires the **admin** role."
+      operationId: "start_checkout"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CheckoutRequest"
+        required: true
+      responses:
+        "200":
+          description: "Successful Response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckoutResponse"
+        "401":
+          description: "The credential is missing, malformed, expired, or not trusted"
+        "403":
+          description: "The caller is not an admin, or is an API key"
+        "422":
+          description: "Validation Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+      x-speakeasy-name-override: "checkout"
+  /organizations/current/billing/upgrade:
+    post:
+      tags:
+        - "billing"
+      summary: "Upgrade to pay as you go"
+      description: "Finishes a checkout: its card becomes the default, and the organization moves to pay as you go. Limits lift at once; charges start at the next hour. Requires the **admin** role."
+      operationId: "upgrade_billing_plan"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpgradeRequest"
+        required: true
+      responses:
+        "200":
+          description: "Successful Response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BillingResponse"
+        "401":
+          description: "The credential is missing, malformed, expired, or not trusted"
+        "403":
+          description: "The caller is not an admin, or is an API key"
+        "422":
+          description: "Validation Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+      x-speakeasy-name-override: "upgrade"
+  /organizations/current/billing/downgrade:
+    post:
+      tags:
+        - "billing"
+      summary: "Downgrade to Free"
+      description: "New seed and test generation stops at once, and every live environment gets the Free plan's deadline, counted from now. Requires the **admin** role."
+      operationId: "downgrade_billing_plan"
+      responses:
+        "200":
+          description: "Successful Response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BillingResponse"
+        "401":
+          description: "The credential is missing, malformed, expired, or not trusted"
+        "403":
+          description: "The caller is not an admin, or is an API key"
+      x-speakeasy-name-override: "downgrade"
   /twins/catalog:
     get:
       tags:
@@ -2415,6 +2699,87 @@ components:
         - "image_digest"
         - "description"
       title: "ApiSchemaProvenance"
+    BillingResponse:
+      properties:
+        plan:
+          type: "string"
+          enum:
+            - "free"
+            - "paygo"
+          title: "Plan"
+        max_environment_seconds:
+          anyOf:
+            - type: "integer"
+            - type: "null"
+          title: "Max Environment Seconds"
+          description: "How long an environment may run, or null for no limit"
+        max_parallel_twins:
+          anyOf:
+            - type: "integer"
+            - type: "null"
+          title: "Max Parallel Twins"
+          description: "How many twins may run at once, or null for no limit"
+        ai_generation_enabled:
+          type: "boolean"
+          title: "Ai Generation Enabled"
+          description: "Whether seeds, generated tests and evaluators can be built"
+        active_twins:
+          type: "integer"
+          title: "Active Twins"
+          description: "Twins currently asked to run"
+        ready:
+          type: "boolean"
+          title: "Ready"
+          description: "Whether the billing account is set up; plan changes wait for it"
+        upgrade_available:
+          type: "boolean"
+          title: "Upgrade Available"
+          description: "Whether this deployment can take a card for pay as you go"
+        remaining_credit_cents:
+          anyOf:
+            - type: "number"
+            - type: "null"
+          title: "Remaining Credit Cents"
+          description: "Spendable USD credit after current draft invoice deductions. Null while billing is unreachable or not yet set up."
+        invoice:
+          anyOf:
+            - $ref: "#/components/schemas/InvoicePreview"
+            - type: "null"
+          description: "The draft invoice for the current period, updated as usage arrives. Null while billing is unreachable or not yet set up."
+      type: "object"
+      required:
+        - "plan"
+        - "max_environment_seconds"
+        - "max_parallel_twins"
+        - "ai_generation_enabled"
+        - "active_twins"
+        - "ready"
+        - "upgrade_available"
+      title: "BillingResponse"
+    CheckoutRequest:
+      properties:
+        return_url:
+          type: "string"
+          maxLength: 2083
+          minLength: 1
+          format: "uri"
+          title: "Return Url"
+          description: "Where Stripe sends the caller back to, on this dashboard"
+      additionalProperties: false
+      type: "object"
+      required:
+        - "return_url"
+      title: "CheckoutRequest"
+    CheckoutResponse:
+      properties:
+        url:
+          type: "string"
+          title: "Url"
+          description: "The Stripe Checkout page that saves a card"
+      type: "object"
+      required:
+        - "url"
+      title: "CheckoutResponse"
     CompilerProvenance:
       properties:
         provider:
@@ -2611,6 +2976,20 @@ components:
       additionalProperties: false
       type: "object"
       title: "CreateExportRequest"
+    CreateInvitationRequest:
+      properties:
+        email:
+          type: "string"
+          format: "email"
+          title: "Email"
+        role:
+          $ref: "#/components/schemas/OrganizationRole"
+      additionalProperties: false
+      type: "object"
+      required:
+        - "email"
+        - "role"
+      title: "CreateInvitationRequest"
     CreateOrganizationRequest:
       properties:
         name:
@@ -3195,6 +3574,163 @@ components:
           title: "Detail"
       type: "object"
       title: "HTTPValidationError"
+    InvitationResponse:
+      properties:
+        id:
+          type: "string"
+          title: "Id"
+          description: "WorkOS invitation id"
+        email:
+          type: "string"
+          format: "email"
+          title: "Email"
+        role:
+          $ref: "#/components/schemas/OrganizationRole"
+        state:
+          type: "string"
+          const: "pending"
+          title: "State"
+        created_at:
+          type: "string"
+          format: "date-time"
+          title: "Created At"
+        expires_at:
+          type: "string"
+          format: "date-time"
+          title: "Expires At"
+      type: "object"
+      required:
+        - "id"
+        - "email"
+        - "role"
+        - "state"
+        - "created_at"
+        - "expires_at"
+      title: "InvitationResponse"
+    Invoice:
+      properties:
+        id:
+          type: "string"
+          title: "Id"
+        period_start:
+          anyOf:
+            - type: "string"
+              format: "date-time"
+            - type: "null"
+          title: "Period Start"
+        period_end:
+          anyOf:
+            - type: "string"
+              format: "date-time"
+            - type: "null"
+          title: "Period End"
+        issued_at:
+          anyOf:
+            - type: "string"
+              format: "date-time"
+            - type: "null"
+          title: "Issued At"
+        total_cents:
+          type: "number"
+          title: "Total Cents"
+        status:
+          anyOf:
+            - type: "string"
+            - type: "null"
+          title: "Status"
+          description: "The payment status Stripe reports, such as `PAID` or `PAYMENT_FAILED`, or null when nothing was sent to collect"
+        pdf_url:
+          anyOf:
+            - type: "string"
+            - type: "null"
+          title: "Pdf Url"
+      type: "object"
+      required:
+        - "id"
+        - "period_start"
+        - "period_end"
+        - "issued_at"
+        - "total_cents"
+        - "status"
+      title: "Invoice"
+    InvoiceLineItem:
+      properties:
+        name:
+          type: "string"
+          title: "Name"
+          description: "The product this line charges for"
+        twin:
+          anyOf:
+            - type: "string"
+            - type: "null"
+          title: "Twin"
+          description: "The twin the line is itemized by, if any"
+        quantity:
+          anyOf:
+            - type: "number"
+            - type: "null"
+          title: "Quantity"
+          description: "Twin-hours for runtime, builds otherwise"
+        unit_price_cents:
+          anyOf:
+            - type: "number"
+            - type: "null"
+          title: "Unit Price Cents"
+        total_cents:
+          type: "number"
+          title: "Total Cents"
+      type: "object"
+      required:
+        - "name"
+        - "total_cents"
+      title: "InvoiceLineItem"
+    InvoicePreview:
+      properties:
+        period_start:
+          anyOf:
+            - type: "string"
+              format: "date-time"
+            - type: "null"
+          title: "Period Start"
+        period_end:
+          anyOf:
+            - type: "string"
+              format: "date-time"
+            - type: "null"
+          title: "Period End"
+        total_cents:
+          type: "number"
+          title: "Total Cents"
+          description: "What is due, after credits"
+        credits_applied_cents:
+          type: "number"
+          title: "Credits Applied Cents"
+          description: "Credit drawn down against this period's usage"
+          default: 0
+        line_items:
+          items:
+            $ref: "#/components/schemas/InvoiceLineItem"
+          type: "array"
+          title: "Line Items"
+      type: "object"
+      required:
+        - "period_start"
+        - "period_end"
+        - "total_cents"
+        - "line_items"
+      title: "InvoicePreview"
+    InvoicesResponse:
+      properties:
+        invoices:
+          items:
+            $ref: "#/components/schemas/Invoice"
+          type: "array"
+          title: "Invoices"
+          description: "Issued invoices, newest first"
+      type: "object"
+      required:
+        - "invoices"
+      title: "InvoicesResponse"
     LastError:
       properties:
         code:
@@ -3281,6 +3817,46 @@ components:
         - "organization"
         - "role"
       title: "MembershipResponse"
+    OrganizationMemberResponse:
+      properties:
+        id:
+          type: "string"
+          title: "Id"
+          description: "WorkOS organization membership id"
+        email:
+          type: "string"
+          format: "email"
+          title: "Email"
+        first_name:
+          anyOf:
+            - type: "string"
+            - type: "null"
+          title: "First Name"
+        last_name:
+          anyOf:
+            - type: "string"
+            - type: "null"
+          title: "Last Name"
+        role:
+          $ref: "#/components/schemas/OrganizationRole"
+        status:
+          type: "string"
+          const: "active"
+          title: "Status"
+        created_at:
+          type: "string"
+          format: "date-time"
+          title: "Created At"
+      type: "object"
+      required:
+        - "id"
+        - "email"
+        - "first_name"
+        - "last_name"
+        - "role"
+        - "status"
+        - "created_at"
+      title: "OrganizationMemberResponse"
     OrganizationResponse:
       properties:
         id:
@@ -3535,6 +4111,37 @@ components:
         - "size"
         - "pages"
       title: "Page[ExportResponse]"
+    Page_InvitationResponse_:
+      properties:
+        items:
+          items:
+            $ref: "#/components/schemas/InvitationResponse"
+          type: "array"
+          title: "Items"
+        total:
+          type: "integer"
+          minimum: 0.0
+          title: "Total"
+        page:
+          type: "integer"
+          minimum: 1.0
+          title: "Page"
+        size:
+          type: "integer"
+          minimum: 1.0
+          title: "Size"
+        pages:
+          type: "integer"
+          minimum: 0.0
+          title: "Pages"
+      type: "object"
+      required:
+        - "items"
+        - "total"
+        - "page"
+        - "size"
+        - "pages"
+      title: "Page[InvitationResponse]"
     Page_MembershipResponse_:
       properties:
         items:
@@ -3566,6 +4173,37 @@ components:
         - "size"
         - "pages"
       title: "Page[MembershipResponse]"
+    Page_OrganizationMemberResponse_:
+      properties:
+        items:
+          items:
+            $ref: "#/components/schemas/OrganizationMemberResponse"
+          type: "array"
+          title: "Items"
+        total:
+          type: "integer"
+          minimum: 0.0
+          title: "Total"
+        page:
+          type: "integer"
+          minimum: 1.0
+          title: "Page"
+        size:
+          type: "integer"
+          minimum: 1.0
+          title: "Size"
+        pages:
+          type: "integer"
+          minimum: 0.0
+          title: "Pages"
+      type: "object"
+      required:
+        - "items"
+        - "total"
+        - "page"
+        - "size"
+        - "pages"
+      title: "Page[OrganizationMemberResponse]"
     Page_RequestLogSummaryResponse_:
       properties:
         items:
@@ -3783,6 +4421,42 @@ components:
         - "size"
         - "pages"
       title: "Page[TwinResponse]"
+    PaymentMethod:
+      properties:
+        brand:
+          type: "string"
+          title: "Brand"
+          description: "The card brand, or the payment method type"
+        last4:
+          anyOf:
+            - type: "string"
+            - type: "null"
+          title: "Last4"
+        exp_month:
+          anyOf:
+            - type: "integer"
+            - type: "null"
+          title: "Exp Month"
+        exp_year:
+          anyOf:
+            - type: "integer"
+            - type: "null"
+          title: "Exp Year"
+      type: "object"
+      required:
+        - "brand"
+      title: "PaymentMethod"
+    PaymentMethodResponse:
+      properties:
+        payment_method:
+          anyOf:
+            - $ref: "#/components/schemas/PaymentMethod"
+            - type: "null"
+          description: "The default payment method, or null when none is saved"
+      type: "object"
+      required:
+        - "payment_method"
+      title: "PaymentMethodResponse"
     Predicate:
       properties:
         source:
@@ -4347,6 +5021,18 @@ components:
         - "task_description"
         - "outcomes"
       title: "UpdateTestRequest"
+    UpgradeRequest:
+      properties:
+        checkout_session:
+          type: "string"
+          minLength: 1
+          title: "Checkout Session"
+          description: "The Checkout session Stripe returned with"
+      additionalProperties: false
+      type: "object"
+      required:
+        - "checkout_session"
+      title: "UpgradeRequest"
     UserResponse:
       properties:
         id:
@@ -4413,6 +5099,8 @@ tags:
     description: "The current user. Sign-up and sign-in happen in WorkOS AuthKit, which issues the access tokens this API accepts."
   - name: "organizations"
     description: "Organizations the caller belongs to. Every authenticated request acts inside exactly one organization — the one its access token names — so these routes address it as `current`."
+  - name: "billing"
+    description: "The active organization's plan, its limits, and what the current period has cost so far."
   - name: "api-keys"
     description: "Long-lived credentials for callers that cannot hold an AuthKit session — agents, SDKs, CI. A key is accepted wherever an access token is, and acts with the role its creator holds when the request arrives."
   - name: "environments"
