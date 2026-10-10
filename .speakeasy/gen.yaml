@@ -32,9 +32,10 @@ generation:
     generateNewTests: true
     skipResponseBodyAssertions: false
 cli:
-  version: 0.5.0
+  version: 0.5.1
   additionalDependencies: {}
   agentEnvironmentDetection: true
+  arrayFlagFormat: repeatable
   classifiedErrors: false
   cliName: twinbay
   defaultColor: auto
@@ -84,4 +85,5 @@ cli:
   removeStutter: true
   retryFlagsVisibility: visible
   retryMethodPolicy: spec
+  rootVersionFlag: false
   serverSelectionFlag: visible

@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/panoratech/twinbay-cli/internal/cli/apikeys"
+	"github.com/panoratech/twinbay-cli/internal/cli/billing"
 	"github.com/panoratech/twinbay-cli/internal/cli/catalog"
 	"github.com/panoratech/twinbay-cli/internal/cli/environmentexports"
 	"github.com/panoratech/twinbay-cli/internal/cli/environmentlogs"
@@ -81,6 +82,9 @@ func NewRootCommand() (*cobra.Command, error) {
 	}
 	if err := apikeys.InitApiKeysRoot(rootCmd); err != nil {
 		return nil, fmt.Errorf("init api-keys: %w", err)
+	}
+	if err := billing.InitBillingRoot(rootCmd); err != nil {
+		return nil, fmt.Errorf("init billing: %w", err)
 	}
 	if err := catalog.InitCatalogRoot(rootCmd); err != nil {
 		return nil, fmt.Errorf("init catalog: %w", err)

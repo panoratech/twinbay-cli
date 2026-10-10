@@ -160,7 +160,7 @@ This CLI is built to be driven by AI coding agents as well as people: everything
 |-----|---------|
 | `twinbay --help`, `twinbay api-keys list --help` | Commands by category, runnable examples, flags |
 | `twinbay --usage`, `twinbay api-keys list --usage` | The command surface as machine-readable [KDL](https://kdl.dev): commands, aliases, flags, defaults, env vars, config keys |
-| `twinbay test-runs create --schema` | The exact JSON Schema of the command's request body (all `$ref`s bundled) — build a valid `--body` from it |
+| `twinbay organizations invite --schema` | The exact JSON Schema of the command's request body (all `$ref`s bundled) — build a valid `--body` from it |
 | `twinbay api-keys list --dry-run` | The exact HTTP request (method, URL, headers, body), with no credentials or network call |
 | `twinbay api-keys list --output-format json` (or `--jq`) | Machine-readable output |
 
@@ -180,7 +180,7 @@ twinbay api-keys list --usage
 
 ```bash
 # JSON Schema (draft 2020-12) of the request body, with every $ref bundled under $defs
-twinbay test-runs create --schema
+twinbay organizations invite --schema
 ```
 
 ### Probe before you spend
@@ -346,6 +346,13 @@ Every command accepts `--help`; body-bearing commands also accept `--schema` (ex
   * [`logout`](docs/twinbay_auth_logout.md) - End the browser session and clear stored credentials
   * [`switch`](docs/twinbay_auth_switch.md) - Change the active organization
   * [`whoami`](docs/twinbay_auth_whoami.md) - Display the current user, organization, and credential sources
+* [`billing`](docs/twinbay_billing.md) - The active organization's plan, its limits, and what the current period has cost so far
+  * [`checkout`](docs/twinbay_billing_checkout.md) - Start an upgrade
+  * [`downgrade`](docs/twinbay_billing_downgrade.md) - Downgrade to Free
+  * [`list-invoices`](docs/twinbay_billing_list-invoices.md) - List issued invoices
+  * [`retrieve`](docs/twinbay_billing_retrieve.md) - Read the plan, credits and current usage
+  * [`retrieve-payment-method`](docs/twinbay_billing_retrieve-payment-method.md) - Read the payment method
+  * [`upgrade`](docs/twinbay_billing_upgrade.md) - Upgrade to pay as you go
 * [`catalog`](docs/twinbay_catalog.md) - Browse the digital twins available for new environments
   * [`list`](docs/twinbay_catalog_list.md) - List available twins
   * [`retrieve`](docs/twinbay_catalog_retrieve.md) - Retrieve a twin
@@ -381,7 +388,10 @@ Every command accepts `--help`; body-bearing commands also accept `--schema` (ex
 * [`get`](docs/twinbay_get.md) - Send a GET request to an API path
 * [`organizations`](docs/twinbay_organizations.md) - Organizations the caller belongs to
   * [`create`](docs/twinbay_organizations_create.md) - Create an organization
+  * [`invite`](docs/twinbay_organizations_invite.md) - Invite an organization member
   * [`list`](docs/twinbay_organizations_list.md) - List your organizations
+  * [`list-invitations`](docs/twinbay_organizations_list-invitations.md) - List pending organization invitations
+  * [`list-members`](docs/twinbay_organizations_list-members.md) - List active organization members
   * [`retrieve`](docs/twinbay_organizations_retrieve.md) - Read the active organization
   * [`update`](docs/twinbay_organizations_update.md) - Rename the active organization
 * [`patch`](docs/twinbay_patch.md) - Send a PATCH request to an API path
@@ -429,14 +439,14 @@ Every command accepts `--help`; body-bearing commands also accept `--schema` (ex
 <!-- Start Request Body Input [stdinpiping] -->
 ## Request Body Input
 
-Commands that accept a request body take it three ways, with a clear priority chain. The examples use `twinbay test-runs create`; every body-bearing command works the same way and prints its exact request schema with `--schema`.
+Commands that accept a request body take it three ways, with a clear priority chain. The examples use `twinbay organizations invite`; every body-bearing command works the same way and prints its exact request schema with `--schema`.
 
 ### Individual flags (highest priority)
 
 Each top-level body field is a flag:
 
 ```bash
-twinbay test-runs create --environment-id '24e86869-c8aa-4fa2-9d08-6690490dcd5a' --evaluator-id '24e86869-c8aa-4fa2-9d08-6690490dcd5a'
+twinbay organizations invite --email 'Lester22@hotmail.com' --role 'member'
 ```
 
 ### `--body` flag
@@ -444,14 +454,14 @@ twinbay test-runs create --environment-id '24e86869-c8aa-4fa2-9d08-6690490dcd5a'
 Provide the entire request body as a JSON string:
 
 ```bash
-twinbay test-runs create --body '{"environment_id":"24e86869-c8aa-4fa2-9d08-6690490dcd5a","evaluator_id":"24e86869-c8aa-4fa2-9d08-6690490dcd5a"}'
+twinbay organizations invite --body '{"email":"Lester22@hotmail.com","role":"member"}'
 ```
 
 Individual flags override `--body` values:
 
 ```bash
-# Sends {"environment_id":"24e86869-c8aa-4fa2-9d08-6690490dcd5a (updated)","evaluator_id":"24e86869-c8aa-4fa2-9d08-6690490dcd5a"}
-twinbay test-runs create --body '{"environment_id":"24e86869-c8aa-4fa2-9d08-6690490dcd5a","evaluator_id":"24e86869-c8aa-4fa2-9d08-6690490dcd5a"}' --environment-id '24e86869-c8aa-4fa2-9d08-6690490dcd5a (updated)'
+# Sends {"email":"Lester22@hotmail.com (updated)","role":"member"}
+twinbay organizations invite --body '{"email":"Lester22@hotmail.com","role":"member"}' --email 'Lester22@hotmail.com (updated)'
 ```
 
 ### Stdin piping (lowest priority)
@@ -459,24 +469,24 @@ twinbay test-runs create --body '{"environment_id":"24e86869-c8aa-4fa2-9d08-6690
 Pipe JSON into any command that accepts a request body:
 
 ```bash
-echo '{"environment_id":"24e86869-c8aa-4fa2-9d08-6690490dcd5a","evaluator_id":"24e86869-c8aa-4fa2-9d08-6690490dcd5a"}' | twinbay test-runs create
+echo '{"email":"Lester22@hotmail.com","role":"member"}' | twinbay organizations invite
 ```
 
 Individual flags override stdin values:
 
 ```bash
-# Sends {"environment_id":"24e86869-c8aa-4fa2-9d08-6690490dcd5a (updated)","evaluator_id":"24e86869-c8aa-4fa2-9d08-6690490dcd5a"}
-echo '{"environment_id":"24e86869-c8aa-4fa2-9d08-6690490dcd5a","evaluator_id":"24e86869-c8aa-4fa2-9d08-6690490dcd5a"}' | twinbay test-runs create --environment-id '24e86869-c8aa-4fa2-9d08-6690490dcd5a (updated)'
+# Sends {"email":"Lester22@hotmail.com (updated)","role":"member"}
+echo '{"email":"Lester22@hotmail.com","role":"member"}' | twinbay organizations invite --email 'Lester22@hotmail.com (updated)'
 ```
 
 This is useful for chaining commands, reading from files, or scripting:
 
 ```bash
 # Read body from a file
-twinbay test-runs create < request.json
+twinbay organizations invite < request.json
 
 # Pipe from another command
-curl -s https://example.com/request.json | twinbay test-runs create
+curl -s https://example.com/request.json | twinbay organizations invite
 ```
 
 ### Priority
@@ -485,7 +495,7 @@ When multiple input methods are used, the priority is:
 
 | Priority | Source | Description |
 |----------|--------|-------------|
-| 1 (highest) | Individual flags | `--environment-id ...` always wins |
+| 1 (highest) | Individual flags | `--email ...` always wins |
 | 2 | `--body` flag | Whole-body JSON via flag |
 | 3 (lowest) | Stdin | Piped JSON input |
 <!-- End Request Body Input [stdinpiping] -->
