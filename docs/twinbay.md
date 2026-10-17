@@ -38,6 +38,7 @@ twinbay [flags]
 
 * [twinbay api-keys](twinbay_api-keys.md)	 - Long-lived credentials for callers that cannot hold an AuthKit session — agents, SDKs, CI
 * [twinbay auth](twinbay_auth.md)	 - Manage authentication credentials
+* [twinbay billing](twinbay_billing.md)	 - The active organization's plan, its limits, and what the current period has cost so far
 * [twinbay catalog](twinbay_catalog.md)	 - Browse the digital twins available for new environments
 * [twinbay config](twinbay_config.md)	 - List, set and unset CLI settings without prompts
 * [twinbay configure](twinbay_configure.md)	 - Configure authentication credentials and preferences
