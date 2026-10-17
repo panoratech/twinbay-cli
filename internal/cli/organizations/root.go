@@ -39,6 +39,18 @@ func InitOrganizationsRoot(parent *cobra.Command) error {
 		return err
 	}
 
+	if err := initListMembersCmd(OrganizationsCmd); err != nil {
+		return err
+	}
+
+	if err := initListInvitationsCmd(OrganizationsCmd); err != nil {
+		return err
+	}
+
+	if err := initInviteCmd(OrganizationsCmd); err != nil {
+		return err
+	}
+
 	parent.AddCommand(OrganizationsCmd)
 	return nil
 }
