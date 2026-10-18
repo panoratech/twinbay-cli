@@ -58,6 +58,8 @@ type Twinbay struct {
 	Organizations *Organizations
 	// Long-lived credentials for callers that cannot hold an AuthKit session — agents, SDKs, CI. A key is accepted wherever an access token is, and acts with the role its creator holds when the request arrives.
 	APIKeys *APIKeys
+	// The active organization's plan, its limits, and what the current period has cost so far.
+	Billing *Billing
 	// Browse the digital twins available for new environments.
 	Catalog *Catalog
 	// Create and edit isolated provider environments. Each environment contains behavioural twins from the `twins` package.
@@ -152,10 +154,10 @@ func WithTimeout(timeout time.Duration) SDKOption {
 // New creates a new instance of the SDK with the provided options
 func New(opts ...SDKOption) *Twinbay {
 	sdk := &Twinbay{
-		SDKVersion: "0.5.0",
+		SDKVersion: "0.5.1",
 		sdkConfiguration: config.SDKConfiguration{
-			UserAgent:         "speakeasy-sdk/go 0.5.0 2.941.0 0.1.0 github.com/panoratech/twinbay-cli/internal/sdk",
-			SDKVersion:        "0.5.0",
+			UserAgent:         "speakeasy-sdk/go 0.5.1 2.941.0 0.1.0 github.com/panoratech/twinbay-cli/internal/sdk",
+			SDKVersion:        "0.5.1",
 			GenVersion:        "2.941.0",
 			OpenAPIDocVersion: "0.1.0",
 			ServerList:        ServerList,
@@ -176,6 +178,7 @@ func New(opts ...SDKOption) *Twinbay {
 	sdk.Users = newUsers(sdk, sdk.sdkConfiguration, sdk.hooks)
 	sdk.Organizations = newOrganizations(sdk, sdk.sdkConfiguration, sdk.hooks)
 	sdk.APIKeys = newAPIKeys(sdk, sdk.sdkConfiguration, sdk.hooks)
+	sdk.Billing = newBilling(sdk, sdk.sdkConfiguration, sdk.hooks)
 	sdk.Catalog = newCatalog(sdk, sdk.sdkConfiguration, sdk.hooks)
 	sdk.Environments = newEnvironments(sdk, sdk.sdkConfiguration, sdk.hooks)
 	sdk.Twins = newTwins(sdk, sdk.sdkConfiguration, sdk.hooks)
