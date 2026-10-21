@@ -5,9 +5,9 @@
 # for Linux and macOS systems.
 #
 # Usage:
-#   curl -fsSL https://raw.githubusercontent.com/panoratech/twinbay-cli/main/scripts/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/twinbay/cli/main/scripts/install.sh | bash
 #   or
-#   wget -qO- https://raw.githubusercontent.com/panoratech/twinbay-cli/main/scripts/install.sh | bash
+#   wget -qO- https://raw.githubusercontent.com/twinbay/cli/main/scripts/install.sh | bash
 #
 # Options:
 #   CLI_TWINBAY_INSTALL_DIR - Installation directory (default: /usr/local/bin)
@@ -17,7 +17,7 @@
 set -e
 
 # Configuration
-REPO="panoratech/twinbay-cli"
+REPO="twinbay/cli"
 DEFAULT_INSTALL_DIR="/usr/local/bin"
 USER_INSTALL_DIR="$HOME/.local/bin"
 VERSION="${CLI_TWINBAY_VERSION:-latest}"
