@@ -4,10 +4,11 @@
 package components
 
 type TwinResponse struct {
-	Slug        string `json:"slug"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Version     string `json:"version"`
+	Slug        string      `json:"slug"`
+	Name        string      `json:"name"`
+	Description string      `json:"description"`
+	Version     string      `json:"version"`
+	Service     TwinService `json:"service"`
 }
 
 func (t *TwinResponse) GetSlug() string {
@@ -36,4 +37,11 @@ func (t *TwinResponse) GetVersion() string {
 		return ""
 	}
 	return t.Version
+}
+
+func (t *TwinResponse) GetService() TwinService {
+	if t == nil {
+		return TwinService("")
+	}
+	return t.Service
 }
