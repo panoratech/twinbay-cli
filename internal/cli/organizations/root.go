@@ -4,8 +4,8 @@
 package organizations
 
 import (
-	"github.com/panoratech/twinbay-cli/internal/usage"
 	"github.com/spf13/cobra"
+	"github.com/twinbay/cli/internal/usage"
 )
 
 func InitOrganizationsRoot(parent *cobra.Command) error {
@@ -36,6 +36,18 @@ func InitOrganizationsRoot(parent *cobra.Command) error {
 	}
 
 	if err := initUpdateCmd(OrganizationsCmd); err != nil {
+		return err
+	}
+
+	if err := initListMembersCmd(OrganizationsCmd); err != nil {
+		return err
+	}
+
+	if err := initListInvitationsCmd(OrganizationsCmd); err != nil {
+		return err
+	}
+
+	if err := initInviteCmd(OrganizationsCmd); err != nil {
 		return err
 	}
 

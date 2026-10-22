@@ -4,8 +4,8 @@
 package evaluations
 
 import (
-	"github.com/panoratech/twinbay-cli/internal/usage"
 	"github.com/spf13/cobra"
+	"github.com/twinbay/cli/internal/usage"
 )
 
 func InitEvaluationsRoot(parent *cobra.Command) error {

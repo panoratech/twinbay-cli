@@ -15,8 +15,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/panoratech/twinbay-cli/internal/clierrors"
-	"github.com/panoratech/twinbay-cli/internal/flagutil"
+	"github.com/twinbay/cli/internal/clierrors"
+	"github.com/twinbay/cli/internal/flagutil"
 )
 
 type ErrorType string

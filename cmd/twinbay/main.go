@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/panoratech/twinbay-cli/internal/cli"
-	"github.com/panoratech/twinbay-cli/internal/clierrors"
+	"github.com/twinbay/cli/internal/cli"
+	"github.com/twinbay/cli/internal/clierrors"
 )
 
 // version and buildTime can be set at build time using Go linker flags:

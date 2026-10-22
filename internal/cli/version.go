@@ -5,9 +5,9 @@ package cli
 
 import (
 	"fmt"
-	"github.com/panoratech/twinbay-cli/internal/output"
-	"github.com/panoratech/twinbay-cli/internal/usage"
 	"github.com/spf13/cobra"
+	"github.com/twinbay/cli/internal/output"
+	"github.com/twinbay/cli/internal/usage"
 )
 
 // Version is the current version of the CLI, defaulting to the version from gen.yaml.
@@ -15,7 +15,7 @@ import (
 // which propagates the value here (see cmd/twinbay/main.go):
 //
 //	go build -ldflags "-X main.version=x.y.z" ./cmd/twinbay
-var Version = "0.5.0"
+var Version = "0.5.1"
 
 // BuildTime is optionally set at build time via ldflags targeting the main package.
 var BuildTime string

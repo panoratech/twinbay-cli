@@ -7,12 +7,12 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/panoratech/twinbay-cli/internal/sdk/models/components"
-	"github.com/panoratech/twinbay-cli/internal/sdk/models/operations"
-	"github.com/panoratech/twinbay-cli/internal/sdk/models/sdkerrors"
-	"github.com/panoratech/twinbay-cli/internal/sdk/sdkinternal/config"
-	"github.com/panoratech/twinbay-cli/internal/sdk/sdkinternal/hooks"
-	"github.com/panoratech/twinbay-cli/internal/sdk/sdkinternal/utils"
+	"github.com/twinbay/cli/internal/sdk/models/components"
+	"github.com/twinbay/cli/internal/sdk/models/operations"
+	"github.com/twinbay/cli/internal/sdk/models/sdkerrors"
+	"github.com/twinbay/cli/internal/sdk/sdkinternal/config"
+	"github.com/twinbay/cli/internal/sdk/sdkinternal/hooks"
+	"github.com/twinbay/cli/internal/sdk/sdkinternal/utils"
 	"net/http"
 )
 

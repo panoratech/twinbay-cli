@@ -4,8 +4,8 @@
 package operations
 
 import (
-	"github.com/panoratech/twinbay-cli/internal/sdk/models/components"
-	"github.com/panoratech/twinbay-cli/internal/sdk/sdkinternal/utils"
+	"github.com/twinbay/cli/internal/sdk/models/components"
+	"github.com/twinbay/cli/internal/sdk/sdkinternal/utils"
 )
 
 type CreateOrganizationResponse struct {
