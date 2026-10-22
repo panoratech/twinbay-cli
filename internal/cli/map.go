@@ -6,7 +6,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/panoratech/twinbay-cli/internal/flagutil"
+	"github.com/twinbay/cli/internal/flagutil"
 	"github.com/spf13/cobra"
 )
 

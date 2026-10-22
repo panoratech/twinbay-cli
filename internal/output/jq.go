@@ -9,7 +9,7 @@ import (
 
 	"github.com/itchyny/gojq"
 
-	"github.com/panoratech/twinbay-cli/internal/flagutil"
+	"github.com/twinbay/cli/internal/flagutil"
 )
 
 // ApplyJqFilter applies a jq expression to the given content and returns the results.

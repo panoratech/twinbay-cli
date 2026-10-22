@@ -4,7 +4,7 @@
 package environmentexports
 
 import (
-	"github.com/panoratech/twinbay-cli/internal/usage"
+	"github.com/twinbay/cli/internal/usage"
 	"github.com/spf13/cobra"
 )
 

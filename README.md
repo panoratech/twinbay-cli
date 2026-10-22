@@ -2,7 +2,7 @@
 
 Command-line interface for the *Twinbay* API.
 
-[![Built by Speakeasy](https://img.shields.io/badge/Built_by-SPEAKEASY-374151?style=for-the-badge&labelColor=f3f4f6)](https://www.speakeasy.com/?utm_source=github-com/panoratech/twinbay-cli&utm_campaign=cli)
+[![Built by Speakeasy](https://img.shields.io/badge/Built_by-SPEAKEASY-374151?style=for-the-badge&labelColor=f3f4f6)](https://www.speakeasy.com/?utm_source=github-com/twinbay/cli&utm_campaign=cli)
 [![License: MIT](https://img.shields.io/badge/LICENSE_//_MIT-3b5bdb?style=for-the-badge&labelColor=eff6ff)](https://opensource.org/licenses/MIT)
 
 
@@ -40,13 +40,13 @@ Twinbay: Backend API
 ### Quick Install (Linux/macOS)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/panoratech/twinbay-cli/main/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/twinbay/cli/main/scripts/install.sh | bash
 ```
 
 ### Quick Install (Windows PowerShell)
 
 ```powershell
-iwr -useb https://raw.githubusercontent.com/panoratech/twinbay-cli/main/scripts/install.ps1 | iex
+iwr -useb https://raw.githubusercontent.com/twinbay/cli/main/scripts/install.ps1 | iex
 ```
 
 ### Go Install
@@ -54,12 +54,12 @@ iwr -useb https://raw.githubusercontent.com/panoratech/twinbay-cli/main/scripts/
 Alternatively, install directly via Go:
 
 ```bash
-go install github.com/panoratech/twinbay-cli/cmd/twinbay@latest
+go install github.com/twinbay/cli/cmd/twinbay@latest
 ```
 
 ### Manual Download
 
-Download pre-built binaries for your platform from the [releases page](https://github.com/panoratech/twinbay-cli/releases).
+Download pre-built binaries for your platform from the [releases page](https://github.com/twinbay/cli/releases).
 <!-- End CLI Installation [installation] -->
 
 <!-- Start Shell Completion [completion] -->
@@ -113,7 +113,7 @@ against the twin, and grade the traffic it sent:
 
 ```bash
 # 1. Install and sign in (or export TWINBAY_API_KEY for CI)
-brew install panoratech/tap/twinbay
+curl -fsSL https://raw.githubusercontent.com/twinbay/cli/main/scripts/install.sh | bash
 twinbay auth login
 
 # 2. Start an environment with a Stripe twin, then read its URL and credential
@@ -721,4 +721,4 @@ looking for the latest version.
 While we value open-source contributions to this CLI, this library is generated programmatically. Any manual changes added to internal files will be overwritten on the next generation. 
 We look forward to hearing your feedback. Feel free to open a PR or an issue with a proof of concept and we'll do our best to include it in a future release. 
 
-### CLI Created by [Speakeasy](https://www.speakeasy.com/?utm_source=github-com/panoratech/twinbay-cli&utm_campaign=cli)
+### CLI Created by [Speakeasy](https://www.speakeasy.com/?utm_source=github-com/twinbay/cli&utm_campaign=cli)

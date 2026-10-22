@@ -5,8 +5,8 @@ package operations
 
 import (
 	"errors"
-	"github.com/panoratech/twinbay-cli/internal/sdk/retry"
-	"github.com/panoratech/twinbay-cli/internal/sdk/sdkinternal/utils"
+	"github.com/twinbay/cli/internal/sdk/retry"
+	"github.com/twinbay/cli/internal/sdk/sdkinternal/utils"
 	"time"
 )
 

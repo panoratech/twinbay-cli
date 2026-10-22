@@ -7,8 +7,8 @@ management:
   generationVersion: 2.941.0
   releaseVersion: 0.5.0
   configChecksum: c3676529975acc770b79d7b2429255b0
-  repoURL: https://github.com/panoratech/twinbay-cli.git
-  installationURL: https://github.com/panoratech/twinbay-cli
+  repoURL: https://github.com/twinbay/cli.git
+  installationURL: https://github.com/twinbay/cli
 persistentEdits:
   generation_id: fb0af91b-d495-441a-80ef-621ae48acf29
   pristine_commit_hash: 70904c64c2cd76592ffef42e7c6911f4a66b1e38

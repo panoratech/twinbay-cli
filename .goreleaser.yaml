@@ -2,7 +2,7 @@
 version: 2
 
 # The archive name_template below interpolates .ProjectName, which GoReleaser
-# otherwise defaults to the repository name — publishing twinbay-cli_Darwin_arm64.tar.gz
+# otherwise defaults to the repository name — publishing cli_Darwin_arm64.tar.gz
 # while scripts/install.sh fetches twinbay_Darwin_arm64.tar.gz. See .genignore.
 project_name: twinbay
 
@@ -47,36 +47,11 @@ archives:
 
 release:
   github:
-    owner: panoratech
-    name: twinbay-cli
+    owner: twinbay
+    name: cli
   draft: false
   prerelease: auto
   mode: append
-
-# Publishes Casks/twinbay.rb to panoratech/homebrew-tap, so users can run
-# `brew install panoratech/tap/twinbay`. Skipped until the release workflow
-# has a HOMEBREW_TAP_GITHUB_TOKEN secret that can push to the tap repository.
-# Configured here instead of gen.yaml's distribution.homebrew: that setting
-# regenerates release.yaml with a GPG import step that fails without
-# CLI_GPG_SECRET_KEY, although casks are not signed.
-homebrew_casks:
-  - name: twinbay
-    ids: [twinbay]
-    binaries: [twinbay]
-    homepage: https://twinbay.ai
-    description: Command-line interface for the Twinbay API
-    license: MIT
-    repository:
-      owner: panoratech
-      name: homebrew-tap
-      token: '{{ index .Env "HOMEBREW_TAP_GITHUB_TOKEN" }}'
-    skip_upload: '{{ if index .Env "HOMEBREW_TAP_GITHUB_TOKEN" }}false{{ else }}true{{ end }}'
-    hooks:
-      post:
-        install: |
-          if OS.mac?
-            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/twinbay"]
-          end
 
 checksum:
   name_template: "checksums.txt"

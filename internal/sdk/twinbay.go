@@ -8,11 +8,11 @@ package sdk
 import (
 	"context"
 	"fmt"
-	"github.com/panoratech/twinbay-cli/internal/sdk/models/components"
-	"github.com/panoratech/twinbay-cli/internal/sdk/retry"
-	"github.com/panoratech/twinbay-cli/internal/sdk/sdkinternal/config"
-	"github.com/panoratech/twinbay-cli/internal/sdk/sdkinternal/hooks"
-	"github.com/panoratech/twinbay-cli/internal/sdk/sdkinternal/utils"
+	"github.com/twinbay/cli/internal/sdk/models/components"
+	"github.com/twinbay/cli/internal/sdk/retry"
+	"github.com/twinbay/cli/internal/sdk/sdkinternal/config"
+	"github.com/twinbay/cli/internal/sdk/sdkinternal/hooks"
+	"github.com/twinbay/cli/internal/sdk/sdkinternal/utils"
 	"net/http"
 	"time"
 )
@@ -154,7 +154,7 @@ func New(opts ...SDKOption) *Twinbay {
 	sdk := &Twinbay{
 		SDKVersion: "0.5.0",
 		sdkConfiguration: config.SDKConfiguration{
-			UserAgent:         "speakeasy-sdk/go 0.5.0 2.941.0 0.1.0 github.com/panoratech/twinbay-cli/internal/sdk",
+			UserAgent:         "speakeasy-sdk/go 0.5.0 2.941.0 0.1.0 github.com/twinbay/cli/internal/sdk",
 			SDKVersion:        "0.5.0",
 			GenVersion:        "2.941.0",
 			OpenAPIDocVersion: "0.1.0",

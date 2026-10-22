@@ -80,7 +80,7 @@ cli:
     subtleColor: '#475569'
     successColor: '#4ADE80'
   jqRawOutput: false
-  packageName: github.com/panoratech/twinbay-cli
+  packageName: github.com/twinbay/cli
   removeStutter: true
   retryFlagsVisibility: visible
   retryMethodPolicy: spec

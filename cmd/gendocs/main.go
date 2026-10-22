@@ -12,8 +12,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/panoratech/twinbay-cli/internal/cli"
-	"github.com/panoratech/twinbay-cli/internal/clierrors"
+	"github.com/twinbay/cli/internal/cli"
+	"github.com/twinbay/cli/internal/clierrors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/cobra/doc"
 )
@@ -39,7 +39,7 @@ against the twin, and grade the traffic it sent:
 
 ` + "```bash" + `
 # 1. Install and sign in (or export TWINBAY_API_KEY for CI)
-brew install panoratech/tap/twinbay
+curl -fsSL https://raw.githubusercontent.com/twinbay/cli/main/scripts/install.sh | bash
 twinbay auth login
 
 # 2. Start an environment with a Stripe twin, then read its URL and credential
