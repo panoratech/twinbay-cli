@@ -39,8 +39,8 @@ type SeedResponse struct {
 	Name string `json:"name"`
 	// The twin this seed can be loaded into.
 	Twin string `json:"twin"`
-	// The starting state this seed was asked for.
-	Prompt string `json:"prompt"`
+	// The requested starting state, or null for an imported seed.
+	Prompt *string `json:"prompt"`
 	// Generation state.
 	Status SeedResponseStatus `json:"status"`
 	// Why generation failed, if it did.
@@ -86,9 +86,9 @@ func (s *SeedResponse) GetTwin() string {
 	return s.Twin
 }
 
-func (s *SeedResponse) GetPrompt() string {
+func (s *SeedResponse) GetPrompt() *string {
 	if s == nil {
-		return ""
+		return nil
 	}
 	return s.Prompt
 }
