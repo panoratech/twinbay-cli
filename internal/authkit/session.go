@@ -10,8 +10,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/panoratech/twinbay-cli/internal/clierrors"
-	"github.com/panoratech/twinbay-cli/internal/config"
+	"github.com/twinbay/cli/internal/clierrors"
+	"github.com/twinbay/cli/internal/config"
 	"github.com/zalando/go-keyring"
 )
 

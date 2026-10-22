@@ -6,7 +6,7 @@ package components
 import (
 	"encoding/json"
 	"errors"
-	"github.com/panoratech/twinbay-cli/internal/sdk/sdkinternal/utils"
+	"github.com/twinbay/cli/internal/sdk/sdkinternal/utils"
 )
 
 type LocType string

@@ -4,11 +4,11 @@ import (
 	"context"
 	"errors"
 
-	"github.com/panoratech/twinbay-cli/internal/authkit"
-	"github.com/panoratech/twinbay-cli/internal/config"
-	"github.com/panoratech/twinbay-cli/internal/flagutil"
-	"github.com/panoratech/twinbay-cli/internal/sdk/models/components"
 	"github.com/spf13/cobra"
+	"github.com/twinbay/cli/internal/authkit"
+	"github.com/twinbay/cli/internal/config"
+	"github.com/twinbay/cli/internal/flagutil"
+	"github.com/twinbay/cli/internal/sdk/models/components"
 )
 
 func buildGlobalSecuritySource(cmd *cobra.Command, allowedSecurityFields []string) func(context.Context) (components.Security, error) {

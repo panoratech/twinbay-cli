@@ -8,13 +8,13 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/panoratech/twinbay-cli/internal/client"
-	"github.com/panoratech/twinbay-cli/internal/flagutil"
-	"github.com/panoratech/twinbay-cli/internal/output"
-	"github.com/panoratech/twinbay-cli/internal/sdk"
-	"github.com/panoratech/twinbay-cli/internal/sdk/models/sdkerrors"
-	"github.com/panoratech/twinbay-cli/internal/usage"
 	"github.com/spf13/cobra"
+	"github.com/twinbay/cli/internal/client"
+	"github.com/twinbay/cli/internal/flagutil"
+	"github.com/twinbay/cli/internal/output"
+	"github.com/twinbay/cli/internal/sdk"
+	"github.com/twinbay/cli/internal/sdk/models/sdkerrors"
+	"github.com/twinbay/cli/internal/usage"
 )
 
 // initRawCmds adds get/post/put/patch/delete for API paths without a

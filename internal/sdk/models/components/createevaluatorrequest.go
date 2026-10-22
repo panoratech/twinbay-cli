@@ -4,7 +4,7 @@
 package components
 
 import (
-	"github.com/panoratech/twinbay-cli/internal/sdk/optionalnullable"
+	"github.com/twinbay/cli/internal/sdk/optionalnullable"
 )
 
 type CreateEvaluatorRequest struct {

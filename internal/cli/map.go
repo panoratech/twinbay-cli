@@ -6,8 +6,8 @@ import (
 	"io"
 	"strings"
 
-	"github.com/panoratech/twinbay-cli/internal/flagutil"
 	"github.com/spf13/cobra"
+	"github.com/twinbay/cli/internal/flagutil"
 )
 
 // installMapFlag adds --map, which prints the command tree below the

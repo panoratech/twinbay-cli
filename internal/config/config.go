@@ -19,7 +19,7 @@ import (
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 
-	"github.com/panoratech/twinbay-cli/internal/flagutil"
+	"github.com/twinbay/cli/internal/flagutil"
 )
 
 // ConfigVersion is the current config file schema version.

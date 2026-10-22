@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/panoratech/twinbay-cli/internal/config"
 	"github.com/spf13/cobra"
+	"github.com/twinbay/cli/internal/config"
 	"github.com/zalando/go-keyring"
 )
 

@@ -3,9 +3,9 @@
 # This script downloads and installs the latest version of the twinbay CLI
 #
 # Usage:
-#   iwr -useb https://raw.githubusercontent.com/panoratech/twinbay-cli/main/scripts/install.ps1 | iex
+#   iwr -useb https://raw.githubusercontent.com/twinbay/cli/main/scripts/install.ps1 | iex
 #   or
-#   Invoke-WebRequest -Uri https://raw.githubusercontent.com/panoratech/twinbay-cli/main/scripts/install.ps1 -UseBasicParsing | Invoke-Expression
+#   Invoke-WebRequest -Uri https://raw.githubusercontent.com/twinbay/cli/main/scripts/install.ps1 -UseBasicParsing | Invoke-Expression
 #
 # Options:
 #   $env:CLI_TWINBAY_INSTALL_DIR - Installation directory (default: $env:LOCALAPPDATA\Programs\twinbay)
@@ -18,7 +18,7 @@ param()
 $ErrorActionPreference = 'Stop'
 
 # Configuration
-$Repo = "panoratech/twinbay-cli"
+$Repo = "twinbay/cli"
 $BinaryName = "twinbay.exe"
 $DefaultInstallDir = Join-Path $env:LOCALAPPDATA "Programs\twinbay"
 $InstallDir = if ($env:CLI_TWINBAY_INSTALL_DIR) { $env:CLI_TWINBAY_INSTALL_DIR } else { $DefaultInstallDir }

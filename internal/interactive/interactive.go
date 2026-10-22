@@ -21,10 +21,10 @@ import (
 	"github.com/spf13/pflag"
 	"golang.org/x/term"
 
-	"github.com/panoratech/twinbay-cli/internal/config"
-	"github.com/panoratech/twinbay-cli/internal/flagutil"
-	"github.com/panoratech/twinbay-cli/internal/output"
-	"github.com/panoratech/twinbay-cli/internal/usage"
+	"github.com/twinbay/cli/internal/config"
+	"github.com/twinbay/cli/internal/flagutil"
+	"github.com/twinbay/cli/internal/output"
+	"github.com/twinbay/cli/internal/usage"
 )
 
 const PromptArgsAnnotation = "speakeasy_prompt_args"

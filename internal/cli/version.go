@@ -5,9 +5,9 @@ package cli
 
 import (
 	"fmt"
-	"github.com/panoratech/twinbay-cli/internal/output"
-	"github.com/panoratech/twinbay-cli/internal/usage"
 	"github.com/spf13/cobra"
+	"github.com/twinbay/cli/internal/output"
+	"github.com/twinbay/cli/internal/usage"
 )
 
 // Version is the current version of the CLI, defaulting to the version from gen.yaml.

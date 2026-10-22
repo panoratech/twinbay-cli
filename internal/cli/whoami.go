@@ -5,10 +5,10 @@ package cli
 
 import (
 	"fmt"
-	"github.com/panoratech/twinbay-cli/internal/config"
-	"github.com/panoratech/twinbay-cli/internal/output"
-	"github.com/panoratech/twinbay-cli/internal/usage"
 	"github.com/spf13/cobra"
+	"github.com/twinbay/cli/internal/config"
+	"github.com/twinbay/cli/internal/output"
+	"github.com/twinbay/cli/internal/usage"
 )
 
 // initWhoamiCmd initializes the whoami command.

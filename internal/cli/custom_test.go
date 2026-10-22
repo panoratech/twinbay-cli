@@ -10,8 +10,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/panoratech/twinbay-cli/internal/config"
-	"github.com/panoratech/twinbay-cli/internal/output"
+	"github.com/twinbay/cli/internal/config"
+	"github.com/twinbay/cli/internal/output"
 )
 
 // runCLI executes the real command tree in-process, the way main does.

@@ -6,8 +6,8 @@ package components
 import (
 	"errors"
 	"fmt"
-	"github.com/panoratech/twinbay-cli/internal/sdk/optionalnullable"
-	"github.com/panoratech/twinbay-cli/internal/sdk/sdkinternal/utils"
+	"github.com/twinbay/cli/internal/sdk/optionalnullable"
+	"github.com/twinbay/cli/internal/sdk/sdkinternal/utils"
 )
 
 type CreateEnvironmentRequestTwinType string

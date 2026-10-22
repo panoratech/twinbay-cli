@@ -11,7 +11,7 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
 
-	"github.com/panoratech/twinbay-cli/internal/output"
+	"github.com/twinbay/cli/internal/output"
 )
 
 type FormMode int
