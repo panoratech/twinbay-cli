@@ -6,7 +6,7 @@ package components
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/panoratech/twinbay-cli/internal/sdk/optionalnullable"
+	"github.com/twinbay/cli/internal/sdk/optionalnullable"
 )
 
 // CreateEvaluationRequestPhase - Checkpoint grades without closing the run; final closes and grades it.

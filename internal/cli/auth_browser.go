@@ -7,15 +7,15 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/huh"
-	"github.com/panoratech/twinbay-cli/internal/authkit"
-	"github.com/panoratech/twinbay-cli/internal/config"
-	"github.com/panoratech/twinbay-cli/internal/flagutil"
-	"github.com/panoratech/twinbay-cli/internal/interactive"
-	"github.com/panoratech/twinbay-cli/internal/output"
-	"github.com/panoratech/twinbay-cli/internal/sdk"
-	"github.com/panoratech/twinbay-cli/internal/sdk/models/components"
-	"github.com/panoratech/twinbay-cli/internal/usage"
 	"github.com/spf13/cobra"
+	"github.com/twinbay/cli/internal/authkit"
+	"github.com/twinbay/cli/internal/config"
+	"github.com/twinbay/cli/internal/flagutil"
+	"github.com/twinbay/cli/internal/interactive"
+	"github.com/twinbay/cli/internal/output"
+	"github.com/twinbay/cli/internal/sdk"
+	"github.com/twinbay/cli/internal/sdk/models/components"
+	"github.com/twinbay/cli/internal/usage"
 	"github.com/zalando/go-keyring"
 )
 

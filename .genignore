@@ -1,6 +1,6 @@
 # Files Speakeasy must not overwrite on regeneration.
 
 # Holds `project_name: twinbay`. Speakeasy's generated config omits it, so
-# GoReleaser falls back to the repo name and builds twinbay-cli_Darwin_arm64.tar.gz
+# GoReleaser falls back to the repo name and builds cli_Darwin_arm64.tar.gz
 # while scripts/install.sh looks for twinbay_Darwin_arm64.tar.gz.
 .goreleaser.yaml

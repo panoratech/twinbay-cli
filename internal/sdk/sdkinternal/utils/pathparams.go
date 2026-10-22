@@ -12,8 +12,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/panoratech/twinbay-cli/internal/sdk/optionalnullable"
-	"github.com/panoratech/twinbay-cli/internal/sdk/types"
+	"github.com/twinbay/cli/internal/sdk/optionalnullable"
+	"github.com/twinbay/cli/internal/sdk/types"
 )
 
 func GenerateURL(_ context.Context, serverURL, path string, pathParams interface{}, globals interface{}) (string, error) {

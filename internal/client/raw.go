@@ -9,10 +9,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/panoratech/twinbay-cli/internal/flagutil"
-	"github.com/panoratech/twinbay-cli/internal/sdk"
-	"github.com/panoratech/twinbay-cli/internal/testclient"
 	"github.com/spf13/cobra"
+	"github.com/twinbay/cli/internal/flagutil"
+	"github.com/twinbay/cli/internal/sdk"
+	"github.com/twinbay/cli/internal/testclient"
 )
 
 // Raw sends one request to an API path with the server, authentication,

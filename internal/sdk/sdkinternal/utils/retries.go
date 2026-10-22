@@ -7,7 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/panoratech/twinbay-cli/internal/sdk/retry"
+	"github.com/twinbay/cli/internal/sdk/retry"
 	"io"
 	"math"
 	"math/rand"

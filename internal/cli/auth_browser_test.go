@@ -10,10 +10,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/panoratech/twinbay-cli/internal/authkit"
-	"github.com/panoratech/twinbay-cli/internal/config"
-	"github.com/panoratech/twinbay-cli/internal/output"
 	"github.com/spf13/cobra"
+	"github.com/twinbay/cli/internal/authkit"
+	"github.com/twinbay/cli/internal/config"
+	"github.com/twinbay/cli/internal/output"
 	"github.com/zalando/go-keyring"
 )
 

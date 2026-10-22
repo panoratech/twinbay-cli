@@ -15,8 +15,8 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/panoratech/twinbay-cli/internal/sdk/optionalnullable"
-	"github.com/panoratech/twinbay-cli/internal/sdk/types"
+	"github.com/twinbay/cli/internal/sdk/optionalnullable"
+	"github.com/twinbay/cli/internal/sdk/types"
 )
 
 func MarshalJSON(v interface{}, tag reflect.StructTag, topLevel bool) ([]byte, error) {

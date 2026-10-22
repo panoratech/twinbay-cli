@@ -14,7 +14,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spyzhov/ajson"
 
-	"github.com/panoratech/twinbay-cli/internal/flagutil"
+	"github.com/twinbay/cli/internal/flagutil"
 )
 
 // PaginationProbe describes the server-provided continuation value for an operation.

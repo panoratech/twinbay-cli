@@ -6,7 +6,7 @@ package hooks
 import (
 	"context"
 	"errors"
-	"github.com/panoratech/twinbay-cli/internal/sdk/sdkinternal/config"
+	"github.com/twinbay/cli/internal/sdk/sdkinternal/config"
 	"net/http"
 )
 
