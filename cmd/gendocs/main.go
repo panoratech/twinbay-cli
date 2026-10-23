@@ -12,10 +12,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/panoratech/twinbay-cli/internal/cli"
-	"github.com/panoratech/twinbay-cli/internal/clierrors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/cobra/doc"
+	"github.com/twinbay/cli/internal/cli"
+	"github.com/twinbay/cli/internal/clierrors"
 )
 
 const (

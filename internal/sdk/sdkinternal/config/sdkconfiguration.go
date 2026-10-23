@@ -5,7 +5,7 @@ package config
 
 import (
 	"context"
-	"github.com/panoratech/twinbay-cli/internal/sdk/retry"
+	"github.com/twinbay/cli/internal/sdk/retry"
 	"net/http"
 	"time"
 )

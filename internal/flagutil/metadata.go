@@ -21,8 +21,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/panoratech/twinbay-cli/internal/sdk/sdkinternal/utils"
-	"github.com/panoratech/twinbay-cli/internal/sdk/types"
+	"github.com/twinbay/cli/internal/sdk/sdkinternal/utils"
+	"github.com/twinbay/cli/internal/sdk/types"
 )
 
 // FlagKind describes what kind of value a flag carries.

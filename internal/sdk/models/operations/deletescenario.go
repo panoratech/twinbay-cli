@@ -4,7 +4,7 @@
 package operations
 
 import (
-	"github.com/panoratech/twinbay-cli/internal/sdk/models/components"
+	"github.com/twinbay/cli/internal/sdk/models/components"
 )
 
 type DeleteScenarioRequest struct {

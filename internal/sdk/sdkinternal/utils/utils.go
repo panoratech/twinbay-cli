@@ -17,7 +17,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/panoratech/twinbay-cli/internal/sdk/optionalnullable"
+	"github.com/twinbay/cli/internal/sdk/optionalnullable"
 )
 
 const (

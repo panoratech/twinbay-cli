@@ -6,7 +6,7 @@ package components
 import (
 	"errors"
 	"fmt"
-	"github.com/panoratech/twinbay-cli/internal/sdk/sdkinternal/utils"
+	"github.com/twinbay/cli/internal/sdk/sdkinternal/utils"
 )
 
 type CreateScenarioRequestTwinType string
