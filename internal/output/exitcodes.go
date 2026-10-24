@@ -11,8 +11,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/panoratech/twinbay-cli/internal/flagutil"
-	"github.com/panoratech/twinbay-cli/internal/usage"
+	"github.com/twinbay/cli/internal/flagutil"
+	"github.com/twinbay/cli/internal/usage"
 )
 
 // InstallErrorHandling runs after usage.Intercept, which rewrites the hooks and Args wrapped here.

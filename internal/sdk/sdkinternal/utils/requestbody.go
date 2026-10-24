@@ -18,8 +18,8 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/panoratech/twinbay-cli/internal/sdk/optionalnullable"
-	"github.com/panoratech/twinbay-cli/internal/sdk/types"
+	"github.com/twinbay/cli/internal/sdk/optionalnullable"
+	"github.com/twinbay/cli/internal/sdk/types"
 )
 
 const (

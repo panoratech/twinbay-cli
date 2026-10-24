@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/panoratech/twinbay-cli/internal/config"
-	"github.com/panoratech/twinbay-cli/internal/flagutil"
-	"github.com/panoratech/twinbay-cli/internal/interactive"
 	"github.com/spf13/cobra"
+	"github.com/twinbay/cli/internal/config"
+	"github.com/twinbay/cli/internal/flagutil"
+	"github.com/twinbay/cli/internal/interactive"
 	"golang.org/x/term"
 	"os"
 )

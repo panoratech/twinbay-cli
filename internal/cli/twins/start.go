@@ -5,14 +5,14 @@ package twins
 
 import (
 	"fmt"
-	"github.com/panoratech/twinbay-cli/internal/client"
-	"github.com/panoratech/twinbay-cli/internal/flagutil"
-	"github.com/panoratech/twinbay-cli/internal/interactive"
-	"github.com/panoratech/twinbay-cli/internal/output"
-	"github.com/panoratech/twinbay-cli/internal/sdk"
-	"github.com/panoratech/twinbay-cli/internal/sdk/models/operations"
-	"github.com/panoratech/twinbay-cli/internal/usage"
 	"github.com/spf13/cobra"
+	"github.com/twinbay/cli/internal/client"
+	"github.com/twinbay/cli/internal/flagutil"
+	"github.com/twinbay/cli/internal/interactive"
+	"github.com/twinbay/cli/internal/output"
+	"github.com/twinbay/cli/internal/sdk"
+	"github.com/twinbay/cli/internal/sdk/models/operations"
+	"github.com/twinbay/cli/internal/usage"
 )
 
 var startCmdMeta = []flagutil.FlagMeta{

@@ -1,4 +1,4 @@
-module github.com/panoratech/twinbay-cli
+module github.com/twinbay/cli
 
 go 1.26.8
 

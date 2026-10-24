@@ -5,12 +5,12 @@ package client
 
 import (
 	"fmt"
-	"github.com/panoratech/twinbay-cli/internal/config"
-	"github.com/panoratech/twinbay-cli/internal/flagutil"
-	"github.com/panoratech/twinbay-cli/internal/sdk"
-	"github.com/panoratech/twinbay-cli/internal/sdk/models/components"
-	"github.com/panoratech/twinbay-cli/internal/testclient"
 	"github.com/spf13/cobra"
+	"github.com/twinbay/cli/internal/config"
+	"github.com/twinbay/cli/internal/flagutil"
+	"github.com/twinbay/cli/internal/sdk"
+	"github.com/twinbay/cli/internal/sdk/models/components"
+	"github.com/twinbay/cli/internal/testclient"
 	"net"
 	"net/http"
 	"strconv"

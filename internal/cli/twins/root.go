@@ -4,8 +4,8 @@
 package twins
 
 import (
-	"github.com/panoratech/twinbay-cli/internal/usage"
 	"github.com/spf13/cobra"
+	"github.com/twinbay/cli/internal/usage"
 )
 
 func InitTwinsRoot(parent *cobra.Command) error {
